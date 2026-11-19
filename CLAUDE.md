@@ -230,3 +230,7 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
 25. **Pings frequentes usam só o liveness.** Um health com banco a cada poucos minutos impede o
     Neon de dormir (scale to zero) e gasta CU-horas 24 h por dia (~180 CU-h/mês a 0,25 CU),
     acima da cota free. Coberto por `HealthProbesIntegrationTest` (spy no `DataSource`).
+26. **CI do backend usa o Maven do runner** (`mvn verify`), não o `./mvnw`: o wrapper
+    `only-script` baixa a distribuição do Maven sem retry, e uma falha de rede pontual derrubou o
+    job. O `setup-java` faz cache do `~/.m2` e o `MVN_FLAGS` liga retry nos downloads. O wrapper
+    (Maven 3.9.11, LF, testado limpo) continua para uso local.

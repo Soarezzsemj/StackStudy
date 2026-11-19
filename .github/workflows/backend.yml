@@ -10,26 +10,51 @@ on:
 permissions:
   contents: read
 
+env:
+  # Retry nos downloads de dependências (Maven 3.9 / Resolver 1.9): falhas de rede pontuais
+  # e 429/503 do Maven Central não derrubam o build.
+  # Não se chama MAVEN_ARGS de propósito: o Maven 3.9 já lê essa variável sozinho e duplicaria.
+  MVN_FLAGS: >-
+    -B -ntp
+    -Daether.connector.http.retryHandler.count=5
+    -Daether.connector.http.retryHandler.requestSentEnabled=true
+    -Daether.connector.connectTimeout=30000
+    -Daether.connector.requestTimeout=120000
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: backend
     steps:
       - uses: actions/checkout@v4
 
+      # Cache do ~/.m2 pela hash do pom.xml: depois da 1ª execução quase nada é baixado.
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
           cache: maven
+          cache-dependency-path: backend/pom.xml
 
-      # verify = compila, roda os testes (Testcontainers usa o Docker do runner)
-      # e confere a formatação (Spotless).
+      # Usa o Maven que já vem no runner (sem baixar distribuição pelo wrapper, que não tem
+      # retry). Se um dia ele sumir da imagem, instala pelo apt.
+      - name: Maven
+        run: |
+          if ! command -v mvn >/dev/null; then
+            sudo apt-get update -q && sudo apt-get install -y -q maven
+          fi
+          mvn -v
+
+      # Testcontainers usa o Docker do runner.
+      - name: Docker
+        run: docker version --format 'Docker {{.Server.Version}} (API {{.Server.APIVersion}})'
+
+      # verify = compila, roda os testes (unitários + Testcontainers) e o spotless:check.
       - name: Build and test
-        # `sh` evita depender da permissão de execução (arquivos do Windows podem não ter).
-        run: sh ./mvnw -B verify
+        run: mvn $MVN_FLAGS verify
 
       - name: Upload test reports
         if: failure()
