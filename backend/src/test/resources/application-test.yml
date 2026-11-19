@@ -1,0 +1,13 @@
+stackstudy:
+  security:
+    jwt:
+      # Valor só para testes; os segredos reais vêm das variáveis de ambiente.
+      secret: test-only-secret-not-used-anywhere-else-0123456789abcdef
+    refresh-cookie:
+      secure: false
+    cors:
+      allowed-origins: http://localhost:5173
+
+logging:
+  level:
+    com.stackstudy: INFO

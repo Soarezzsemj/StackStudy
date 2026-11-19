@@ -1,0 +1,72 @@
+/*
+ * Design tokens do StackStudy: fonte única de cores e medidas.
+ * O Tailwind usa estas variáveis (tailwind.config.ts). Mude aqui; nunca use hex solto.
+ */
+:root {
+  color-scheme: dark;
+
+  /* Superfícies */
+  --bg: #080808;
+  --surface: #111111;
+  --surface-raised: #1a1a1a;
+  --border: #272727;
+  --border-control: #626262;
+
+  /* Texto */
+  --text: #f5f5f2;
+  --text-secondary: #a8a8a8;
+  --text-muted: #929292;
+  --text-on-space: #c9c2da;
+
+  /* Ação (a única cor de ação) */
+  --action: #cdfb50;
+  --action-hover: #d9ff6e;
+  --action-ink: #080808;
+  --action-glow: 0 0 22px rgba(205, 251, 80, 0.22);
+
+  /* Espaço (roxo) */
+  --space-deep: #3c1c7e;
+  --space-glow: #bd6cf7;
+
+  /* Feedback */
+  --danger: #ff8a7a;
+  --warning: #f2b861;
+
+  /* Cores das matérias (dadas em ordem ao criar a matéria) */
+  --subject-blue: #6aa7ff;
+  --subject-amber: #f2b861;
+  --subject-purple: #bd6cf7;
+  --subject-cyan: #5ad1e6;
+  --subject-pink: #ff7a90;
+  --subject-lime: #cdfb50;
+
+  /* Níveis do heatmap (0 a 4) */
+  --heat-0: #1c1c1c;
+  --heat-1: #2f3a14;
+  --heat-2: #5a7119;
+  --heat-3: #98bd2f;
+  --heat-4: #cdfb50;
+
+  /* Formas */
+  --radius-card: 22px;
+  --radius-inner: 16px;
+
+  /* Gradientes */
+  --card-sheen: linear-gradient(165deg, rgba(245, 245, 242, 0.05), transparent 45%);
+  --space-glow-gradient: radial-gradient(
+      65% 100% at 100% 0%,
+      rgba(60, 28, 126, 0.9),
+      transparent 72%
+    ),
+    radial-gradient(35% 55% at 100% 0%, rgba(189, 108, 247, 0.18), transparent 70%);
+  --page-glow: radial-gradient(60% 38% at 100% 0%, rgba(60, 28, 126, 0.6), transparent 70%);
+
+  /* Botão secundário */
+  --secondary-fill: rgba(245, 245, 242, 0.06);
+  --secondary-border: rgba(245, 245, 242, 0.34);
+
+  /* Layout */
+  --sidebar-width: 248px;
+  --topbar-height: 52px;
+  --statusbar-height: 30px;
+}

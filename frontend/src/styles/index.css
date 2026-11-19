@@ -1,0 +1,160 @@
+@import './tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--page-glow), var(--bg);
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: 'Manrope Variable', Manrope, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--action);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--action);
+    color: var(--action-ink);
+  }
+}
+
+@layer components {
+  /* Tipografia */
+  .page-title {
+    font-size: clamp(2.5rem, 6vw, 56px);
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: -0.045em;
+    line-height: 0.98;
+  }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+
+  .label {
+    font-size: 12px;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Cards */
+  .card {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    background: var(--card-sheen), var(--surface);
+  }
+
+  .card-hero {
+    background: var(--space-glow-gradient), var(--card-sheen), var(--surface);
+  }
+
+  .card-inner {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-inner);
+    background: var(--surface-raised);
+  }
+
+  /* Botões */
+  .btn {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    padding: 0 1.25rem;
+    font-size: 13px;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      box-shadow 150ms ease,
+      color 150ms ease;
+  }
+
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .btn-primary {
+    background: var(--action);
+    color: var(--action-ink);
+    box-shadow: var(--action-glow);
+  }
+
+  .btn-primary:not(:disabled):hover {
+    background: var(--action-hover);
+  }
+
+  .btn-secondary {
+    border: 1px solid var(--secondary-border);
+    background: var(--secondary-fill);
+    color: var(--text);
+  }
+
+  .btn-secondary:not(:disabled):hover {
+    border-color: var(--action);
+  }
+
+  .btn-ghost {
+    color: var(--text-secondary);
+  }
+
+  .btn-ghost:not(:disabled):hover {
+    background: var(--secondary-fill);
+    color: var(--text);
+  }
+
+  /* Campos de formulário */
+  .input {
+    min-height: 44px;
+    width: 100%;
+    border: 1px solid var(--border-control);
+    border-radius: 999px;
+    background: var(--surface-raised);
+    padding: 0 1.125rem;
+    color: var(--text);
+    font-size: 15px;
+  }
+
+  .input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .input:focus-visible {
+    border-color: var(--action);
+    outline: none;
+    box-shadow: 0 0 0 1px var(--action);
+  }
+
+  .input[aria-invalid='true'] {
+    border-color: var(--danger);
+  }
+}

@@ -1,0 +1,93 @@
+name: stackstudy
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-stackstudy}
+      POSTGRES_USER: ${POSTGRES_USER:-stackstudy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      target: dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      DB_URL: ${DB_URL:-jdbc:postgresql://postgres:5432/stackstudy}
+      DB_USERNAME: ${DB_USERNAME:-stackstudy}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (openssl rand -base64 48)}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-PT15M}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-P14D}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+      REFRESH_COOKIE_SECURE: ${REFRESH_COOKIE_SECURE:-false}
+      REFRESH_COOKIE_SAME_SITE: ${REFRESH_COOKIE_SAME_SITE:-Strict}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    volumes:
+      - ./backend:/app
+      - maven-repo:/root/.m2
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    depends_on:
+      - backend
+    environment:
+      VITE_API_PROXY_TARGET: ${VITE_API_PROXY_TARGET:-http://backend:8080}
+      VITE_API_URL: ${VITE_API_URL:-/api}
+      VITE_WAKE_URL: ${VITE_WAKE_URL:-}
+      VITE_USE_POLLING: "true"
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+
+  # Imagem de produção do backend contra o Postgres local, com o limite de memória do Render free.
+  # Só sobe se pedir: docker compose --profile prod up --build backend-prod  (porta 8081)
+  backend-prod:
+    profiles: ["prod"]
+    build:
+      context: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      PORT: 8080
+      # Mesmo formato do Neon (postgresql://user:senha@host/db); aqui as duas URLs são iguais.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-stackstudy}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-stackstudy}
+      DATABASE_DIRECT_URL: postgresql://${POSTGRES_USER:-stackstudy}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-stackstudy}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      # Local é HTTP, então o cookie não pode exigir Secure.
+      REFRESH_COOKIE_SECURE: "false"
+    ports:
+      - "8081:8080"
+    mem_limit: 512m
+
+volumes:
+  postgres-data:
+  maven-repo:
+  frontend-node-modules:

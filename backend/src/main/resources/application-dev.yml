@@ -1,0 +1,9 @@
+logging:
+  level:
+    com.stackstudy: DEBUG
+    org.springframework.security: INFO
+
+management:
+  endpoint:
+    health:
+      show-details: always

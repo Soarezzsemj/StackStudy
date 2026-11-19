@@ -1,0 +1,135 @@
+{
+  "common": {
+    "loading": "Carregando…",
+    "comingSoon": "Em breve",
+    "phase": "Fase {{n}}",
+    "language": "Idioma",
+    "languages": { "pt-BR": "Português", "en": "English" }
+  },
+  "nav": {
+    "label": "Navegação principal",
+    "cockpit": "Cockpit",
+    "stack": "The Stack",
+    "deepWork": "Deep Work",
+    "flashcards": "Flashcards",
+    "grades": "Grade Predictor",
+    "design": "Design system"
+  },
+  "shell": {
+    "root": "~/stackstudy",
+    "breadcrumb": "Caminho",
+    "search": "Buscar",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu",
+    "subjects": "Matérias do semestre",
+    "noSubjects": "Nenhuma matéria ainda",
+    "hours": "{{value}}h",
+    "logout": "Sair",
+    "userMenu": "Conta"
+  },
+  "statusbar": {
+    "label": "Barra de status",
+    "noSession": "Nenhuma sessão ativa",
+    "remaining": "{{time}} restantes",
+    "week": "Semana {{hours}}h",
+    "gpa": "GPA {{value}}",
+    "gpaEmpty": "GPA —"
+  },
+  "palette": {
+    "label": "Paleta de comandos",
+    "placeholder": "Digite um comando ou busque…",
+    "empty": "Nada encontrado.",
+    "navigate": "Navegação",
+    "goTo": "Ir para {{page}}"
+  },
+  "auth": {
+    "tagline": "O cockpit do estudante de engenharia.",
+    "name": "Nome",
+    "email": "E-mail",
+    "password": "Senha",
+    "passwordHint": "Mínimo de 8 caracteres.",
+    "login": {
+      "title": "Entrar",
+      "subtitle": "Bem-vindo de volta. Continue de onde parou.",
+      "submit": "Entrar",
+      "noAccount": "Ainda não tem conta?",
+      "toRegister": "Criar conta"
+    },
+    "register": {
+      "title": "Criar conta",
+      "subtitle": "Matérias, foco, flashcards e notas em um só lugar.",
+      "submit": "Criar conta",
+      "haveAccount": "Já tem conta?",
+      "toLogin": "Entrar"
+    }
+  },
+  "errors": {
+    "generic": "Algo deu errado. Tente novamente.",
+    "network": "Não foi possível falar com o servidor.",
+    "INVALID_CREDENTIALS": "E-mail ou senha incorretos.",
+    "EMAIL_ALREADY_REGISTERED": "Este e-mail já está cadastrado.",
+    "VALIDATION_ERROR": "Confira os campos destacados.",
+    "UNAUTHORIZED": "Sua sessão expirou. Entre novamente.",
+    "NOT_FOUND": "Não encontrado."
+  },
+  "pages": {
+    "cockpit": {
+      "title": "Cockpit",
+      "description": "Sessão ativa, radar de risco, próximas entregas, metas semanais e heatmap."
+    },
+    "stack": {
+      "title": "The Stack",
+      "description": "Matérias em cards e tarefas TODO/DOING/DONE com prazo e peso."
+    },
+    "deepWork": {
+      "title": "Deep Work",
+      "description": "Pomodoro e Flow vinculados à matéria, com commit message da sessão."
+    },
+    "flashcards": {
+      "title": "Flashcards",
+      "description": "Decks por matéria com repetição espaçada (SM-2)."
+    },
+    "grades": {
+      "title": "Grade Predictor",
+      "description": "Nota necessária, cenários, faltas, CR e GPA."
+    },
+    "notFound": {
+      "title": "404",
+      "description": "Esta página não existe.",
+      "back": "Voltar ao Cockpit"
+    }
+  },
+  "design": {
+    "title": "Design system",
+    "description": "Componentes base do stack.study para conferência visual.",
+    "colors": "Cores",
+    "typography": "Tipografia",
+    "buttons": "Botões",
+    "cards": "Cards",
+    "chips": "Chips",
+    "progress": "Progresso",
+    "stats": "Indicadores",
+    "heatmap": "Heatmap",
+    "sampleCardTitle": "Cálculo II",
+    "sampleCardBody": "Card padrão com gradiente sutil sobre a superfície.",
+    "sampleHeroTitle": "Sessão ativa",
+    "sampleHeroBody": "Card hero com o brilho roxo no canto superior direito.",
+    "primary": "Iniciar sessão",
+    "secondary": "Cancelar",
+    "disabled": "Desabilitado",
+    "heatmapLabel": "Exemplo de heatmap com 20 semanas de estudo",
+    "statHours": "Horas na semana",
+    "statStreak": "Sequência",
+    "statGpa": "GPA",
+    "days": "{{count}} dias",
+    "progressLabel": "Progresso da matéria"
+  },
+  "heatmap": {
+    "less": "Menos",
+    "more": "Mais",
+    "cell": "{{value}} em {{label}}"
+  },
+  "network": {
+    "waking": "Acordando o servidor… isso pode levar até 1 minuto."
+  }
+}

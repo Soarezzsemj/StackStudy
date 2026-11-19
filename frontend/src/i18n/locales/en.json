@@ -1,0 +1,135 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "comingSoon": "Coming soon",
+    "phase": "Phase {{n}}",
+    "language": "Language",
+    "languages": { "pt-BR": "Português", "en": "English" }
+  },
+  "nav": {
+    "label": "Main navigation",
+    "cockpit": "Cockpit",
+    "stack": "The Stack",
+    "deepWork": "Deep Work",
+    "flashcards": "Flashcards",
+    "grades": "Grade Predictor",
+    "design": "Design system"
+  },
+  "shell": {
+    "root": "~/stackstudy",
+    "breadcrumb": "Path",
+    "search": "Search",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "subjects": "Semester subjects",
+    "noSubjects": "No subjects yet",
+    "hours": "{{value}}h",
+    "logout": "Log out",
+    "userMenu": "Account"
+  },
+  "statusbar": {
+    "label": "Status bar",
+    "noSession": "No active session",
+    "remaining": "{{time}} left",
+    "week": "Week {{hours}}h",
+    "gpa": "GPA {{value}}",
+    "gpaEmpty": "GPA —"
+  },
+  "palette": {
+    "label": "Command palette",
+    "placeholder": "Type a command or search…",
+    "empty": "No results.",
+    "navigate": "Navigation",
+    "goTo": "Go to {{page}}"
+  },
+  "auth": {
+    "tagline": "The engineering student's cockpit.",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 8 characters.",
+    "login": {
+      "title": "Log in",
+      "subtitle": "Welcome back. Pick up where you left off.",
+      "submit": "Log in",
+      "noAccount": "No account yet?",
+      "toRegister": "Create account"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Subjects, focus, flashcards and grades in one place.",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "toLogin": "Log in"
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Could not reach the server.",
+    "INVALID_CREDENTIALS": "Wrong email or password.",
+    "EMAIL_ALREADY_REGISTERED": "This email is already registered.",
+    "VALIDATION_ERROR": "Check the highlighted fields.",
+    "UNAUTHORIZED": "Your session expired. Please log in again.",
+    "NOT_FOUND": "Not found."
+  },
+  "pages": {
+    "cockpit": {
+      "title": "Cockpit",
+      "description": "Active session, risk radar, upcoming deadlines, weekly goals and heatmap."
+    },
+    "stack": {
+      "title": "The Stack",
+      "description": "Subjects as cards and TODO/DOING/DONE tasks with due date and weight."
+    },
+    "deepWork": {
+      "title": "Deep Work",
+      "description": "Pomodoro and Flow linked to a subject, with a session commit message."
+    },
+    "flashcards": {
+      "title": "Flashcards",
+      "description": "Decks per subject with spaced repetition (SM-2)."
+    },
+    "grades": {
+      "title": "Grade Predictor",
+      "description": "Needed grade, scenarios, absences, CR and GPA."
+    },
+    "notFound": {
+      "title": "404",
+      "description": "This page does not exist.",
+      "back": "Back to Cockpit"
+    }
+  },
+  "design": {
+    "title": "Design system",
+    "description": "stack.study base components for visual review.",
+    "colors": "Colors",
+    "typography": "Typography",
+    "buttons": "Buttons",
+    "cards": "Cards",
+    "chips": "Chips",
+    "progress": "Progress",
+    "stats": "Stats",
+    "heatmap": "Heatmap",
+    "sampleCardTitle": "Calculus II",
+    "sampleCardBody": "Default card with a subtle sheen over the surface.",
+    "sampleHeroTitle": "Active session",
+    "sampleHeroBody": "Hero card with the purple glow in the top-right corner.",
+    "primary": "Start session",
+    "secondary": "Cancel",
+    "disabled": "Disabled",
+    "heatmapLabel": "Sample heatmap with 20 weeks of study",
+    "statHours": "Hours this week",
+    "statStreak": "Streak",
+    "statGpa": "GPA",
+    "days": "{{count}} days",
+    "progressLabel": "Subject progress"
+  },
+  "heatmap": {
+    "less": "Less",
+    "more": "More",
+    "cell": "{{value}} on {{label}}"
+  },
+  "network": {
+    "waking": "Waking up the server… this can take up to a minute."
+  }
+}

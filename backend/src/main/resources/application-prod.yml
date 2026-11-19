@@ -1,0 +1,63 @@
+# Perfil de produção (Render + Neon). Todos os valores sensíveis vêm de variáveis de ambiente.
+# DATABASE_URL e DATABASE_DIRECT_URL aceitam o formato do Neon (postgresql://user:senha@host/db)
+# ou JDBC (jdbc:postgresql://host/db); ver DatabaseUrlEnvironmentPostProcessor.
+
+server:
+  port: ${PORT:8080}
+  # Render fica na frente como proxy: respeita X-Forwarded-Proto/Host.
+  forward-headers-strategy: framework
+  shutdown: graceful
+  tomcat:
+    threads:
+      max: ${SERVER_MAX_THREADS:20}
+
+spring:
+  jmx:
+    enabled: false
+  datasource:
+    # Conexão da aplicação: URL "pooled" do Neon.
+    url: ${DATABASE_URL}
+    # Opcionais: se vazios, saem da própria URL (postgresql://user:senha@host/db).
+    username: ${DATABASE_USERNAME:}
+    password: ${DATABASE_PASSWORD:}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:5}
+      minimum-idle: 1
+      idle-timeout: 300000
+      connection-timeout: 20000
+      data-source-properties:
+        # Sem prepared statements no servidor: seguro atrás do pooler (PgBouncer) do Neon.
+        prepareThreshold: 0
+  flyway:
+    # Migrations usam a URL direta do Neon (o pooler não é adequado para DDL/locks).
+    url: ${DATABASE_DIRECT_URL}
+
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:false}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      show-components: never
+
+stackstudy:
+  security:
+    refresh-cookie:
+      secure: ${REFRESH_COOKIE_SECURE:true}
+      same-site: ${REFRESH_COOKIE_SAME_SITE:Lax}
+    cors:
+      # Vazio = nenhuma origem externa liberada. Com o rewrite da Vercel não é preciso.
+      allowed-origins: ${ALLOWED_ORIGINS:}
+
+logging:
+  level:
+    root: INFO
+    org.flywaydb: INFO

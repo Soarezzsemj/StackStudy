@@ -1,0 +1,46 @@
+# Blueprint do Render: só o backend (Docker). O banco é o Neon (não use o Postgres do Render:
+# o plano free dele expira em 30 dias). O frontend fica na Vercel.
+# Os valores das variáveis NÃO ficam aqui: o Render pede cada um ao criar o Blueprint.
+services:
+  - type: web
+    name: stackstudy-api
+    runtime: docker
+    plan: free
+    # Regiões: oregon, ohio, virginia, frankfurt, singapore. Escolha a mais perto do Neon
+    # (ex.: Neon "AWS US East 1 (N. Virginia)" -> virginia).
+    region: virginia
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    # Liveness não consulta o banco: o health check do Render não acorda o Neon.
+    healthCheckPath: /actuator/health/liveness
+    autoDeploy: true
+    # Só faz deploy quando o backend muda.
+    buildFilter:
+      paths:
+        - backend/**
+        - render.yaml
+    envVars:
+      # prod (a imagem já usa prod por padrão)
+      - key: SPRING_PROFILES_ACTIVE
+        sync: false
+      # URL "pooled" do Neon (host com -pooler), para a aplicação
+      - key: DATABASE_URL
+        sync: false
+      # URL direta do Neon (host sem -pooler), para as migrations do Flyway
+      - key: DATABASE_DIRECT_URL
+        sync: false
+      # Opcional se o usuário já estiver na URL
+      - key: DATABASE_USERNAME
+        sync: false
+      # Opcional se a senha já estiver na URL
+      - key: DATABASE_PASSWORD
+        sync: false
+      # openssl rand -base64 48 (mínimo 32 bytes)
+      - key: JWT_SECRET
+        sync: false
+      # Vazio com o rewrite da Vercel; só preencha se chamar a API de outra origem
+      - key: ALLOWED_ORIGINS
+        sync: false
+      # Opcional: flags extras da JVM
+      - key: JAVA_TOOL_OPTIONS
+        sync: false
