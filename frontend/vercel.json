@@ -7,7 +7,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "stackstudy.onrender.com"
+      "destination": "https://stackstudy.onrender.com/api/$1"
     },
     {
       "source": "/((?!api/).*)",
