@@ -96,7 +96,8 @@
     "SEMESTER_ARCHIVED": "An archived semester cannot be the current one.",
     "SESSION_ALREADY_ACTIVE": "There is already a focus session running.",
     "SESSION_NOT_ACTIVE": "This session has already ended.",
-    "SESSION_STILL_ACTIVE": "Finish the session before editing it."
+    "SESSION_STILL_ACTIVE": "Finish the session before editing it.",
+    "ABSENCE_ALREADY_REGISTERED": "An absence is already recorded on this date. Delete it and record again."
   },
   "pages": {
     "cockpit": {
@@ -409,6 +410,178 @@
       "manual": "manual",
       "edit": "Edit session",
       "delete": "Delete session"
+    }
+  },
+  "grades": {
+    "semester": "Semester",
+    "loadError": "Could not load grades.",
+    "simulationHint": "Simulations are never saved: they are only for trying scenarios.",
+    "method": {
+      "WEIGHTED": "Weighted average",
+      "ARITHMETIC": "Simple average"
+    },
+    "gpaScale": {
+      "TEN": "0 to 10",
+      "FOUR": "0 to 4.0"
+    },
+    "gpaWeight": {
+      "CREDITS": "credits",
+      "WORKLOAD": "workload"
+    },
+    "standing": {
+      "NO_ASSESSMENTS": "No assessments",
+      "NOT_STARTED": "No grades yet",
+      "SECURED": "Pass secured",
+      "ON_TRACK": "Passing",
+      "AT_RISK": "At risk",
+      "EXAM": "Final exam",
+      "IMPOSSIBLE": "Cannot pass",
+      "PASSED": "Passed",
+      "FAILED": "Failed"
+    },
+    "attendanceStatus": {
+      "UNKNOWN": "No workload",
+      "OK": "Within limit",
+      "WARNING": "Close to limit",
+      "OVER": "Limit exceeded"
+    },
+    "empty": {
+      "noSemesterTitle": "No semester yet",
+      "noSemesterBody": "Create a semester and its subjects in The Stack; they show up here.",
+      "noSubjectsTitle": "No subjects in this semester",
+      "noSubjectsBody": "Subjects from The Stack are the same ones here. Add them there.",
+      "goStack": "Go to The Stack"
+    },
+    "card": {
+      "currentAverage": "Current average",
+      "finalAverage": "Final average",
+      "finalGrade": "Final result",
+      "required": "You need",
+      "requiredHint": "on each remaining assessment",
+      "requiredDone": "All graded",
+      "secured": "Already secured",
+      "aboveMax": "max {{max}}",
+      "exam": "On the exam",
+      "examBest": "best case",
+      "passing": "Pass mark {{value}} · scale {{max}}",
+      "progress": "Weight already graded",
+      "absences": "Absences",
+      "absencesValue": "{{used}} of {{allowed}}",
+      "absencesUnknown": "{{used}} recorded",
+      "simulate": "Simulate",
+      "simulateNamed": "Simulate {{name}}",
+      "assessments": "Assessments",
+      "assessmentsNamed": "Assessments of {{name}}",
+      "rule": "Rule",
+      "ruleNamed": "Rule for {{name}}",
+      "noAssessments": "Add the assessments to compute the average and the needed grade.",
+      "impossibleBody": "Even a perfect score on everything left is not enough to pass.",
+      "dropped": "Dropped: not counted in the GPA."
+    },
+    "gpa": {
+      "title": "Grade point average",
+      "semester": "Semester GPA",
+      "cumulative": "Cumulative GPA",
+      "basis": "Scale {{scale}} · weighted by {{basis}}",
+      "provisional_one": "{{count}} subject with a partial average",
+      "provisional_other": "{{count}} subjects with a partial average",
+      "excluded_one": "{{count}} subject without weight is left out",
+      "excluded_other": "{{count}} subjects without weight are left out",
+      "bySemester": "By semester",
+      "droppedNote": "Dropped subjects are not counted."
+    },
+    "attendance": {
+      "title": "Absences",
+      "register": "Record absence",
+      "remaining_one": "{{count}} left",
+      "remaining_other": "{{count}} left",
+      "over_one": "{{count}} over the limit",
+      "over_other": "{{count}} over the limit",
+      "unknown": "Set the workload to compute the limit.",
+      "limit": "Limit of {{pct}}% of {{base}} classes",
+      "manage": "Absences in {{name}}"
+    },
+    "absence": {
+      "title": "Record absence",
+      "subject": "Subject",
+      "date": "Date",
+      "count": "Classes missed",
+      "add": "Record",
+      "list": "Records",
+      "empty": "No absences recorded for this subject.",
+      "countValue_one": "{{count}} class",
+      "countValue_other": "{{count}} classes",
+      "delete": "Delete absence on {{date}}"
+    },
+    "simulator": {
+      "eyebrow": "What if…",
+      "title": "Simulator",
+      "subject": "Subject",
+      "hint": "Type hypothetical grades on assessments without a grade. Nothing is saved.",
+      "graded": "graded",
+      "whatIf": "What if I get",
+      "whatIfNamed": "What if I get on {{name}}",
+      "needed": "need {{value}}",
+      "exam": "Final exam (hypothetical)",
+      "examRecorded": "Final exam (recorded)",
+      "clear": "Clear simulation",
+      "simulated": "Simulated",
+      "real": "No simulation",
+      "average": "Average",
+      "stillNeeds": "Still need",
+      "examNeeded": "On the exam",
+      "invalid": "Use a grade from 0 to {{max}}, up to 2 decimals.",
+      "empty": "Add assessments to a subject to simulate."
+    },
+    "settings": {
+      "open": "Preferences",
+      "title": "Grading preferences",
+      "hint": "Apply to every subject without its own rule.",
+      "method": "Average type",
+      "scaleMax": "Maximum grade (scale)",
+      "passingGrade": "Pass mark",
+      "maxAbsencePct": "Absence limit (%)",
+      "finalExam": "Final exam",
+      "finalExamEnabled": "There is a final exam",
+      "finalExamMinAverage": "Minimum average to take the exam",
+      "finalExamAverageWeight": "Weight of the average in the result (%)",
+      "finalExamAverageWeightHint": "50 = (average + exam) ÷ 2. 0 = only the exam counts.",
+      "finalExamPassingGrade": "Minimum result after the exam",
+      "gpa": "GPA",
+      "gpaScale": "GPA scale",
+      "gpaWeight": "Weight the GPA by"
+    },
+    "rule": {
+      "title": "Rule for {{name}}",
+      "hint": "Empty fields use your preferences.",
+      "inherit": "Default ({{value}})",
+      "placeholder": "Default: {{value}}",
+      "totalClasses": "Total classes (for absences)",
+      "totalClassesHint": "Empty = uses the subject workload.",
+      "finalExamScore": "Final exam grade (if taken)",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "assessments": {
+      "title": "Assessments of {{name}}",
+      "name": "Name",
+      "weight": "Weight",
+      "score": "Grade",
+      "add": "Add assessment",
+      "remove": "Remove {{name}}",
+      "untitled": "assessment {{n}}",
+      "namePlaceholder": "e.g. Midterm",
+      "scorePlaceholder": "no grade",
+      "weightHint": "Weights are relative: they do not need to add up to 100. Empty grade = not out yet.",
+      "arithmeticHint": "Simple average: weights are ignored. Empty grade = not out yet.",
+      "totalWeight": "Total weight: {{total}}",
+      "empty": "No assessments yet.",
+      "row": "Assessment {{n}}"
+    },
+    "stackLine": {
+      "average": "Average {{value}}",
+      "absences_one": "{{count}} absence",
+      "absences_other": "{{count}} absences"
     }
   }
 }

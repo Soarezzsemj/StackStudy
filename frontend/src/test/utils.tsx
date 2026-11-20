@@ -42,6 +42,29 @@ export const emptyPage = {
   hasNext: false,
 };
 
+export const emptyOverview = {
+  settings: {
+    method: 'WEIGHTED',
+    scaleMax: 10,
+    passingGrade: 6,
+    maxAbsencePct: 25,
+    finalExamEnabled: false,
+    finalExamMinAverage: 4,
+    finalExamAverageWeight: 50,
+    finalExamPassingGrade: 5,
+    gpaScale: 'TEN',
+    gpaWeight: 'CREDITS',
+  },
+  subjects: [],
+  gpa: {
+    scale: 'TEN',
+    weightBasis: 'CREDITS',
+    cumulativeSubjects: 0,
+    cumulativeProvisional: 0,
+    semesters: [],
+  },
+};
+
 /**
  * Mock de fetch roteado por `"MÉTODO /caminho"` (sem a query). Listas do The Stack sem handler
  * respondem vazio; o resto responde 404.
@@ -60,6 +83,9 @@ export function mockApi(handlers: Record<string, Handler> = {}) {
     if (method === 'GET' && path === '/api/deepwork/sessions/active')
       return new Response(null, { status: 204 });
     if (method === 'GET' && path === '/api/deepwork/sessions') return jsonResponse(200, emptyPage);
+    // Grade Predictor: sem semestre, sem matérias.
+    if (method === 'GET' && path === '/api/grades/overview')
+      return jsonResponse(200, emptyOverview);
     return jsonResponse(404, { code: 'NOT_FOUND', message: 'Not found' });
   });
 }

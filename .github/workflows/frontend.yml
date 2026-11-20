@@ -3,9 +3,17 @@ name: Frontend CI
 on:
   push:
     branches: [main]
-    paths: ['frontend/**', '.github/workflows/frontend.yml']
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend.yml'
+      # Casos da calculadora de notas compartilhados com o backend.
+      - 'backend/src/test/resources/grade-calculator-cases.json'
   pull_request:
-    paths: ['frontend/**', '.github/workflows/frontend.yml']
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend.yml'
+      # Casos da calculadora de notas compartilhados com o backend.
+      - 'backend/src/test/resources/grade-calculator-cases.json'
 
 permissions:
   contents: read

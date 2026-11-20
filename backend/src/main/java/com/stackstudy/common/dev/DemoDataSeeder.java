@@ -2,8 +2,13 @@ package com.stackstudy.common.dev;
 
 import com.stackstudy.auth.User;
 import com.stackstudy.auth.UserRepository;
+import com.stackstudy.grade.Absence;
+import com.stackstudy.grade.AbsenceRepository;
+import com.stackstudy.grade.Assessment;
+import com.stackstudy.grade.AssessmentRepository;
 import com.stackstudy.session.StudySession;
 import com.stackstudy.session.StudySessionRepository;
+import com.stackstudy.subject.GradingOverrides;
 import com.stackstudy.subject.Semester;
 import com.stackstudy.subject.SemesterRepository;
 import com.stackstudy.subject.Subject;
@@ -15,6 +20,7 @@ import com.stackstudy.task.TaskEnums.Priority;
 import com.stackstudy.task.TaskEnums.Status;
 import com.stackstudy.task.TaskEnums.Type;
 import com.stackstudy.task.TaskRepository;
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -54,6 +60,8 @@ public class DemoDataSeeder implements ApplicationRunner {
   private final SubjectRepository subjects;
   private final TaskRepository tasks;
   private final StudySessionRepository sessions;
+  private final AssessmentRepository assessments;
+  private final AbsenceRepository absences;
   private final PasswordEncoder passwordEncoder;
   private final Clock clock;
 
@@ -63,6 +71,8 @@ public class DemoDataSeeder implements ApplicationRunner {
       SubjectRepository subjects,
       TaskRepository tasks,
       StudySessionRepository sessions,
+      AssessmentRepository assessments,
+      AbsenceRepository absences,
       PasswordEncoder passwordEncoder,
       Clock clock) {
     this.users = users;
@@ -70,6 +80,8 @@ public class DemoDataSeeder implements ApplicationRunner {
     this.subjects = subjects;
     this.tasks = tasks;
     this.sessions = sessions;
+    this.assessments = assessments;
+    this.absences = absences;
     this.passwordEncoder = passwordEncoder;
     this.clock = clock;
   }
@@ -211,6 +223,7 @@ public class DemoDataSeeder implements ApplicationRunner {
         Status.TODO);
 
     seedSessions(user, created, today);
+    seedGrades(user, created, today);
 
     log.info("Demo data created: {} / {}", DEMO_EMAIL, DEMO_PASSWORD);
     return true;
@@ -234,6 +247,78 @@ public class DemoDataSeeder implements ApplicationRunner {
         int minutes = 25 + ((back * 7 + i * 11) % 4) * 15;
         sessions.save(StudySession.manual(user.getId(), subject.getId(), null, start, minutes));
       }
+    }
+  }
+
+  /**
+   * Grade Predictor: avaliações e faltas que mostram todas as situações (aprovando, em risco,
+   * exame, impossível, aprovado) e um semestre anterior concluído para o CR acumulado.
+   */
+  private void seedGrades(User user, List<Subject> subjects, LocalDate today) {
+    // Cálculo I: em risco, faltas perto do limite (12 de 15).
+    grades(
+        subjects.get(0),
+        new Object[][] {{"P1", "40", "5.5"}, {"P2", "40", null}, {"Listas", "20", "8"}});
+    absences(subjects.get(0), today, 6, 2);
+    // Direito: aprovando.
+    grades(subjects.get(1), new Object[][] {{"Prova", "50", "8"}, {"Trabalho", "50", null}});
+    absences(subjects.get(1), today, 2, 2);
+    // Anatomia: passar direto não dá mais, o exame final ainda salva; faltas acima do limite.
+    Subject anatomy = subjects.get(2);
+    anatomy.updateGrading(
+        new GradingOverrides(null, null, null, null, null, true, null, null, null, null));
+    // Salva explícito: o seed pode rodar sem transação (chamado de dentro do próprio bean).
+    this.subjects.save(anatomy);
+    grades(
+        anatomy, new Object[][] {{"P1", "30", "3"}, {"P2", "30", "2.5"}, {"Prática", "40", null}});
+    absences(anatomy, today, 12, 2);
+    // Contabilidade: média aritmética.
+    Subject accounting = subjects.get(3);
+    accounting.updateGrading(
+        new GradingOverrides("ARITHMETIC", null, null, null, null, null, null, null, null, null));
+    this.subjects.save(accounting);
+    grades(accounting, new Object[][] {{"P1", "1", "7"}, {"P2", "1", "6.5"}, {"P3", "1", null}});
+    // História: tudo lançado, aprovada.
+    grades(subjects.get(4), new Object[][] {{"Resenha", "1", "9"}});
+    // Programação fica sem avaliações (estado vazio do cartão).
+
+    Semester past =
+        new Semester(user.getId(), "Semestre anterior", today.minusMonths(8), today.minusMonths(3));
+    past.setArchived(true);
+    semesters.save(past);
+    String[][] done = {{"Introdução à Economia", "4", "8.5"}, {"Metodologia Científica", "2", "7"}};
+    for (int i = 0; i < done.length; i++) {
+      Subject s = new Subject(past.getId(), done[i][0], SubjectColors.forIndex(i));
+      s.update(
+          past.getId(),
+          done[i][0],
+          null,
+          null,
+          Integer.parseInt(done[i][1]),
+          60,
+          SubjectColors.forIndex(i),
+          SubjectStatus.PASSED);
+      this.subjects.save(s);
+      grades(s, new Object[][] {{"Média", "1", done[i][2]}});
+    }
+  }
+
+  private void grades(Subject subject, Object[][] items) {
+    for (int i = 0; i < items.length; i++) {
+      Assessment a = new Assessment(subject.getId());
+      a.update(
+          (String) items[i][0],
+          new BigDecimal((String) items[i][1]),
+          items[i][2] == null ? null : new BigDecimal((String) items[i][2]),
+          i);
+      assessments.save(a);
+    }
+  }
+
+  /** {@code days} faltas semanais (uma por semana, para trás), de {@code each} aulas cada. */
+  private void absences(Subject subject, LocalDate today, int days, int each) {
+    for (int i = 1; i <= days; i++) {
+      absences.save(new Absence(subject.getId(), today.minusWeeks(i), each));
     }
   }
 

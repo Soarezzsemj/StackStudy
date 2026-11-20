@@ -15,6 +15,7 @@ import {
   type TaskInput,
   type TaskStatus,
 } from '@/lib/api/stack';
+import { gradeKeys } from '@/features/grades/queries';
 import { useAuthStore } from '@/stores/authStore';
 import { buildTaskQuery, type TaskFilters } from './filters';
 
@@ -79,6 +80,11 @@ export function useTasks(filters: TaskFilters) {
   });
 }
 
+/** Matérias ou semestres mudaram: as notas (nome, créditos, semestre atual) também. */
+function invalidateGrades(qc: QueryClient) {
+  return qc.invalidateQueries({ queryKey: gradeKeys.all });
+}
+
 /** Tarefas mudaram: atualiza listas e as contagens de pendentes das matérias. */
 function invalidateTasks(qc: QueryClient) {
   return Promise.all([
@@ -140,7 +146,11 @@ export function useSaveSubject() {
   return useMutation({
     mutationFn: ({ id, input }: { id?: string; input: SubjectInput }) =>
       id ? stackApi.updateSubject(id, input) : stackApi.createSubject(input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: stackKeys.allSubjects }),
+    onSuccess: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: stackKeys.allSubjects }),
+        invalidateGrades(qc),
+      ]),
   });
 }
 
@@ -148,8 +158,8 @@ export function useDeleteSubject() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => stackApi.deleteSubject(id),
-    // As tarefas da matéria somem junto (cascade no banco).
-    onSuccess: () => invalidateTasks(qc),
+    // As tarefas, notas e faltas da matéria somem junto (cascade no banco).
+    onSuccess: () => Promise.all([invalidateTasks(qc), invalidateGrades(qc)]),
   });
 }
 
@@ -158,7 +168,8 @@ export function useSaveSemester() {
   return useMutation({
     mutationFn: ({ id, input }: { id?: string; input: SemesterInput }) =>
       id ? stackApi.updateSemester(id, input) : stackApi.createSemester(input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: stackKeys.semesters }),
+    onSuccess: () =>
+      Promise.all([qc.invalidateQueries({ queryKey: stackKeys.semesters }), invalidateGrades(qc)]),
   });
 }
 
@@ -173,6 +184,7 @@ export function useSemesterAction() {
         : action === 'unarchive'
           ? stackApi.unarchiveSemester(id)
           : stackApi.makeCurrentSemester(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: stackKeys.semesters }),
+    onSuccess: () =>
+      Promise.all([qc.invalidateQueries({ queryKey: stackKeys.semesters }), invalidateGrades(qc)]),
   });
 }

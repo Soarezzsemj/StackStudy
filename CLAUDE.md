@@ -19,8 +19,8 @@ Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 2
 | 0 | Fundação: monorepo, Docker, schema, auth, app shell, design system, CI | ✅ |
 | 1 | The Stack: semestres (atual/arquivar), matérias, tarefas por prazo, filtros, atalhos | ✅ |
 | 2 | Deep Work: sessões no servidor (pausa/retomada), Pomodoro/Flow, heatmap, streak, meta | ✅ |
-| 3 | Flashcards: CRUD, Markdown + KaTeX, SM-2 (serviço puro), previsão 7 dias | ⏳ |
-| 4 | Grade Predictor: regras, nota necessária, what-if, faltas, CR/GPA, PDF | ⏳ |
+| 3 | Grade Predictor: avaliações, nota necessária, exame final, what-if, faltas, CR/GPA | ✅ |
+| 4 | Flashcards: CRUD, Markdown + KaTeX, SM-2 (serviço puro), previsão 7 dias | ⏳ |
 | 5 | Cockpit e polimento: dashboard, radar de risco, estados vazios, atalhos | ⏳ |
 
 ## Estrutura
@@ -59,7 +59,11 @@ app/            App, router, NAV_ITEMS (rotas e breadcrumbs)
 components/ui/  Button, Card, Chip, ProgressBar, PageTitle, StatBlock, Heatmap, Icon, TextField,
                 SelectField, TextAreaField, Dialog, Loading/Error/EmptyState, Wordmark
 components/shell/ AppShell, Sidebar, Topbar, StatusBar, CommandPalette
-features/<x>/   telas e hooks por módulo (auth, stack, deepwork)
+features/<x>/   telas e hooks por módulo (auth, stack, deepwork, grades)
+features/grades/ GradesPage, SubjectGradeCard, SimulatorCard ("e se"), SideCards (CR e faltas),
+                GradeDialogs (preferências, regra, avaliações, faltas), SubjectGradeLine (linha na
+                Stack); calculator.ts = espelho do GradeCalculator (BigInt em centésimos),
+                simulation.ts, format.ts
 features/deepwork/ DeepWorkPage, TimerCard, InsightsSections (stats, heatmap, histórico), dialogs;
                 DeepWorkEngine (montado no AppShell: fim do pomodoro, pausas, alertas, título da aba);
                 lógica pura e testada em clock.ts, pomodoro.ts, heatmapGrid.ts, format.ts
@@ -67,6 +71,7 @@ features/stack/ StackPage, SubjectPanel, TaskToolbar (filtros + criação rápid
                 Task/Subject/Semester dialogs; lógica pura e testada em due.ts, grouping.ts,
                 filters.ts, shortcuts.ts; queries.ts (TanStack Query)
 lib/api/        client.ts (fetch, refresh automático, retry de GET), auth.ts, stack.ts, deepwork.ts,
+                grades.ts,
                 types.ts,
                 config.ts (VITE_API_URL, tempos), slow.ts (aviso de lentidão), wake.ts (wake-up ping)
 stores/         Zustand: authStore, uiStore, networkStore, stackStore (filtros, seleção e diálogo
@@ -185,6 +190,43 @@ nunca passa do planejado; qualquer sessão no máximo 12 h. O frontend calcula o
 timestamps (+ diferença de relógio via `serverTime`); o `setInterval` só redesenha. Atalhos: Espaço
 inicia/pausa na tela; Ctrl K "Iniciar foco em <matéria>".
 
+## Grade Predictor (Fase 3)
+
+API (tudo do usuário logado; matéria/falta de outro usuário = 404):
+
+- `GET /api/grades/overview[?semesterId=]`: matérias do semestre (padrão: atual) com regra
+  efetiva, avaliações, resultado e faltas, mais o CR por semestre e acumulado. 5 consultas fixas.
+- `GET/PUT /api/grades/settings`: preferências (padrão das matérias + escala/peso do CR).
+- `GET /api/subjects/{id}/grades`, `PUT /api/subjects/{id}/grading` (regra própria; campo null
+  herda), `PUT /api/subjects/{id}/assessments` (substitui a lista: com `id` atualiza, sem cria,
+  ausentes apaga; máx. 30).
+- `GET/POST /api/subjects/{id}/absences`, `PUT/DELETE /api/absences/{id}`. Uma falta por matéria e
+  dia (`ABSENCE_ALREADY_REGISTERED` 409); `count` = aulas perdidas (1–24).
+
+Toda a conta fica em `grade.GradeCalculator` (puro, BigDecimal). O frontend tem o espelho em
+`features/grades/calculator.ts` só para o simulador "e se" (nada é salvo). Os casos de
+`backend/src/test/resources/grade-calculator-cases.json` rodam **nos dois lados** (JUnit e
+Vitest): mudou a regra, mude o JSON e as duas implementações.
+
+Regras de cálculo (conferir com a faculdade de cada um):
+
+- Média ponderada = Σ(peso × nota) ÷ Σ(peso); pesos relativos (não precisam somar 100).
+  Aritmética = todos os pesos 1. Padrões: ponderada, escala 0–10, mínima 6,0, faltas 25%.
+- Média arredondada **uma vez**, 2 casas, meio para cima; a aprovação compara a média arredondada.
+- Nota necessária = menor nota (2 casas, arredondada para cima) **igual em todas as avaliações sem
+  nota** que leva a média a ≥ mínima. Acima da escala = não dá para passar direto.
+- Exame final (opcional): tem direito quem fica abaixo da mínima e ≥ "média mínima do exame".
+  Resultado = (p × média + (100 − p) × exame) ÷ 100, com p = peso da média (padrão 50, < 100);
+  passa com resultado ≥ "mínima após o exame" (padrão 5,0). Com avaliações abertas, a nota de
+  exame mostrada é a do melhor caso (nota máxima no que falta).
+- Faltas: base = total de aulas da regra ou, sem ele, a carga horária. Limite =
+  piso(base × limite% ÷ 100). Aviso a partir de 75% do limite (e no limite); erro acima dele.
+  Faltas não alteram a situação das notas (o cartão mostra os dois).
+- CR = Σ(nota final convertida × peso) ÷ Σ(peso), peso = créditos (ou carga horária). Conversão
+  linear (nota × máx. do CR ÷ máx. da matéria), escala 0–10 ou 0–4.0. Entram matérias não
+  trancadas com nota (parcial conta e é marcada como "parcial"); sem créditos/horas ficam de fora.
+  O acumulado pondera todas as matérias juntas (não é a média dos semestres).
+
 ## Auth (como funciona)
 
 - `POST /api/auth/register|login` → `{ accessToken, tokenType, expiresIn, user }` + cookie
@@ -250,7 +292,8 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
 7. `study_sessions` tem índice único parcial: **no máximo uma sessão ativa por usuário**
    (`ended_at IS NULL`). Também há `CHECK`s de domínio (enums, faixas, cor `#rrggbb`).
 8. `tasks.due_date` é `TIMESTAMPTZ` (permite horário de entrega); `cards.tags` é `TEXT[]`;
-   `subjects.grading_rule` é `JSONB` (formato definido na Fase 4); `min_attendance_pct` padrão 75.
+   `subjects.grading_rule` (JSONB) e `min_attendance_pct` saíram na V4 sem nunca terem sido
+   usados (ver Decisão 41).
 9. **Fonte self-hosted** (`@fontsource-variable`) em vez de Google Fonts: sem dependência externa.
 10. **Tailwind 3** com tokens via `color-mix(... <alpha-value>)` para manter modificadores de opacidade.
 11. `/_design` é pública (não mostra dados), para conferência visual sem login.
@@ -321,3 +364,19 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
 39. `deep_work_settings` é criada sob demanda (sem linha = padrões). `sessionStore` saiu: a
     sessão ativa vem do TanStack Query (`useActiveSession`), inclusive na status bar.
 40. Seed de demo (dev) inclui ~5 meses de sessões manuais determinísticas para o heatmap.
+41. **Regra de nota em colunas tipadas (V4)** em vez do JSONB `grading_rule`: dá para ter `CHECK`
+    e validação por campo. `grades` virou `assessments` (nota na escala da matéria, sem
+    `max_value`, peso > 0) e `absences` ganhou índice único `(subject_id, date)`. Nada disso tinha
+    API, então não havia dado real para migrar.
+42. **Regra por matéria = só o que difere** (colunas null herdam de `grade_settings`). Mudar a
+    preferência muda todas as matérias sem regra própria. `grade_settings` é criada sob demanda.
+43. **Arredondamento único e consistente**: a média exibida é a que decide a aprovação, e a nota
+    necessária é a menor que, com esse arredondamento, aprova (testado: necessária aprova,
+    necessária − 0,01 reprova). Simulador e backend usam os mesmos casos de teste.
+44. **Lista de avaliações salva de uma vez** (`PUT .../assessments`): o diálogo edita a tabela e
+    manda tudo. Id de avaliação de outra matéria/usuário = 404.
+45. **Escala não desce abaixo da maior nota lançada** (validação em `PUT .../grading`). Se a
+    preferência mudar e deixar uma matéria herdada incoerente (ex.: mínima > escala), a
+    calculadora não quebra: mostra "impossível".
+46. **Faltas na Stack** vêm do mesmo `GET /api/grades/overview` (cache do TanStack Query); salvar
+    matéria ou semestre invalida as notas.

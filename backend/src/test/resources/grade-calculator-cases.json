@@ -1,0 +1,412 @@
+[
+  {
+    "name": "sem avaliações",
+    "rule": { "method": "WEIGHTED", "scaleMax": "10", "passingGrade": "6", "exam": null },
+    "assessments": [],
+    "examScore": null,
+    "expected": {
+      "standing": "NO_ASSESSMENTS",
+      "gradedWeightPct": "0",
+      "currentAverage": null,
+      "minimumAverage": null,
+      "maximumAverage": null,
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": null,
+      "complete": false
+    }
+  },
+  {
+    "name": "nenhuma nota lançada",
+    "rule": { "method": "WEIGHTED", "scaleMax": "10", "passingGrade": "6", "exam": null },
+    "assessments": [
+      { "weight": "30", "score": null },
+      { "weight": "30", "score": null },
+      { "weight": "40", "score": null }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "NOT_STARTED",
+      "gradedWeightPct": "0",
+      "currentAverage": null,
+      "minimumAverage": "0",
+      "maximumAverage": "10",
+      "requiredScore": "6",
+      "examRequired": null,
+      "finalGrade": null,
+      "complete": false
+    }
+  },
+  {
+    "name": "pesos que não somam 100 são relativos",
+    "rule": { "method": "WEIGHTED", "scaleMax": "10", "passingGrade": "6", "exam": null },
+    "assessments": [
+      { "weight": "2", "score": "8" },
+      { "weight": "3", "score": null }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "ON_TRACK",
+      "gradedWeightPct": "40",
+      "currentAverage": "8",
+      "minimumAverage": "3.2",
+      "maximumAverage": "9.2",
+      "requiredScore": "4.66",
+      "examRequired": null,
+      "finalGrade": "8",
+      "complete": false
+    }
+  },
+  {
+    "name": "tudo lançado, aprovado",
+    "rule": { "method": "WEIGHTED", "scaleMax": "10", "passingGrade": "6", "exam": null },
+    "assessments": [
+      { "weight": "40", "score": "7" },
+      { "weight": "60", "score": "5.5" }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "PASSED",
+      "gradedWeightPct": "100",
+      "currentAverage": "6.1",
+      "minimumAverage": "6.1",
+      "maximumAverage": "6.1",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "6.1",
+      "complete": true
+    }
+  },
+  {
+    "name": "arredondamento meio para cima aprova 5,995",
+    "rule": { "method": "ARITHMETIC", "scaleMax": "10", "passingGrade": "6", "exam": null },
+    "assessments": [
+      { "weight": "1", "score": "5.99" },
+      { "weight": "1", "score": "6" }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "PASSED",
+      "gradedWeightPct": "100",
+      "currentAverage": "6",
+      "minimumAverage": "6",
+      "maximumAverage": "6",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "6",
+      "complete": true
+    }
+  },
+  {
+    "name": "arredondamento: 5,9933 fica 5,99 e reprova",
+    "rule": { "method": "ARITHMETIC", "scaleMax": "10", "passingGrade": "6", "exam": null },
+    "assessments": [
+      { "weight": "1", "score": "5.99" },
+      { "weight": "1", "score": "5.99" },
+      { "weight": "1", "score": "6" }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "FAILED",
+      "gradedWeightPct": "100",
+      "currentAverage": "5.99",
+      "minimumAverage": "5.99",
+      "maximumAverage": "5.99",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "5.99",
+      "complete": true
+    }
+  },
+  {
+    "name": "nota necessária acima do máximo, sem exame",
+    "rule": { "method": "WEIGHTED", "scaleMax": "10", "passingGrade": "6", "exam": null },
+    "assessments": [
+      { "weight": "50", "score": "1" },
+      { "weight": "50", "score": null }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "IMPOSSIBLE",
+      "gradedWeightPct": "50",
+      "currentAverage": "1",
+      "minimumAverage": "0.5",
+      "maximumAverage": "5.5",
+      "requiredScore": "10.99",
+      "examRequired": null,
+      "finalGrade": "1",
+      "complete": false
+    }
+  },
+  {
+    "name": "nota necessária acima do máximo, exame ainda salva (melhor caso)",
+    "rule": {
+      "method": "WEIGHTED",
+      "scaleMax": "10",
+      "passingGrade": "6",
+      "exam": { "minAverage": "4", "averageWeight": "50", "passingGrade": "5" }
+    },
+    "assessments": [
+      { "weight": "50", "score": "1" },
+      { "weight": "50", "score": null }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "EXAM",
+      "gradedWeightPct": "50",
+      "currentAverage": "1",
+      "minimumAverage": "0.5",
+      "maximumAverage": "5.5",
+      "requiredScore": "10.99",
+      "examRequired": "4.49",
+      "finalGrade": "1",
+      "complete": false
+    }
+  },
+  {
+    "name": "tudo lançado, vai para o exame",
+    "rule": {
+      "method": "ARITHMETIC",
+      "scaleMax": "10",
+      "passingGrade": "6",
+      "exam": { "minAverage": "4", "averageWeight": "50", "passingGrade": "5" }
+    },
+    "assessments": [
+      { "weight": "1", "score": "5" },
+      { "weight": "1", "score": "4" }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "EXAM",
+      "gradedWeightPct": "100",
+      "currentAverage": "4.5",
+      "minimumAverage": "4.5",
+      "maximumAverage": "4.5",
+      "requiredScore": null,
+      "examRequired": "5.49",
+      "finalGrade": "4.5",
+      "complete": false
+    }
+  },
+  {
+    "name": "exame feito: aprovado no limite",
+    "rule": {
+      "method": "ARITHMETIC",
+      "scaleMax": "10",
+      "passingGrade": "6",
+      "exam": { "minAverage": "4", "averageWeight": "50", "passingGrade": "5" }
+    },
+    "assessments": [
+      { "weight": "1", "score": "5" },
+      { "weight": "1", "score": "4" }
+    ],
+    "examScore": "5.5",
+    "expected": {
+      "standing": "PASSED",
+      "gradedWeightPct": "100",
+      "currentAverage": "4.5",
+      "minimumAverage": "4.5",
+      "maximumAverage": "4.5",
+      "requiredScore": null,
+      "examRequired": "5.49",
+      "finalGrade": "5",
+      "complete": true
+    }
+  },
+  {
+    "name": "exame feito: reprovado",
+    "rule": {
+      "method": "ARITHMETIC",
+      "scaleMax": "10",
+      "passingGrade": "6",
+      "exam": { "minAverage": "4", "averageWeight": "50", "passingGrade": "5" }
+    },
+    "assessments": [
+      { "weight": "1", "score": "5" },
+      { "weight": "1", "score": "4" }
+    ],
+    "examScore": "5.4",
+    "expected": {
+      "standing": "FAILED",
+      "gradedWeightPct": "100",
+      "currentAverage": "4.5",
+      "minimumAverage": "4.5",
+      "maximumAverage": "4.5",
+      "requiredScore": null,
+      "examRequired": "5.49",
+      "finalGrade": "4.95",
+      "complete": true
+    }
+  },
+  {
+    "name": "média abaixo do mínimo para o exame",
+    "rule": {
+      "method": "ARITHMETIC",
+      "scaleMax": "10",
+      "passingGrade": "6",
+      "exam": { "minAverage": "4", "averageWeight": "50", "passingGrade": "5" }
+    },
+    "assessments": [
+      { "weight": "1", "score": "3" },
+      { "weight": "1", "score": "4" }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "FAILED",
+      "gradedWeightPct": "100",
+      "currentAverage": "3.5",
+      "minimumAverage": "3.5",
+      "maximumAverage": "3.5",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "3.5",
+      "complete": true
+    }
+  },
+  {
+    "name": "exame impossível: precisaria de mais que o máximo",
+    "rule": {
+      "method": "ARITHMETIC",
+      "scaleMax": "10",
+      "passingGrade": "6",
+      "exam": { "minAverage": "4", "averageWeight": "80", "passingGrade": "6" }
+    },
+    "assessments": [
+      { "weight": "1", "score": "4" },
+      { "weight": "1", "score": "4" }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "FAILED",
+      "gradedWeightPct": "100",
+      "currentAverage": "4",
+      "minimumAverage": "4",
+      "maximumAverage": "4",
+      "requiredScore": null,
+      "examRequired": "13.98",
+      "finalGrade": "4",
+      "complete": true
+    }
+  },
+  {
+    "name": "aprovação garantida mesmo com zero no resto",
+    "rule": { "method": "WEIGHTED", "scaleMax": "10", "passingGrade": "6", "exam": null },
+    "assessments": [
+      { "weight": "70", "score": "10" },
+      { "weight": "30", "score": null }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "SECURED",
+      "gradedWeightPct": "70",
+      "currentAverage": "10",
+      "minimumAverage": "7",
+      "maximumAverage": "10",
+      "requiredScore": "0",
+      "examRequired": null,
+      "finalGrade": "10",
+      "complete": false
+    }
+  },
+  {
+    "name": "escala 0 a 100, em risco",
+    "rule": { "method": "WEIGHTED", "scaleMax": "100", "passingGrade": "70", "exam": null },
+    "assessments": [
+      { "weight": "1", "score": "80" },
+      { "weight": "1", "score": "55" },
+      { "weight": "2", "score": null }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "AT_RISK",
+      "gradedWeightPct": "50",
+      "currentAverage": "67.5",
+      "minimumAverage": "33.75",
+      "maximumAverage": "83.75",
+      "requiredScore": "72.49",
+      "examRequired": null,
+      "finalGrade": "67.5",
+      "complete": false
+    }
+  },
+  {
+    "name": "média aritmética ignora os pesos",
+    "rule": { "method": "ARITHMETIC", "scaleMax": "10", "passingGrade": "6", "exam": null },
+    "assessments": [
+      { "weight": "10", "score": "10" },
+      { "weight": "90", "score": "2" }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "PASSED",
+      "gradedWeightPct": "100",
+      "currentAverage": "6",
+      "minimumAverage": "6",
+      "maximumAverage": "6",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "6",
+      "complete": true
+    }
+  },
+  {
+    "name": "tudo zero",
+    "rule": { "method": "ARITHMETIC", "scaleMax": "10", "passingGrade": "6", "exam": null },
+    "assessments": [
+      { "weight": "1", "score": "0" },
+      { "weight": "1", "score": "0" }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "FAILED",
+      "gradedWeightPct": "100",
+      "currentAverage": "0",
+      "minimumAverage": "0",
+      "maximumAverage": "0",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "0",
+      "complete": true
+    }
+  },
+  {
+    "name": "nota necessária exatamente no máximo ainda é possível",
+    "rule": { "method": "WEIGHTED", "scaleMax": "10", "passingGrade": "6", "exam": null },
+    "assessments": [
+      { "weight": "60", "score": "3.33" },
+      { "weight": "40", "score": null }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "AT_RISK",
+      "gradedWeightPct": "60",
+      "currentAverage": "3.33",
+      "minimumAverage": "2",
+      "maximumAverage": "6",
+      "requiredScore": "10",
+      "examRequired": null,
+      "finalGrade": "3.33",
+      "complete": false
+    }
+  },
+  {
+    "name": "um centésimo abaixo: necessária passa do máximo",
+    "rule": { "method": "WEIGHTED", "scaleMax": "10", "passingGrade": "6", "exam": null },
+    "assessments": [
+      { "weight": "60", "score": "3.32" },
+      { "weight": "40", "score": null }
+    ],
+    "examScore": null,
+    "expected": {
+      "standing": "IMPOSSIBLE",
+      "gradedWeightPct": "60",
+      "currentAverage": "3.32",
+      "minimumAverage": "1.99",
+      "maximumAverage": "5.99",
+      "requiredScore": "10.01",
+      "examRequired": null,
+      "finalGrade": "3.32",
+      "complete": false
+    }
+  }
+]

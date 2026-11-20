@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
@@ -9,6 +10,8 @@ import {
   SelectField,
 } from '@/components/ui';
 import { errorMessage } from '@/features/auth/errorMessage';
+import { SubjectGradeLine } from '@/features/grades/SubjectGradeLine';
+import { useGradesOverview } from '@/features/grades/queries';
 import type { Semester, Subject } from '@/lib/api/stack';
 import { cn } from '@/lib/cn';
 import { useStackStore } from '@/stores/stackStore';
@@ -38,6 +41,9 @@ export function SubjectPanel({
   const openDialog = useStackStore((s) => s.openDialog);
   const action = useSemesterAction();
   const active = semesters.filter((s) => !s.archived);
+  // Notas e faltas do semestre atual (mesma consulta da tela do Grade Predictor, em cache).
+  const grades = useGradesOverview();
+  const gradesById = new Map((grades.data?.subjects ?? []).map((g) => [g.subjectId, g] as const));
 
   return (
     <Card as="section" aria-labelledby="stack-subjects-title" className="flex flex-col gap-5 p-5">
@@ -97,6 +103,7 @@ export function SubjectPanel({
                 onClick={() => setFilters({ subject: s.id })}
                 onEdit={() => openDialog({ kind: 'subject', subjectId: s.id })}
                 editLabel={t('stack.subjects.editNamed', { name: s.name })}
+                detail={<SubjectGradeLine grades={gradesById.get(s.id)} />}
               />
             ))}
             <FilterItem
@@ -136,6 +143,8 @@ interface FilterItemProps {
   countLabel?: string;
   onEdit?: () => void;
   editLabel?: string;
+  /** Linha extra abaixo do nome (média e faltas). */
+  detail?: ReactNode;
 }
 
 function FilterItem({
@@ -147,6 +156,7 @@ function FilterItem({
   countLabel,
   onEdit,
   editLabel,
+  detail,
 }: FilterItemProps) {
   return (
     <li className="group flex items-center gap-1">
@@ -168,7 +178,10 @@ function FilterItem({
             style={{ backgroundColor: color }}
           />
         )}
-        <span className="flex-1 truncate">{label}</span>
+        <span className="flex min-w-0 flex-1 flex-col py-1">
+          <span className="truncate">{label}</span>
+          {detail}
+        </span>
         {count !== undefined && (
           <span className="tabular text-text-muted">
             <span aria-hidden="true">{count}</span>

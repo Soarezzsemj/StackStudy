@@ -96,7 +96,8 @@
     "SEMESTER_ARCHIVED": "Um semestre arquivado não pode ser o atual.",
     "SESSION_ALREADY_ACTIVE": "Já existe uma sessão de foco em andamento.",
     "SESSION_NOT_ACTIVE": "Esta sessão já foi encerrada.",
-    "SESSION_STILL_ACTIVE": "Conclua a sessão antes de editá-la."
+    "SESSION_STILL_ACTIVE": "Conclua a sessão antes de editá-la.",
+    "ABSENCE_ALREADY_REGISTERED": "Já existe falta registrada nesta data. Exclua o registro e lance de novo."
   },
   "pages": {
     "cockpit": {
@@ -409,6 +410,178 @@
       "manual": "manual",
       "edit": "Editar sessão",
       "delete": "Excluir sessão"
+    }
+  },
+  "grades": {
+    "semester": "Semestre",
+    "loadError": "Não foi possível carregar as notas.",
+    "simulationHint": "As simulações não são salvas: servem só para testar cenários.",
+    "method": {
+      "WEIGHTED": "Média ponderada",
+      "ARITHMETIC": "Média aritmética"
+    },
+    "gpaScale": {
+      "TEN": "0 a 10",
+      "FOUR": "0 a 4.0"
+    },
+    "gpaWeight": {
+      "CREDITS": "créditos",
+      "WORKLOAD": "carga horária"
+    },
+    "standing": {
+      "NO_ASSESSMENTS": "Sem avaliações",
+      "NOT_STARTED": "Sem notas",
+      "SECURED": "Aprovação garantida",
+      "ON_TRACK": "Aprovando",
+      "AT_RISK": "Em risco",
+      "EXAM": "Exame final",
+      "IMPOSSIBLE": "Impossível passar",
+      "PASSED": "Aprovado",
+      "FAILED": "Reprovado"
+    },
+    "attendanceStatus": {
+      "UNKNOWN": "Sem carga horária",
+      "OK": "Dentro do limite",
+      "WARNING": "Perto do limite",
+      "OVER": "Limite ultrapassado"
+    },
+    "empty": {
+      "noSemesterTitle": "Nenhum semestre ainda",
+      "noSemesterBody": "Crie um semestre e as matérias na The Stack; elas aparecem aqui.",
+      "noSubjectsTitle": "Nenhuma matéria neste semestre",
+      "noSubjectsBody": "As matérias da The Stack são as mesmas daqui. Cadastre-as lá.",
+      "goStack": "Ir para The Stack"
+    },
+    "card": {
+      "currentAverage": "Média atual",
+      "finalAverage": "Média final",
+      "finalGrade": "Resultado final",
+      "required": "Precisa tirar",
+      "requiredHint": "em cada avaliação que falta",
+      "requiredDone": "Tudo lançado",
+      "secured": "Já garantiu",
+      "aboveMax": "máx. {{max}}",
+      "exam": "No exame",
+      "examBest": "no melhor caso",
+      "passing": "Mínima {{value}} · escala {{max}}",
+      "progress": "Peso já lançado",
+      "absences": "Faltas",
+      "absencesValue": "{{used}} de {{allowed}}",
+      "absencesUnknown": "{{used}} registradas",
+      "simulate": "Simular",
+      "simulateNamed": "Simular {{name}}",
+      "assessments": "Avaliações",
+      "assessmentsNamed": "Avaliações de {{name}}",
+      "rule": "Regra",
+      "ruleNamed": "Regra de {{name}}",
+      "noAssessments": "Cadastre as avaliações para calcular a média e a nota necessária.",
+      "impossibleBody": "Nem com nota máxima em tudo o que falta dá para passar.",
+      "dropped": "Trancada: não entra no CR."
+    },
+    "gpa": {
+      "title": "Coeficiente de rendimento",
+      "semester": "CR do semestre",
+      "cumulative": "CR acumulado",
+      "basis": "Escala {{scale}} · ponderado por {{basis}}",
+      "provisional_one": "{{count}} matéria com média parcial",
+      "provisional_other": "{{count}} matérias com média parcial",
+      "excluded_one": "{{count}} matéria sem peso não entra",
+      "excluded_other": "{{count}} matérias sem peso não entram",
+      "bySemester": "Por semestre",
+      "droppedNote": "Matérias trancadas não entram no CR."
+    },
+    "attendance": {
+      "title": "Faltas",
+      "register": "Registrar falta",
+      "remaining_one": "resta {{count}}",
+      "remaining_other": "restam {{count}}",
+      "over_one": "{{count}} acima do limite",
+      "over_other": "{{count}} acima do limite",
+      "unknown": "Informe a carga horária para calcular o limite.",
+      "limit": "Limite de {{pct}}% de {{base}} aulas",
+      "manage": "Faltas de {{name}}"
+    },
+    "absence": {
+      "title": "Registrar falta",
+      "subject": "Matéria",
+      "date": "Data",
+      "count": "Aulas perdidas",
+      "add": "Registrar",
+      "list": "Registros",
+      "empty": "Nenhuma falta registrada nesta matéria.",
+      "countValue_one": "{{count}} aula",
+      "countValue_other": "{{count}} aulas",
+      "delete": "Excluir falta de {{date}}"
+    },
+    "simulator": {
+      "eyebrow": "E se…",
+      "title": "Simulador",
+      "subject": "Matéria",
+      "hint": "Digite notas hipotéticas nas avaliações sem nota. Nada é salvo.",
+      "graded": "lançada",
+      "whatIf": "E se eu tirar",
+      "whatIfNamed": "E se eu tirar em {{name}}",
+      "needed": "precisa {{value}}",
+      "exam": "Exame final (hipotético)",
+      "examRecorded": "Exame final (lançado)",
+      "clear": "Limpar simulação",
+      "simulated": "Simulado",
+      "real": "Sem simulação",
+      "average": "Média",
+      "stillNeeds": "Ainda precisa",
+      "examNeeded": "No exame",
+      "invalid": "Use uma nota de 0 a {{max}}, com até 2 casas.",
+      "empty": "Cadastre avaliações em uma matéria para simular."
+    },
+    "settings": {
+      "open": "Preferências",
+      "title": "Preferências de nota",
+      "hint": "Valem para todas as matérias sem regra própria.",
+      "method": "Tipo de média",
+      "scaleMax": "Nota máxima (escala)",
+      "passingGrade": "Média mínima para aprovação",
+      "maxAbsencePct": "Limite de faltas (%)",
+      "finalExam": "Exame final",
+      "finalExamEnabled": "Há exame final",
+      "finalExamMinAverage": "Média mínima para fazer o exame",
+      "finalExamAverageWeight": "Peso da média no resultado (%)",
+      "finalExamAverageWeightHint": "50 = (média + exame) ÷ 2. 0 = só o exame vale.",
+      "finalExamPassingGrade": "Resultado mínimo após o exame",
+      "gpa": "CR",
+      "gpaScale": "Escala do CR",
+      "gpaWeight": "Ponderar o CR por"
+    },
+    "rule": {
+      "title": "Regra de {{name}}",
+      "hint": "Campos vazios usam as suas preferências.",
+      "inherit": "Padrão ({{value}})",
+      "placeholder": "Padrão: {{value}}",
+      "totalClasses": "Total de aulas (para as faltas)",
+      "totalClassesHint": "Vazio = usa a carga horária da matéria.",
+      "finalExamScore": "Nota do exame final (se já fez)",
+      "yes": "Sim",
+      "no": "Não"
+    },
+    "assessments": {
+      "title": "Avaliações de {{name}}",
+      "name": "Nome",
+      "weight": "Peso",
+      "score": "Nota",
+      "add": "Adicionar avaliação",
+      "remove": "Remover {{name}}",
+      "untitled": "avaliação {{n}}",
+      "namePlaceholder": "Ex.: P1",
+      "scorePlaceholder": "sem nota",
+      "weightHint": "Pesos são relativos: não precisam somar 100. Nota vazia = ainda não saiu.",
+      "arithmeticHint": "Média aritmética: os pesos são ignorados. Nota vazia = ainda não saiu.",
+      "totalWeight": "Peso total: {{total}}",
+      "empty": "Nenhuma avaliação ainda.",
+      "row": "Avaliação {{n}}"
+    },
+    "stackLine": {
+      "average": "Média {{value}}",
+      "absences_one": "{{count}} falta",
+      "absences_other": "{{count}} faltas"
     }
   }
 }
