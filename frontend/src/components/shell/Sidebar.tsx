@@ -6,21 +6,22 @@ import { useAuthStore } from '@/stores/authStore';
 import { authApi } from '@/lib/api/auth';
 import { changeLanguage, SUPPORTED_LANGUAGES, type Language } from '@/i18n';
 import { cn } from '@/lib/cn';
-
-/** Matérias do semestre atual; vêm da API na Fase 1. */
-interface SidebarSubject {
-  id: string;
-  name: string;
-  color: string;
-  weekHours: number;
-}
-
-const SUBJECTS: SidebarSubject[] = [];
+import { useCurrentSubjects } from '@/features/stack/queries';
+import { useStackStore } from '@/stores/stackStore';
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { t, i18n } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
+  // Matérias do semestre atual, com pendentes (mesma consulta da tela The Stack).
+  const { list: subjects, current } = useCurrentSubjects();
+  const setFilters = useStackStore((st) => st.setFilters);
+
+  function openSubject(id: string) {
+    setFilters({ subject: id });
+    navigate('/stack');
+    onNavigate?.();
+  }
 
   async function handleLogout() {
     await authApi.logout().catch(() => undefined);
@@ -66,21 +67,30 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <h2 id="sidebar-subjects" className="label mb-3 px-3 text-text-muted">
           {t('shell.subjects')}
         </h2>
-        {SUBJECTS.length === 0 ? (
-          <p className="px-3 text-sm text-text-muted">{t('shell.noSubjects')}</p>
+        {subjects.length === 0 ? (
+          <p className="px-3 text-sm text-text-muted">
+            {current ? t('shell.noSubjects') : t('shell.noSemester')}
+          </p>
         ) : (
           <ul className="m-0 flex list-none flex-col gap-1 p-0">
-            {SUBJECTS.map((s) => (
-              <li key={s.id} className="flex min-h-9 items-center gap-3 px-3 text-sm">
-                <span
-                  aria-hidden="true"
-                  className="h-2 w-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: s.color }}
-                />
-                <span className="flex-1 truncate text-text-secondary">{s.name}</span>
-                <span className="tabular text-text-muted">
-                  {t('shell.hours', { value: s.weekHours })}
-                </span>
+            {subjects.map((s) => (
+              <li key={s.id}>
+                <button
+                  type="button"
+                  onClick={() => openSubject(s.id)}
+                  className="flex min-h-11 w-full items-center gap-3 rounded-pill px-3 text-left text-sm text-text-secondary transition-colors hover:bg-surface hover:text-text"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: s.color }}
+                  />
+                  <span className="flex-1 truncate">{s.name}</span>
+                  <span className="tabular text-text-muted">
+                    <span aria-hidden="true">{s.pendingTasks}</span>
+                    <span className="sr-only">{t('shell.pending', { count: s.pendingTasks })}</span>
+                  </span>
+                </button>
               </li>
             ))}
           </ul>

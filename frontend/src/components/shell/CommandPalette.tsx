@@ -5,14 +5,29 @@ import { useTranslation } from 'react-i18next';
 import { NAV_ITEMS } from '@/app/routes';
 import { Icon } from '@/components/ui';
 import { useUiStore } from '@/stores/uiStore';
+import { useStackStore, type StackDialog } from '@/stores/stackStore';
+import type { IconName } from '@/components/ui';
 
-/** Paleta global (Ctrl/Cmd+K). As próximas fases adicionam mais ações. */
+const ITEM_CLASS =
+  'flex min-h-11 cursor-pointer items-center gap-3 rounded-inner px-3 text-sm text-text-secondary data-[selected=true]:bg-surface-raised data-[selected=true]:text-text';
+const GROUP_CLASS =
+  '[&_[cmdk-group-heading]]:label [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-text-muted';
+
+/** Ações que abrem um diálogo do The Stack (a tela é aberta antes, se preciso). */
+const ACTIONS: { key: string; icon: IconName; dialog: StackDialog }[] = [
+  { key: 'palette.newTask', icon: 'plus', dialog: { kind: 'task' } },
+  { key: 'palette.newSubject', icon: 'stack', dialog: { kind: 'subject' } },
+  { key: 'palette.newSemester', icon: 'calendar', dialog: { kind: 'semesterForm' } },
+];
+
+/** Paleta global (Ctrl/Cmd+K): ações rápidas e navegação. */
 export function CommandPalette() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const open = useUiStore((s) => s.paletteOpen);
   const setOpen = useUiStore((s) => s.setPaletteOpen);
   const toggle = useUiStore((s) => s.togglePalette);
+  const openDialog = useStackStore((s) => s.openDialog);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -50,10 +65,25 @@ export function CommandPalette() {
         <Command.Empty className="px-4 py-6 text-sm text-text-muted">
           {t('palette.empty')}
         </Command.Empty>
-        <Command.Group
-          heading={t('palette.navigate')}
-          className="[&_[cmdk-group-heading]]:label [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-text-muted"
-        >
+        <Command.Group heading={t('palette.actions')} className={GROUP_CLASS}>
+          {ACTIONS.map((action) => (
+            <Command.Item
+              key={action.key}
+              value={t(action.key)}
+              onSelect={() =>
+                run(() => {
+                  navigate('/stack');
+                  openDialog(action.dialog);
+                })
+              }
+              className={ITEM_CLASS}
+            >
+              <Icon name={action.icon} size={18} />
+              <span className="flex-1">{t(action.key)}</span>
+            </Command.Item>
+          ))}
+        </Command.Group>
+        <Command.Group heading={t('palette.navigate')} className={GROUP_CLASS}>
           {NAV_ITEMS.map((item) => {
             const label = t('palette.goTo', { page: t(item.labelKey) });
             return (
@@ -61,7 +91,7 @@ export function CommandPalette() {
                 key={item.to}
                 value={label}
                 onSelect={() => run(() => navigate(item.to))}
-                className="flex min-h-11 cursor-pointer items-center gap-3 rounded-inner px-3 text-sm text-text-secondary data-[selected=true]:bg-surface-raised data-[selected=true]:text-text"
+                className={ITEM_CLASS}
               >
                 <Icon name={item.icon} size={18} />
                 <span className="flex-1">{label}</span>

@@ -31,6 +31,35 @@ export function mockFetch(impl: (url: string, init?: RequestInit) => Promise<Res
   return fn;
 }
 
+type Handler = (init?: RequestInit, url?: string) => Response | Promise<Response>;
+
+export const emptyPage = {
+  items: [],
+  page: 0,
+  size: 100,
+  totalElements: 0,
+  totalPages: 0,
+  hasNext: false,
+};
+
+/**
+ * Mock de fetch roteado por `"MÉTODO /caminho"` (sem a query). Listas do The Stack sem handler
+ * respondem vazio; o resto responde 404.
+ */
+export function mockApi(handlers: Record<string, Handler> = {}) {
+  return mockFetch(async (url, init) => {
+    const method = init?.method ?? 'GET';
+    const path = url.split('?')[0] ?? url;
+    const handler = handlers[`${method} ${path}`];
+    if (handler) return handler(init, url);
+    if (method === 'GET' && (path === '/api/semesters' || path === '/api/subjects')) {
+      return jsonResponse(200, []);
+    }
+    if (method === 'GET' && path === '/api/tasks') return jsonResponse(200, emptyPage);
+    return jsonResponse(404, { code: 'NOT_FOUND', message: 'Not found' });
+  });
+}
+
 export function renderWithProviders(
   routes: RouteObject[],
   { initialEntries = ['/'] }: { initialEntries?: string[] } = {},

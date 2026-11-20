@@ -4,7 +4,17 @@
     "comingSoon": "Coming soon",
     "phase": "Phase {{n}}",
     "language": "Language",
-    "languages": { "pt-BR": "Português", "en": "English" }
+    "languages": {
+      "pt-BR": "Português",
+      "en": "English"
+    },
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "retry": "Try again",
+    "delete": "Delete",
+    "confirmDelete": "Confirm delete",
+    "optional": "Optional"
   },
   "nav": {
     "label": "Main navigation",
@@ -23,9 +33,10 @@
     "closeMenu": "Close menu",
     "subjects": "Semester subjects",
     "noSubjects": "No subjects yet",
-    "hours": "{{value}}h",
     "logout": "Log out",
-    "userMenu": "Account"
+    "userMenu": "Account",
+    "pending": "{{count}} pending",
+    "noSemester": "No current semester"
   },
   "statusbar": {
     "label": "Status bar",
@@ -40,7 +51,11 @@
     "placeholder": "Type a command or search…",
     "empty": "No results.",
     "navigate": "Navigation",
-    "goTo": "Go to {{page}}"
+    "goTo": "Go to {{page}}",
+    "actions": "Actions",
+    "newTask": "New task",
+    "newSubject": "New subject",
+    "newSemester": "New semester"
   },
   "auth": {
     "tagline": "The student's cockpit.",
@@ -70,7 +85,10 @@
     "EMAIL_ALREADY_REGISTERED": "This email is already registered.",
     "VALIDATION_ERROR": "Check the highlighted fields.",
     "UNAUTHORIZED": "Your session expired. Please log in again.",
-    "NOT_FOUND": "Not found."
+    "NOT_FOUND": "Not found.",
+    "MALFORMED_REQUEST": "Some value sent is invalid.",
+    "CONFLICT": "Another change happened at the same time. Please try again.",
+    "SEMESTER_ARCHIVED": "An archived semester cannot be the current one."
   },
   "pages": {
     "cockpit": {
@@ -79,7 +97,7 @@
     },
     "stack": {
       "title": "The Stack",
-      "description": "Subjects as cards and TODO/DOING/DONE tasks with due date and weight."
+      "description": "Subjects, semesters and tasks organized by due date."
     },
     "deepWork": {
       "title": "Deep Work",
@@ -140,5 +158,146 @@
   },
   "network": {
     "waking": "Waking up the server… this can take up to a minute."
+  },
+  "stack": {
+    "semester": {
+      "label": "Current semester",
+      "select": "Change current semester",
+      "none": "No current semester",
+      "manage": "Semesters",
+      "new": "New semester",
+      "edit": "Edit semester",
+      "editNamed": "Edit {{name}}",
+      "name": "Name",
+      "namePlaceholder": "E.g. Fall 2026",
+      "startDate": "Start",
+      "endDate": "End",
+      "endBeforeStart": "The end must be after the start.",
+      "required": "Required.",
+      "archived": "Archived",
+      "currentBadge": "Current",
+      "makeCurrent": "Make current",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "emptyTitle": "Start with a semester",
+      "emptyBody": "Create your current semester to organize subjects and tasks.",
+      "listEmpty": "No semesters yet.",
+      "period": "{{start}} – {{end}}"
+    },
+    "subjects": {
+      "title": "Subjects",
+      "all": "All",
+      "none": "No subject",
+      "new": "New subject",
+      "edit": "Edit subject",
+      "editNamed": "Edit {{name}}",
+      "empty": "No subjects in this semester.",
+      "needSemester": "Create a semester to add subjects.",
+      "pending": "{{count}} pending",
+      "loadError": "Could not load subjects.",
+      "fields": {
+        "name": "Name",
+        "namePlaceholder": "E.g. Anatomy",
+        "code": "Code",
+        "codePlaceholder": "E.g. MED-110",
+        "professor": "Professor",
+        "credits": "Credits",
+        "workloadHours": "Workload (h)",
+        "color": "Color",
+        "status": "Status",
+        "semester": "Semester"
+      },
+      "status": {
+        "IN_PROGRESS": "In progress",
+        "PASSED": "Passed",
+        "FAILED": "Failed",
+        "DROPPED": "Dropped"
+      },
+      "colors": {
+        "blue": "Blue",
+        "amber": "Amber",
+        "purple": "Purple",
+        "cyan": "Cyan",
+        "pink": "Pink",
+        "lime": "Lime"
+      },
+      "deleteWarning": "This subject's tasks will be deleted too."
+    },
+    "tasks": {
+      "list": "Tasks",
+      "new": "New task",
+      "edit": "Edit task",
+      "editNamed": "Edit \"{{title}}\"",
+      "quickAdd": "Quick add task",
+      "quickAddPlaceholder": "New task… Enter to save",
+      "quickAddDue": "Quick task due date",
+      "add": "Add",
+      "markDone": "Mark \"{{title}}\" as done",
+      "markUndone": "Reopen \"{{title}}\"",
+      "noSubject": "No subject",
+      "count": "{{count}} tasks",
+      "loadMore": "Load more",
+      "emptyTitle": "Nothing pending here",
+      "emptyBody": "Create a task with N or using the field above.",
+      "emptyFiltered": "No tasks match these filters.",
+      "clearFilters": "Clear filters",
+      "loadError": "Could not load tasks.",
+      "deleteConfirm": "The task will be deleted for good.",
+      "fields": {
+        "title": "Title",
+        "titlePlaceholder": "E.g. Problem set 3",
+        "description": "Description",
+        "subject": "Subject",
+        "type": "Type",
+        "priority": "Priority",
+        "status": "Status",
+        "dueDate": "Due date",
+        "dueTime": "Time",
+        "dueTimeHint": "Optional. Without a time, it is due by the end of the day."
+      },
+      "type": {
+        "EXAM": "Exam",
+        "ASSIGNMENT": "Assignment",
+        "READING": "Reading",
+        "PROJECT": "Project",
+        "EXERCISE_LIST": "Problem set",
+        "OTHER": "Other"
+      },
+      "priority": {
+        "LOW": "Low",
+        "MEDIUM": "Medium",
+        "HIGH": "High"
+      },
+      "priorityLabel": "{{value}} priority",
+      "status": {
+        "TODO": "To do",
+        "DOING": "In progress",
+        "DONE": "Done"
+      },
+      "groups": {
+        "overdue": "Overdue",
+        "today": "Today",
+        "week": "This week",
+        "later": "Later",
+        "noDue": "No due date",
+        "past": "Done earlier"
+      }
+    },
+    "filters": {
+      "label": "Filters",
+      "search": "Search tasks",
+      "searchPlaceholder": "Search by title or description",
+      "type": "Type",
+      "allTypes": "All types",
+      "status": "Status",
+      "open": "Pending",
+      "all": "All",
+      "subject": "Subject",
+      "allSubjects": "All subjects"
+    },
+    "shortcuts": {
+      "label": "Keyboard shortcuts",
+      "hint": "N new · E edit · Space done · ↑ ↓ move"
+    }
   }
 }

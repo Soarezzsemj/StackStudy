@@ -4,7 +4,17 @@
     "comingSoon": "Em breve",
     "phase": "Fase {{n}}",
     "language": "Idioma",
-    "languages": { "pt-BR": "Português", "en": "English" }
+    "languages": {
+      "pt-BR": "Português",
+      "en": "English"
+    },
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "retry": "Tentar novamente",
+    "delete": "Excluir",
+    "confirmDelete": "Confirmar exclusão",
+    "optional": "Opcional"
   },
   "nav": {
     "label": "Navegação principal",
@@ -23,9 +33,10 @@
     "closeMenu": "Fechar menu",
     "subjects": "Matérias do semestre",
     "noSubjects": "Nenhuma matéria ainda",
-    "hours": "{{value}}h",
     "logout": "Sair",
-    "userMenu": "Conta"
+    "userMenu": "Conta",
+    "pending": "{{count}} pendentes",
+    "noSemester": "Nenhum semestre atual"
   },
   "statusbar": {
     "label": "Barra de status",
@@ -40,7 +51,11 @@
     "placeholder": "Digite um comando ou busque…",
     "empty": "Nada encontrado.",
     "navigate": "Navegação",
-    "goTo": "Ir para {{page}}"
+    "goTo": "Ir para {{page}}",
+    "actions": "Ações",
+    "newTask": "Nova tarefa",
+    "newSubject": "Nova matéria",
+    "newSemester": "Novo semestre"
   },
   "auth": {
     "tagline": "O cockpit do estudante.",
@@ -70,7 +85,10 @@
     "EMAIL_ALREADY_REGISTERED": "Este e-mail já está cadastrado.",
     "VALIDATION_ERROR": "Confira os campos destacados.",
     "UNAUTHORIZED": "Sua sessão expirou. Entre novamente.",
-    "NOT_FOUND": "Não encontrado."
+    "NOT_FOUND": "Não encontrado.",
+    "MALFORMED_REQUEST": "Algum valor enviado é inválido.",
+    "CONFLICT": "Outra alteração aconteceu ao mesmo tempo. Tente de novo.",
+    "SEMESTER_ARCHIVED": "Um semestre arquivado não pode ser o atual."
   },
   "pages": {
     "cockpit": {
@@ -79,7 +97,7 @@
     },
     "stack": {
       "title": "The Stack",
-      "description": "Matérias em cards e tarefas TODO/DOING/DONE com prazo e peso."
+      "description": "Matérias, semestres e tarefas organizadas por prazo."
     },
     "deepWork": {
       "title": "Deep Work",
@@ -140,5 +158,146 @@
   },
   "network": {
     "waking": "Acordando o servidor… isso pode levar até 1 minuto."
+  },
+  "stack": {
+    "semester": {
+      "label": "Semestre atual",
+      "select": "Trocar semestre atual",
+      "none": "Nenhum semestre atual",
+      "manage": "Semestres",
+      "new": "Novo semestre",
+      "edit": "Editar semestre",
+      "editNamed": "Editar {{name}}",
+      "name": "Nome",
+      "namePlaceholder": "Ex.: 2026.2",
+      "startDate": "Início",
+      "endDate": "Fim",
+      "endBeforeStart": "O fim precisa ser depois do início.",
+      "required": "Obrigatório.",
+      "archived": "Arquivado",
+      "currentBadge": "Atual",
+      "makeCurrent": "Tornar atual",
+      "archive": "Arquivar",
+      "unarchive": "Desarquivar",
+      "emptyTitle": "Comece pelo semestre",
+      "emptyBody": "Crie o semestre atual para organizar suas matérias e tarefas.",
+      "listEmpty": "Nenhum semestre ainda.",
+      "period": "{{start}} – {{end}}"
+    },
+    "subjects": {
+      "title": "Matérias",
+      "all": "Todas",
+      "none": "Sem matéria",
+      "new": "Nova matéria",
+      "edit": "Editar matéria",
+      "editNamed": "Editar {{name}}",
+      "empty": "Nenhuma matéria neste semestre.",
+      "needSemester": "Crie um semestre para adicionar matérias.",
+      "pending": "{{count}} pendentes",
+      "loadError": "Não foi possível carregar as matérias.",
+      "fields": {
+        "name": "Nome",
+        "namePlaceholder": "Ex.: Anatomia",
+        "code": "Código",
+        "codePlaceholder": "Ex.: MED-110",
+        "professor": "Professor(a)",
+        "credits": "Créditos",
+        "workloadHours": "Carga horária (h)",
+        "color": "Cor",
+        "status": "Situação",
+        "semester": "Semestre"
+      },
+      "status": {
+        "IN_PROGRESS": "Cursando",
+        "PASSED": "Aprovada",
+        "FAILED": "Reprovada",
+        "DROPPED": "Trancada"
+      },
+      "colors": {
+        "blue": "Azul",
+        "amber": "Âmbar",
+        "purple": "Roxo",
+        "cyan": "Ciano",
+        "pink": "Rosa",
+        "lime": "Lima"
+      },
+      "deleteWarning": "As tarefas desta matéria também serão excluídas."
+    },
+    "tasks": {
+      "list": "Tarefas",
+      "new": "Nova tarefa",
+      "edit": "Editar tarefa",
+      "editNamed": "Editar \"{{title}}\"",
+      "quickAdd": "Adicionar tarefa rápida",
+      "quickAddPlaceholder": "Nova tarefa… Enter para salvar",
+      "quickAddDue": "Prazo da tarefa rápida",
+      "add": "Adicionar",
+      "markDone": "Marcar \"{{title}}\" como feita",
+      "markUndone": "Reabrir \"{{title}}\"",
+      "noSubject": "Sem matéria",
+      "count": "{{count}} tarefas",
+      "loadMore": "Carregar mais",
+      "emptyTitle": "Nada pendente por aqui",
+      "emptyBody": "Crie uma tarefa com N ou pelo campo acima.",
+      "emptyFiltered": "Nenhuma tarefa com esses filtros.",
+      "clearFilters": "Limpar filtros",
+      "loadError": "Não foi possível carregar as tarefas.",
+      "deleteConfirm": "A tarefa será excluída de vez.",
+      "fields": {
+        "title": "Título",
+        "titlePlaceholder": "Ex.: Lista 3 de exercícios",
+        "description": "Descrição",
+        "subject": "Matéria",
+        "type": "Tipo",
+        "priority": "Prioridade",
+        "status": "Status",
+        "dueDate": "Data do prazo",
+        "dueTime": "Hora",
+        "dueTimeHint": "Opcional. Sem hora, vale até o fim do dia."
+      },
+      "type": {
+        "EXAM": "Prova",
+        "ASSIGNMENT": "Trabalho",
+        "READING": "Leitura",
+        "PROJECT": "Projeto",
+        "EXERCISE_LIST": "Lista",
+        "OTHER": "Outro"
+      },
+      "priority": {
+        "LOW": "Baixa",
+        "MEDIUM": "Média",
+        "HIGH": "Alta"
+      },
+      "priorityLabel": "Prioridade {{value}}",
+      "status": {
+        "TODO": "A fazer",
+        "DOING": "Em andamento",
+        "DONE": "Feita"
+      },
+      "groups": {
+        "overdue": "Atrasadas",
+        "today": "Hoje",
+        "week": "Esta semana",
+        "later": "Depois",
+        "noDue": "Sem prazo",
+        "past": "Concluídas anteriores"
+      }
+    },
+    "filters": {
+      "label": "Filtros",
+      "search": "Buscar tarefas",
+      "searchPlaceholder": "Buscar por título ou descrição",
+      "type": "Tipo",
+      "allTypes": "Todos os tipos",
+      "status": "Status",
+      "open": "Pendentes",
+      "all": "Todas",
+      "subject": "Matéria",
+      "allSubjects": "Todas as matérias"
+    },
+    "shortcuts": {
+      "label": "Atalhos do teclado",
+      "hint": "N nova · E editar · Espaço feita · ↑ ↓ navegar"
+    }
   }
 }

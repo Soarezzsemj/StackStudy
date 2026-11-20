@@ -62,6 +62,35 @@ const paths = {
     </>
   ),
   arrowRight: <path d="M5 12h14M13 6l6 6-6 6" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
+  edit: (
+    <>
+      <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z" />
+      <path d="M13.5 6.5l4 4" />
+    </>
+  ),
+  trash: (
+    <>
+      <path d="M4 7h16" />
+      <path d="M9 7V4h6v3" />
+      <path d="M6 7l1 13h10l1-13" />
+    </>
+  ),
+  archive: (
+    <>
+      <rect x="3" y="4" width="18" height="4" rx="1.5" />
+      <path d="M5 8v11h14V8" />
+      <path d="M10 12h4" />
+    </>
+  ),
+  calendar: (
+    <>
+      <rect x="3.5" y="5" width="17" height="15" rx="2.5" />
+      <path d="M3.5 10h17M8 3v4M16 3v4" />
+    </>
+  ),
+  star: <path d="M12 4l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 19.2l.9-5.5-4-3.9 5.5-.8L12 4z" />,
   globe: (
     <>
       <circle cx="12" cy="12" r="9" />

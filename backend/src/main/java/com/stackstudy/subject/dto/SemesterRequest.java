@@ -6,7 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
-public record CreateSemesterRequest(
+/** Criar ou editar semestre. */
+public record SemesterRequest(
     @NotBlank @Size(max = 80) String name,
     @NotNull LocalDate startDate,
     @NotNull LocalDate endDate) {

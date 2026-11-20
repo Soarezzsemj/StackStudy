@@ -17,7 +17,7 @@ Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 2
 | Fase | Escopo | Status |
 | --- | --- | --- |
 | 0 | Fundação: monorepo, Docker, schema, auth, app shell, design system, CI | ✅ |
-| 1 | The Stack: CRUD semestres/matérias/tarefas, board, entregas 14 dias | ⏳ |
+| 1 | The Stack: semestres (atual/arquivar), matérias, tarefas por prazo, filtros, atalhos | ✅ |
 | 2 | Deep Work: timer no backend, modos, commit message, heatmap, metas, streak | ⏳ |
 | 3 | Flashcards: CRUD, Markdown + KaTeX, SM-2 (serviço puro), previsão 7 dias | ⏳ |
 | 4 | Grade Predictor: regras, nota necessária, what-if, faltas, CR/GPA, PDF | ⏳ |
@@ -46,21 +46,30 @@ entidades JPA nunca saem do service.
   segue `{ "code", "message", "details": [{ "field", "message" }] }`. O frontend traduz pelo `code`.
 - `common.security`: `JwtService`, `JwtAuthenticationFilter`, `CurrentUser`, `SecurityProperties`.
 - `common.persistence.BaseEntity`: `id` UUID, `created_at`, `updated_at`.
+- `common.web.PageResponse`: página estável `{ items, page, size, totalElements, totalPages,
+  hasNext }` (nunca exponha o `Page` do Spring).
+- `common.dev.DemoDataSeeder`: dados de demonstração, só perfil `dev` e só com `SEED_DEMO=true`
+  (usuário `demo@stackstudy.local` / `demo-password`, fictício). Idempotente.
 - Migrations em `src/main/resources/db/migration` (Flyway). `ddl-auto=validate`.
 
 ### Frontend (`frontend/src`)
 
 ```
 app/            App, router, NAV_ITEMS (rotas e breadcrumbs)
-components/ui/  Button, Card, Chip, ProgressBar, PageTitle, StatBlock, Heatmap, Icon, TextField, Wordmark
+components/ui/  Button, Card, Chip, ProgressBar, PageTitle, StatBlock, Heatmap, Icon, TextField,
+                SelectField, TextAreaField, Dialog, Loading/Error/EmptyState, Wordmark
 components/shell/ AppShell, Sidebar, Topbar, StatusBar, CommandPalette
-features/<x>/   telas e hooks por módulo (auth já existe)
-lib/api/        client.ts (fetch, refresh automático, retry de GET), auth.ts, types.ts,
+features/<x>/   telas e hooks por módulo (auth, stack)
+features/stack/ StackPage, SubjectPanel, TaskToolbar (filtros + criação rápida), TaskList,
+                Task/Subject/Semester dialogs; lógica pura e testada em due.ts, grouping.ts,
+                filters.ts, shortcuts.ts; queries.ts (TanStack Query)
+lib/api/        client.ts (fetch, refresh automático, retry de GET), auth.ts, stack.ts, types.ts,
                 config.ts (VITE_API_URL, tempos), slow.ts (aviso de lentidão), wake.ts (wake-up ping)
-stores/         Zustand: authStore, uiStore, sessionStore, networkStore
+stores/         Zustand: authStore, uiStore, sessionStore, networkStore, stackStore (filtros,
+                seleção e diálogo aberto do The Stack)
 i18n/           react-i18next; locales/pt-BR.json (padrão) e en.json
 styles/         tokens.css (design tokens) e index.css (base + componentes)
-test/           setup.ts e utils.tsx
+test/           setup.ts e utils.tsx (`mockApi` roteia o fetch por "MÉTODO /caminho")
 ```
 
 ## Comandos
@@ -68,6 +77,7 @@ test/           setup.ts e utils.tsx
 ```bash
 # Tudo via Docker (requer .env)
 docker compose up --build           # app :5173, API :8080, Swagger :8080/swagger-ui
+SEED_DEMO=true docker compose up    # idem, com dados de demonstração (só perfil dev)
 docker compose down                 # (-v apaga o volume do Postgres)
 
 # Backend
@@ -132,6 +142,26 @@ Tokens em `frontend/src/styles/tokens.css` (fonte única), mapeados no `tailwind
 - Wordmark `stack.study` minúsculo, 700, ponto verde-limão (`<Wordmark>`).
 - Layout: sidebar 248px (drawer no mobile), topbar 52px com breadcrumb `~/stackstudy / <slug>` e
   busca `Ctrl K`, status bar 30px com a sessão ativa em **qualquer** tela.
+
+## The Stack (Fase 1)
+
+API (todas filtradas pelo usuário logado; recurso de outro usuário = 404):
+
+- `GET/POST /api/semesters`, `GET/PUT /api/semesters/{id}`, `POST /api/semesters/{id}/archive`,
+  `/unarchive`, `/current`. O primeiro semestre vira atual; arquivar o atual promove o mais
+  recente não arquivado; arquivado não pode ser atual (`409 SEMESTER_ARCHIVED`).
+- `GET /api/subjects[?semesterId=]`, `POST`, `GET/PUT/DELETE /api/subjects/{id}`. Cor só da
+  paleta (sem cor = próxima da ordem); `pendingTasks` vem de uma consulta agrupada (sem N+1).
+  Apagar a matéria apaga as tarefas dela (cascade).
+- `GET /api/tasks` com `subjectId`, `withoutSubject`, `type` e `status` (repetidos ou separados por
+  vírgula), `q` (título/descrição, sem diferenciar maiúsculas, curingas escapados), `dueFrom`,
+  `dueTo`, `page`, `size` (1–200, padrão 50). Ordem: prazo crescente, sem prazo no fim.
+  `POST`, `GET/PUT/DELETE /api/tasks/{id}`, `PATCH /api/tasks/{id}/status`.
+
+Frontend: grupos Atrasadas / Hoje / Esta semana (até domingo) / Depois / Sem prazo (+ "Concluídas
+anteriores" se mostrar feitas), calculados no fuso local. Atalhos: `Ctrl K` (Nova tarefa, Nova
+matéria, Novo semestre, navegação), `N` nova, `E` editar selecionada, `Espaço` feita, setas/`j k`
+para navegar. Nunca disparam dentro de campos.
 
 ## Auth (como funciona)
 
@@ -238,3 +268,19 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
     Textos (tagline, `index.html`, README, Swagger) não citam área; dados de exemplo misturam
     matérias de áreas diferentes. Um campo "curso" no perfil, quando existir (Fase de Perfil), será
     texto livre, sem lista fixa de cursos.
+28. **Tarefa com matéria opcional → `tasks.user_id`** (V2). Exceção à Decisão 3: sem matéria não há
+    join até o dono. A V2 preenche `user_id` das tarefas existentes pelo join antes do `NOT NULL`.
+29. **Prazo = instante + `due_all_day`.** Sem hora, o frontend manda o fim do dia local
+    (23:59:59) e marca dia inteiro: a tarefa só atrasa quando o dia acaba. Agrupamento por dia é
+    feito no navegador (fuso do usuário). Mudar de fuso pode deslocar a data de tarefas sem hora.
+30. **Tipos de tarefa**: `EXAM`, `ASSIGNMENT`, `READING`, `PROJECT`, `EXERCISE_LIST`, `OTHER`.
+    `LAB` (V1) virou `OTHER` na V2. Prioridade `LOW/MEDIUM/HIGH`; status `TODO/DOING/DONE`, com
+    `completed_at` preenchido ao concluir (base para streaks na Fase 2).
+31. **Um semestre atual por usuário** via índice único parcial (`WHERE is_current`) e `CHECK` que
+    proíbe atual + arquivado. Corridas que violem restrições respondem `409 CONFLICT`.
+32. **Matérias numa consulta só** no frontend (`GET /api/subjects`), filtradas pelo semestre atual
+    no cliente: tarefas de semestres antigos ainda mostram nome e cor da matéria.
+33. **Lista de tarefas paginada** (100 por página no front, "Carregar mais"); a busca só vai à
+    API após 250 ms sem digitar. Índice `(user_id, status, due_date)` cobre o filtro padrão.
+34. **Seed de demonstração** só em `@Profile("dev & !prod")` + `SEED_DEMO=true`; um teste garante
+    que o bean não existe fora do dev.

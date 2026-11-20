@@ -7,3 +7,8 @@ management:
   endpoint:
     health:
       show-details: always
+
+stackstudy:
+  seed:
+    # Dados de demonstração (DemoDataSeeder). Só existe no perfil dev; ligue com SEED_DEMO=true.
+    demo: ${SEED_DEMO:false}

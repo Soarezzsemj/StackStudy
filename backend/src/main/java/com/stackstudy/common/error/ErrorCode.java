@@ -14,6 +14,7 @@ public enum ErrorCode {
   METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED),
   EMAIL_ALREADY_REGISTERED(HttpStatus.CONFLICT),
   CONFLICT(HttpStatus.CONFLICT),
+  SEMESTER_ARCHIVED(HttpStatus.CONFLICT),
   INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR);
 
   private final HttpStatus status;

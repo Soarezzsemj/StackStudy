@@ -36,6 +36,8 @@ services:
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
       REFRESH_COOKIE_SECURE: ${REFRESH_COOKIE_SECURE:-false}
       REFRESH_COOKIE_SAME_SITE: ${REFRESH_COOKIE_SAME_SITE:-Strict}
+      # Dados de demonstração (só perfil dev): demo@stackstudy.local / demo-password
+      SEED_DEMO: ${SEED_DEMO:-false}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     volumes:

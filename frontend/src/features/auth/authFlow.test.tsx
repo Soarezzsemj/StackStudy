@@ -3,7 +3,14 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { routes } from '@/app/router';
 import { useAuthStore } from '@/stores/authStore';
-import { authBody, jsonResponse, mockFetch, renderWithProviders, testUser } from '@/test/utils';
+import {
+  authBody,
+  jsonResponse,
+  mockApi,
+  mockFetch,
+  renderWithProviders,
+  testUser,
+} from '@/test/utils';
 
 describe('auth flow (UI)', () => {
   it('anonymous users are redirected from a private route to login', async () => {
@@ -14,7 +21,7 @@ describe('auth flow (UI)', () => {
 
   it('logs in and lands on the app shell', async () => {
     useAuthStore.getState().clear();
-    const fetchMock = mockFetch(async () => jsonResponse(200, authBody('t1')));
+    const fetchMock = mockApi({ 'POST /api/auth/login': () => jsonResponse(200, authBody('t1')) });
     const { router } = renderWithProviders(routes, { initialEntries: ['/login'] });
 
     await userEvent.type(await screen.findByLabelText('E-mail'), 'ada@example.com');
@@ -72,6 +79,7 @@ describe('auth flow (UI)', () => {
 
   it('command palette opens with Ctrl+K and navigates', async () => {
     useAuthStore.getState().setSession('t1', testUser);
+    mockApi();
     const { router } = renderWithProviders(routes, { initialEntries: ['/'] });
     await screen.findByRole('heading', { level: 1, name: 'Cockpit' });
 

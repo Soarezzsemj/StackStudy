@@ -5,6 +5,7 @@ import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterPage } from '@/features/auth/RegisterPage';
 import { PlaceholderPage } from '@/pages/PlaceholderPage';
 import { DesignPage } from '@/pages/DesignPage';
+import { StackPage } from '@/features/stack/StackPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 
 export const routes: RouteObject[] = [
@@ -24,7 +25,7 @@ export const routes: RouteObject[] = [
         element: <AppShell />,
         children: [
           { path: '/', element: <PlaceholderPage pageKey="cockpit" phase={5} /> },
-          { path: '/stack', element: <PlaceholderPage pageKey="stack" phase={1} /> },
+          { path: '/stack', element: <StackPage /> },
           { path: '/deep-work', element: <PlaceholderPage pageKey="deepWork" phase={2} /> },
           { path: '/flashcards', element: <PlaceholderPage pageKey="flashcards" phase={3} /> },
           { path: '/grades', element: <PlaceholderPage pageKey="grades" phase={4} /> },
