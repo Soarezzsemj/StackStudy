@@ -1,6 +1,6 @@
 # stack.study
 
-Cockpit para estudantes de Engenharia e cursos STEM: matérias e entregas, foco (Pomodoro/Flow),
+Cockpit para estudantes de qualquer curso: matérias e entregas, foco (Pomodoro/Flow),
 flashcards com repetição espaçada e simulador de notas em uma única plataforma minimalista.
 
 | Módulo | O que faz | Fase |

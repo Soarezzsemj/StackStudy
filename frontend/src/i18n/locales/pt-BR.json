@@ -43,7 +43,7 @@
     "goTo": "Ir para {{page}}"
   },
   "auth": {
-    "tagline": "O cockpit do estudante de engenharia.",
+    "tagline": "O cockpit do estudante.",
     "name": "Nome",
     "email": "E-mail",
     "password": "Senha",
@@ -110,7 +110,8 @@
     "progress": "Progresso",
     "stats": "Indicadores",
     "heatmap": "Heatmap",
-    "sampleCardTitle": "Cálculo II",
+    "sampleCardTitle": "Direito Constitucional",
+    "sampleCardCode": "DIR-201",
     "sampleCardBody": "Card padrão com gradiente sutil sobre a superfície.",
     "sampleHeroTitle": "Sessão ativa",
     "sampleHeroBody": "Card hero com o brilho roxo no canto superior direito.",
@@ -122,7 +123,15 @@
     "statStreak": "Sequência",
     "statGpa": "GPA",
     "days": "{{count}} dias",
-    "progressLabel": "Progresso da matéria"
+    "progressLabel": "Progresso da matéria",
+    "sampleSubjects": {
+      "calculus": "Cálculo I",
+      "constitutionalLaw": "Direito Constitucional",
+      "anatomy": "Anatomia",
+      "accounting": "Contabilidade",
+      "brazilianHistory": "História do Brasil",
+      "programming": "Programação"
+    }
   },
   "heatmap": {
     "less": "Menos",

@@ -10,9 +10,9 @@ Todas as alterações ficam apenas no working tree; o dono do projeto revisa e c
 
 ## Produto
 
-Cockpit para estudantes STEM. Módulos: **Cockpit** (`/`), **The Stack** (`/stack`), **Deep Work**
-(`/deep-work`), **Flashcards** (`/flashcards`), **Grade Predictor** (`/grades`). Rota interna
-`/_design` mostra o design system.
+Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 27). Módulos:
+**Cockpit** (`/`), **The Stack** (`/stack`), **Deep Work** (`/deep-work`), **Flashcards**
+(`/flashcards`), **Grade Predictor** (`/grades`). Rota interna `/_design` mostra o design system.
 
 | Fase | Escopo | Status |
 | --- | --- | --- |
@@ -234,3 +234,7 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
     `only-script` baixa a distribuição do Maven sem retry, e uma falha de rede pontual derrubou o
     job. O `setup-java` faz cache do `~/.m2` e o `MVN_FLAGS` liga retry nos downloads. O wrapper
     (Maven 3.9.11, LF, testado limpo) continua para uso local.
+27. **Posicionamento neutro**: o produto é para estudantes de qualquer curso, não só Engenharia/STEM.
+    Textos (tagline, `index.html`, README, Swagger) não citam área; dados de exemplo misturam
+    matérias de áreas diferentes. Um campo "curso" no perfil, quando existir (Fase de Perfil), será
+    texto livre, sem lista fixa de cursos.

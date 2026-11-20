@@ -34,6 +34,16 @@ const SWATCHES = [
 const SUBJECT_COLORS = ['blue', 'amber', 'purple', 'cyan', 'pink', 'lime'] as const;
 
 /** Amostra fixa, para a página ficar igual em todo carregamento. */
+// Matérias de exemplo de áreas diferentes, uma por cor (ordem de atribuição).
+const SAMPLE_SUBJECTS = [
+  ['calculus', 'var(--subject-blue)'],
+  ['constitutionalLaw', 'var(--subject-amber)'],
+  ['anatomy', 'var(--subject-purple)'],
+  ['accounting', 'var(--subject-cyan)'],
+  ['brazilianHistory', 'var(--subject-pink)'],
+  ['programming', 'var(--subject-lime)'],
+] as const;
+
 function sampleMatrix(rows: number, cols: number): number[][] {
   let seed = 7;
   const next = () => {
@@ -126,7 +136,7 @@ export function DesignPage() {
 
       <Section title={t('design.cards')}>
         <div className="grid gap-4 md:grid-cols-2">
-          <Card title={t('design.sampleCardTitle')} eyebrow="MAT-201">
+          <Card title={t('design.sampleCardTitle')} eyebrow={t('design.sampleCardCode')}>
             <p className="text-text-secondary">{t('design.sampleCardBody')}</p>
             <div className="card-inner mt-4 p-4">
               <ProgressBar value={62} label={t('design.progressLabel')} showValue />
@@ -151,7 +161,11 @@ export function DesignPage() {
           <Chip tone="warning">DOING</Chip>
           <Chip tone="danger">EXAM</Chip>
           <Chip tone="space">LAB</Chip>
-          <Chip dotColor="var(--subject-blue)">{t('design.sampleCardTitle')}</Chip>
+          {SAMPLE_SUBJECTS.map(([key, color]) => (
+            <Chip key={key} dotColor={color}>
+              {t(`design.sampleSubjects.${key}`)}
+            </Chip>
+          ))}
         </div>
       </Section>
 

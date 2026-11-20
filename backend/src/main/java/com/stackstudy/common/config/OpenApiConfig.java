@@ -20,7 +20,7 @@ public class OpenApiConfig {
             new Info()
                 .title("StackStudy API")
                 .version("v1")
-                .description("Cockpit for STEM students: subjects, deep work, flashcards, grades."))
+                .description("The student's cockpit: subjects, deep work, flashcards, grades."))
         .components(
             new Components()
                 .addSecuritySchemes(

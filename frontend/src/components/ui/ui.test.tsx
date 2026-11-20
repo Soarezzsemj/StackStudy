@@ -51,12 +51,12 @@ describe('Button', () => {
 describe('Card', () => {
   it('renders title, eyebrow and body', () => {
     render(
-      <Card title="Cálculo II" eyebrow="MAT-201">
+      <Card title="Direito Constitucional" eyebrow="DIR-201">
         corpo
       </Card>,
     );
-    expect(screen.getByRole('heading', { name: 'Cálculo II' })).toBeInTheDocument();
-    expect(screen.getByText('MAT-201')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Direito Constitucional' })).toBeInTheDocument();
+    expect(screen.getByText('DIR-201')).toBeInTheDocument();
     expect(screen.getByText('corpo')).toBeInTheDocument();
   });
 
@@ -68,8 +68,8 @@ describe('Card', () => {
 
 describe('Chip', () => {
   it('renders text with an optional color dot', () => {
-    render(<Chip dotColor="#6aa7ff">Física</Chip>);
-    expect(screen.getByText('Física')).toBeInTheDocument();
+    render(<Chip dotColor="#6aa7ff">Anatomia</Chip>);
+    expect(screen.getByText('Anatomia')).toBeInTheDocument();
     expect(screen.getByTestId('chip-dot')).toHaveStyle({ backgroundColor: '#6aa7ff' });
   });
 });
