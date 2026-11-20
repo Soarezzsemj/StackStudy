@@ -8,6 +8,9 @@ import { DesignPage } from '@/pages/DesignPage';
 import { StackPage } from '@/features/stack/StackPage';
 import { DeepWorkPage } from '@/features/deepwork/DeepWorkPage';
 import { GradesPage } from '@/features/grades/GradesPage';
+import { FlashcardsPage } from '@/features/flashcards/FlashcardsPage';
+import { DeckPage } from '@/features/flashcards/DeckPage';
+import { ReviewPage } from '@/features/flashcards/ReviewPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 
 export const routes: RouteObject[] = [
@@ -29,7 +32,9 @@ export const routes: RouteObject[] = [
           { path: '/', element: <PlaceholderPage pageKey="cockpit" phase={5} /> },
           { path: '/stack', element: <StackPage /> },
           { path: '/deep-work', element: <DeepWorkPage /> },
-          { path: '/flashcards', element: <PlaceholderPage pageKey="flashcards" phase={4} /> },
+          { path: '/flashcards', element: <FlashcardsPage /> },
+          { path: '/flashcards/decks/:deckId', element: <DeckPage /> },
+          { path: '/flashcards/review', element: <ReviewPage /> },
           { path: '/grades', element: <GradesPage /> },
           { path: '*', element: <NotFoundPage /> },
         ],

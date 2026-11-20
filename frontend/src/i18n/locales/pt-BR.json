@@ -60,7 +60,9 @@
     "newSemester": "Novo semestre",
     "focus": "Foco",
     "startFocus": "Iniciar foco em {{subject}}",
-    "goToSession": "Ir para a sessão ativa"
+    "goToSession": "Ir para a sessão ativa",
+    "newCard": "Nova carta",
+    "reviewCards": "Revisar flashcards"
   },
   "auth": {
     "tagline": "O cockpit do estudante.",
@@ -97,7 +99,8 @@
     "SESSION_ALREADY_ACTIVE": "Já existe uma sessão de foco em andamento.",
     "SESSION_NOT_ACTIVE": "Esta sessão já foi encerrada.",
     "SESSION_STILL_ACTIVE": "Conclua a sessão antes de editá-la.",
-    "ABSENCE_ALREADY_REGISTERED": "Já existe falta registrada nesta data. Exclua o registro e lance de novo."
+    "ABSENCE_ALREADY_REGISTERED": "Já existe falta registrada nesta data. Exclua o registro e lance de novo.",
+    "REVIEW_NOT_LATEST": "Esta não é a última resposta da carta; só ela pode ser desfeita."
   },
   "pages": {
     "cockpit": {
@@ -114,7 +117,7 @@
     },
     "flashcards": {
       "title": "Flashcards",
-      "description": "Decks por matéria com repetição espaçada (SM-2)."
+      "description": "Decks com repetição espaçada (SM-2): revise no seu ritmo, todo dia."
     },
     "grades": {
       "title": "Grade Predictor",
@@ -582,6 +585,153 @@
       "average": "Média {{value}}",
       "absences_one": "{{count}} falta",
       "absences_other": "{{count}} faltas"
+    }
+  },
+  "flashcards": {
+    "stage": {
+      "NEW": "Novas",
+      "LEARNING": "Aprendendo",
+      "MATURE": "Maduras"
+    },
+    "rating": {
+      "AGAIN": "Errei",
+      "HARD": "Difícil",
+      "GOOD": "Bom",
+      "EASY": "Fácil"
+    },
+    "decks": {
+      "title": "Decks",
+      "new": "Novo deck",
+      "edit": "Editar deck",
+      "editNamed": "Editar deck {{name}}",
+      "openNamed": "Ver cartas de {{name}}",
+      "cards": "Cartas",
+      "name": "Nome",
+      "namePlaceholder": "Ex.: Anatomia: ossos",
+      "subject": "Matéria",
+      "noSubject": "Sem matéria (deck solto)",
+      "loose": "Deck solto",
+      "new_": "Novas",
+      "due": "Revisar",
+      "total": "Total",
+      "noCards": "Sem cartas ainda.",
+      "done": "Tudo em dia por hoje.",
+      "limits": "Limites diários deste deck",
+      "limitDefault": "Padrão",
+      "limitsHint": "Vazio = usa os limites globais. O deck nunca passa do limite global.",
+      "emptyTitle": "Nenhum deck ainda",
+      "emptyBody": "Crie um deck (solto ou de uma matéria) e adicione cartas.",
+      "loadError": "Não foi possível carregar os decks.",
+      "notFound": "Deck não encontrado.",
+      "back": "Flashcards",
+      "summary": "{{total}} cartas · {{newCount}} novas e {{due}} para revisar hoje",
+      "deleteTitle": "Excluir {{name}}?",
+      "deleteWarning_one": "A carta deste deck e o histórico dela serão excluídos. Não dá para desfazer.",
+      "deleteWarning_other": "As {{count}} cartas deste deck e o histórico delas serão excluídos. Não dá para desfazer."
+    },
+    "card": {
+      "new": "Nova carta",
+      "short": "Carta",
+      "newIn": "Nova carta em {{name}}",
+      "edit": "Editar carta",
+      "deck": "Deck",
+      "front": "Frente",
+      "back": "Verso",
+      "tags": "Tags",
+      "tagsHint": "Separadas por espaço. Ex.: ossos membro-inferior",
+      "markdownHint": "Markdown simples: **negrito**, *itálico*, `código`, listas com - e títulos com #.",
+      "showPreview": "Ver prévia",
+      "hidePreview": "Esconder prévia",
+      "saveAndNew": "Salvar e criar outra",
+      "saved_one": "{{count}} carta salva.",
+      "saved_other": "{{count}} cartas salvas.",
+      "needDeck": "Crie um deck antes de adicionar cartas."
+    },
+    "cards": {
+      "count_one": "{{count}} carta",
+      "count_other": "{{count}} cartas",
+      "due": "revisar em {{date}}",
+      "editNamed": "Editar carta: {{front}}",
+      "empty": "Nenhuma carta neste deck.",
+      "loadError": "Não foi possível carregar as cartas.",
+      "loadMore": "Carregar mais"
+    },
+    "search": {
+      "label": "Buscar cartas",
+      "inDeck": "Buscar neste deck",
+      "placeholder": "Texto da frente, do verso ou uma tag",
+      "results": "Resultados da busca",
+      "empty": "Nenhuma carta encontrada."
+    },
+    "review": {
+      "title": "Revisão",
+      "start": "Revisar",
+      "all_one": "Revisar tudo ({{count}})",
+      "all_other": "Revisar tudo ({{count}})",
+      "deckNamed_one": "Revisar {{name}} ({{count}} carta hoje)",
+      "deckNamed_other": "Revisar {{name}} ({{count}} cartas hoje)",
+      "reveal": "Mostrar resposta",
+      "progress": "Progresso da revisão",
+      "position": "{{current}} de {{total}}",
+      "cardLabel": "Carta",
+      "answerGroup": "Como foi?",
+      "undo": "Desfazer última",
+      "shortcuts": "Espaço mostra · 1 Errei · 2 Difícil · 3 Bom · 4 Fácil · U desfaz",
+      "emptyTitle": "Nada para revisar agora",
+      "emptyBody": "Sem cartas vencidas e o limite de novas de hoje já foi usado (ou não há novas).",
+      "loadError": "Não foi possível carregar a fila de revisão."
+    },
+    "summary": {
+      "title": "Sessão concluída",
+      "answered": "Respondidas",
+      "accuracy": "Acertos",
+      "time": "Tempo",
+      "done": "Voltar aos decks"
+    },
+    "stats": {
+      "title": "Estatísticas",
+      "accuracy": "Acerto em 30 dias",
+      "accuracyHint_one": "{{count}} resposta",
+      "accuracyHint_other": "{{count}} respostas",
+      "perDay": "Revisões por dia (30 dias)",
+      "perDayLabel": "{{total}} revisões nos últimos 30 dias",
+      "forecast": "Próximos 7 dias",
+      "loadError": "Não foi possível carregar as estatísticas."
+    },
+    "settings": {
+      "open": "Limites",
+      "title": "Limites diários",
+      "hint": "Quantas cartas novas e quantas revisões entram por dia, somando todos os decks.",
+      "newPerDay": "Novas por dia",
+      "reviewsPerDay": "Revisões por dia"
+    },
+    "import": {
+      "open": "Importar CSV",
+      "title": "Importar cartas em {{name}}",
+      "hint": "Colunas: frente, verso e tags (opcional, separadas por espaço). Cabeçalho é opcional. Até 2.000 linhas e 1 MB.",
+      "file": "Arquivo CSV",
+      "paste": "Ou cole o conteúdo",
+      "submit": "Importar",
+      "tooLarge": "Arquivo grande demais (máximo de 1 MB).",
+      "imported_one": "{{count}} carta importada.",
+      "imported_other": "{{count}} cartas importadas.",
+      "errors_one": "{{count}} linha não foi importada:",
+      "errors_other": "{{count}} linhas não foram importadas:",
+      "line": "Linha {{line}}",
+      "codes": {
+        "MISSING_COLUMNS": "faltam colunas (precisa de frente e verso)",
+        "TOO_MANY_COLUMNS": "colunas demais (máximo 3)",
+        "FRONT_REQUIRED": "frente vazia",
+        "BACK_REQUIRED": "verso vazio",
+        "TEXT_TOO_LONG": "texto longo demais (máximo 5.000 caracteres)",
+        "INVALID_TAGS": "tags inválidas (até 10, com até 40 caracteres)",
+        "UNCLOSED_QUOTE": "aspas sem fechar; o resto do arquivo foi ignorado",
+        "TOO_MANY_ROWS": "limite de 2.000 linhas atingido; o resto foi ignorado",
+        "UNKNOWN": "linha inválida"
+      }
+    },
+    "export": {
+      "open": "Exportar CSV"
     }
   }
 }

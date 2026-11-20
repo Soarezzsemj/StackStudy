@@ -19,6 +19,7 @@ public enum ErrorCode {
   SESSION_NOT_ACTIVE(HttpStatus.CONFLICT),
   SESSION_STILL_ACTIVE(HttpStatus.CONFLICT),
   ABSENCE_ALREADY_REGISTERED(HttpStatus.CONFLICT),
+  REVIEW_NOT_LATEST(HttpStatus.CONFLICT),
   INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR);
 
   private final HttpStatus status;

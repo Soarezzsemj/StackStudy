@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Command } from 'cmdk';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { NAV_ITEMS } from '@/app/routes';
 import { Icon } from '@/components/ui';
@@ -15,6 +15,7 @@ import {
   useSessionActions,
 } from '@/features/deepwork/queries';
 import { useDeepWorkStore } from '@/stores/deepWorkStore';
+import { useFlashcardStore } from '@/stores/flashcardStore';
 
 const ITEM_CLASS =
   'flex min-h-11 cursor-pointer items-center gap-3 rounded-inner px-3 text-sm text-text-secondary data-[selected=true]:bg-surface-raised data-[selected=true]:text-text';
@@ -32,10 +33,12 @@ const ACTIONS: { key: string; icon: IconName; dialog: StackDialog }[] = [
 export function CommandPalette() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const open = useUiStore((s) => s.paletteOpen);
   const setOpen = useUiStore((s) => s.setPaletteOpen);
   const toggle = useUiStore((s) => s.togglePalette);
   const openDialog = useStackStore((s) => s.openDialog);
+  const openFlashcardDialog = useFlashcardStore((s) => s.openDialog);
   const { list: subjects } = useCurrentSubjects();
   const { data: active } = useActiveSession();
   const { data: settings = DEFAULT_SETTINGS } = useDeepWorkSettings();
@@ -107,6 +110,30 @@ export function CommandPalette() {
               <span className="flex-1">{t(action.key)}</span>
             </Command.Item>
           ))}
+          <Command.Item
+            value={t('palette.newCard')}
+            onSelect={() =>
+              run(() => {
+                // O diálogo vive na tela de Flashcards e na de um deck.
+                const p = location.pathname;
+                if (p !== '/flashcards' && !p.startsWith('/flashcards/decks/'))
+                  navigate('/flashcards');
+                openFlashcardDialog({ kind: 'card' });
+              })
+            }
+            className={ITEM_CLASS}
+          >
+            <Icon name="flashcards" size={18} />
+            <span className="flex-1">{t('palette.newCard')}</span>
+          </Command.Item>
+          <Command.Item
+            value={t('palette.reviewCards')}
+            onSelect={() => run(() => navigate('/flashcards/review'))}
+            className={ITEM_CLASS}
+          >
+            <Icon name="flashcards" size={18} />
+            <span className="flex-1">{t('palette.reviewCards')}</span>
+          </Command.Item>
         </Command.Group>
         <Command.Group heading={t('palette.focus')} className={GROUP_CLASS}>
           {active ? (

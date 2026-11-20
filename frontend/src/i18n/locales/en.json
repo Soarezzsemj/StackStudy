@@ -60,7 +60,9 @@
     "newSemester": "New semester",
     "focus": "Focus",
     "startFocus": "Start focus on {{subject}}",
-    "goToSession": "Go to the active session"
+    "goToSession": "Go to the active session",
+    "newCard": "New card",
+    "reviewCards": "Review flashcards"
   },
   "auth": {
     "tagline": "The student's cockpit.",
@@ -97,7 +99,8 @@
     "SESSION_ALREADY_ACTIVE": "There is already a focus session running.",
     "SESSION_NOT_ACTIVE": "This session has already ended.",
     "SESSION_STILL_ACTIVE": "Finish the session before editing it.",
-    "ABSENCE_ALREADY_REGISTERED": "An absence is already recorded on this date. Delete it and record again."
+    "ABSENCE_ALREADY_REGISTERED": "An absence is already recorded on this date. Delete it and record again.",
+    "REVIEW_NOT_LATEST": "This is not the card's latest answer; only that one can be undone."
   },
   "pages": {
     "cockpit": {
@@ -114,7 +117,7 @@
     },
     "flashcards": {
       "title": "Flashcards",
-      "description": "Decks per subject with spaced repetition (SM-2)."
+      "description": "Decks with spaced repetition (SM-2): review at your pace, every day."
     },
     "grades": {
       "title": "Grade Predictor",
@@ -582,6 +585,153 @@
       "average": "Average {{value}}",
       "absences_one": "{{count}} absence",
       "absences_other": "{{count}} absences"
+    }
+  },
+  "flashcards": {
+    "stage": {
+      "NEW": "New",
+      "LEARNING": "Learning",
+      "MATURE": "Mature"
+    },
+    "rating": {
+      "AGAIN": "Again",
+      "HARD": "Hard",
+      "GOOD": "Good",
+      "EASY": "Easy"
+    },
+    "decks": {
+      "title": "Decks",
+      "new": "New deck",
+      "edit": "Edit deck",
+      "editNamed": "Edit deck {{name}}",
+      "openNamed": "See cards of {{name}}",
+      "cards": "Cards",
+      "name": "Name",
+      "namePlaceholder": "e.g. Anatomy: bones",
+      "subject": "Subject",
+      "noSubject": "No subject (loose deck)",
+      "loose": "Loose deck",
+      "new_": "New",
+      "due": "Review",
+      "total": "Total",
+      "noCards": "No cards yet.",
+      "done": "All caught up for today.",
+      "limits": "Daily limits for this deck",
+      "limitDefault": "Default",
+      "limitsHint": "Empty = uses the global limits. A deck never goes beyond the global limit.",
+      "emptyTitle": "No decks yet",
+      "emptyBody": "Create a deck (loose or for a subject) and add cards.",
+      "loadError": "Could not load decks.",
+      "notFound": "Deck not found.",
+      "back": "Flashcards",
+      "summary": "{{total}} cards · {{newCount}} new and {{due}} to review today",
+      "deleteTitle": "Delete {{name}}?",
+      "deleteWarning_one": "The card in this deck and its history will be deleted. This cannot be undone.",
+      "deleteWarning_other": "The {{count}} cards in this deck and their history will be deleted. This cannot be undone."
+    },
+    "card": {
+      "new": "New card",
+      "short": "Card",
+      "newIn": "New card in {{name}}",
+      "edit": "Edit card",
+      "deck": "Deck",
+      "front": "Front",
+      "back": "Back",
+      "tags": "Tags",
+      "tagsHint": "Separated by spaces. e.g. bones lower-limb",
+      "markdownHint": "Simple Markdown: **bold**, *italic*, `code`, lists with - and headings with #.",
+      "showPreview": "Show preview",
+      "hidePreview": "Hide preview",
+      "saveAndNew": "Save and add another",
+      "saved_one": "{{count}} card saved.",
+      "saved_other": "{{count}} cards saved.",
+      "needDeck": "Create a deck before adding cards."
+    },
+    "cards": {
+      "count_one": "{{count}} card",
+      "count_other": "{{count}} cards",
+      "due": "review on {{date}}",
+      "editNamed": "Edit card: {{front}}",
+      "empty": "No cards in this deck.",
+      "loadError": "Could not load cards.",
+      "loadMore": "Load more"
+    },
+    "search": {
+      "label": "Search cards",
+      "inDeck": "Search this deck",
+      "placeholder": "Text on the front, back or a tag",
+      "results": "Search results",
+      "empty": "No cards found."
+    },
+    "review": {
+      "title": "Review",
+      "start": "Review",
+      "all_one": "Review all ({{count}})",
+      "all_other": "Review all ({{count}})",
+      "deckNamed_one": "Review {{name}} ({{count}} card today)",
+      "deckNamed_other": "Review {{name}} ({{count}} cards today)",
+      "reveal": "Show answer",
+      "progress": "Review progress",
+      "position": "{{current}} of {{total}}",
+      "cardLabel": "Card",
+      "answerGroup": "How did it go?",
+      "undo": "Undo last",
+      "shortcuts": "Space shows · 1 Again · 2 Hard · 3 Good · 4 Easy · U undoes",
+      "emptyTitle": "Nothing to review right now",
+      "emptyBody": "No due cards and today's new-card limit is used up (or there are no new cards).",
+      "loadError": "Could not load the review queue."
+    },
+    "summary": {
+      "title": "Session complete",
+      "answered": "Answered",
+      "accuracy": "Correct",
+      "time": "Time",
+      "done": "Back to decks"
+    },
+    "stats": {
+      "title": "Statistics",
+      "accuracy": "30-day accuracy",
+      "accuracyHint_one": "{{count}} answer",
+      "accuracyHint_other": "{{count}} answers",
+      "perDay": "Reviews per day (30 days)",
+      "perDayLabel": "{{total}} reviews in the last 30 days",
+      "forecast": "Next 7 days",
+      "loadError": "Could not load statistics."
+    },
+    "settings": {
+      "open": "Limits",
+      "title": "Daily limits",
+      "hint": "How many new cards and reviews come up per day, across all decks.",
+      "newPerDay": "New per day",
+      "reviewsPerDay": "Reviews per day"
+    },
+    "import": {
+      "open": "Import CSV",
+      "title": "Import cards into {{name}}",
+      "hint": "Columns: front, back and tags (optional, space separated). Header is optional. Up to 2,000 lines and 1 MB.",
+      "file": "CSV file",
+      "paste": "Or paste the content",
+      "submit": "Import",
+      "tooLarge": "File too large (max 1 MB).",
+      "imported_one": "{{count}} card imported.",
+      "imported_other": "{{count}} cards imported.",
+      "errors_one": "{{count}} line was not imported:",
+      "errors_other": "{{count}} lines were not imported:",
+      "line": "Line {{line}}",
+      "codes": {
+        "MISSING_COLUMNS": "missing columns (front and back are required)",
+        "TOO_MANY_COLUMNS": "too many columns (max 3)",
+        "FRONT_REQUIRED": "empty front",
+        "BACK_REQUIRED": "empty back",
+        "TEXT_TOO_LONG": "text too long (max 5,000 characters)",
+        "INVALID_TAGS": "invalid tags (up to 10, up to 40 characters)",
+        "UNCLOSED_QUOTE": "unclosed quote; the rest of the file was ignored",
+        "TOO_MANY_ROWS": "2,000-line limit reached; the rest was ignored",
+        "UNKNOWN": "invalid line"
+      }
+    },
+    "export": {
+      "open": "Export CSV"
     }
   }
 }
