@@ -44,7 +44,9 @@
     "remaining": "{{time}} restantes",
     "week": "Semana {{hours}}h",
     "gpa": "GPA {{value}}",
-    "gpaEmpty": "GPA —"
+    "gpaEmpty": "GPA —",
+    "session": "Sessão de foco",
+    "paused": "pausada"
   },
   "palette": {
     "label": "Paleta de comandos",
@@ -55,7 +57,10 @@
     "actions": "Ações",
     "newTask": "Nova tarefa",
     "newSubject": "Nova matéria",
-    "newSemester": "Novo semestre"
+    "newSemester": "Novo semestre",
+    "focus": "Foco",
+    "startFocus": "Iniciar foco em {{subject}}",
+    "goToSession": "Ir para a sessão ativa"
   },
   "auth": {
     "tagline": "O cockpit do estudante.",
@@ -88,7 +93,10 @@
     "NOT_FOUND": "Não encontrado.",
     "MALFORMED_REQUEST": "Algum valor enviado é inválido.",
     "CONFLICT": "Outra alteração aconteceu ao mesmo tempo. Tente de novo.",
-    "SEMESTER_ARCHIVED": "Um semestre arquivado não pode ser o atual."
+    "SEMESTER_ARCHIVED": "Um semestre arquivado não pode ser o atual.",
+    "SESSION_ALREADY_ACTIVE": "Já existe uma sessão de foco em andamento.",
+    "SESSION_NOT_ACTIVE": "Esta sessão já foi encerrada.",
+    "SESSION_STILL_ACTIVE": "Conclua a sessão antes de editá-la."
   },
   "pages": {
     "cockpit": {
@@ -101,7 +109,7 @@
     },
     "deepWork": {
       "title": "Deep Work",
-      "description": "Pomodoro e Flow vinculados à matéria, com commit message da sessão."
+      "description": "Pomodoro ou Flow ligado à matéria, com heatmap, sequência e meta semanal."
     },
     "flashcards": {
       "title": "Flashcards",
@@ -298,6 +306,109 @@
     "shortcuts": {
       "label": "Atalhos do teclado",
       "hint": "N nova · E editar · Espaço feita · ↑ ↓ navegar"
+    }
+  },
+  "deepWork": {
+    "mode": {
+      "label": "Modo do timer",
+      "POMODORO": "Pomodoro",
+      "FLOW": "Flow"
+    },
+    "phase": {
+      "idle": "Pronto",
+      "focus": "Foco",
+      "paused": "Pausado",
+      "shortBreak": "Pausa curta",
+      "longBreak": "Pausa longa"
+    },
+    "timerLabel": "Timer: {{time}}",
+    "cycle": "{{done}} de {{total}} focos no ciclo",
+    "subject": "Matéria",
+    "chooseSubject": "Escolha a matéria",
+    "task": "Tarefa",
+    "noTask": "Sem tarefa",
+    "start": "Iniciar foco",
+    "skipBreak": "Pular pausa",
+    "pause": "Pausar",
+    "resume": "Retomar",
+    "complete": "Concluir",
+    "cancel": "Descartar",
+    "noSubjects": "Crie uma matéria no The Stack para começar a registrar foco.",
+    "loadError": "Não foi possível carregar a sessão.",
+    "shortcutHint": "Espaço inicia ou pausa · Ctrl K para iniciar foco em uma matéria",
+    "completeTitle": "Concluir sessão",
+    "note": "Commit message da sessão",
+    "noteHint": "O que você fez? Opcional.",
+    "focusRating": "Como foi o foco?",
+    "ratingOption": "{{n}} de 5",
+    "settings": {
+      "title": "Preferências do Deep Work",
+      "open": "Preferências",
+      "focus": "Foco (min)",
+      "shortBreak": "Pausa curta (min)",
+      "longBreak": "Pausa longa (min)",
+      "longEvery": "Pausa longa a cada (focos)",
+      "weeklyGoal": "Meta semanal (h)",
+      "alerts": "Alertas",
+      "sound": "Tocar som ao terminar",
+      "notifications": "Notificação do navegador",
+      "notificationsDenied": "O navegador bloqueou as notificações. Libere nas configurações do site."
+    },
+    "manual": {
+      "title": "Registrar sessão",
+      "editTitle": "Editar sessão",
+      "add": "Registrar sessão",
+      "date": "Data",
+      "time": "Início",
+      "minutes": "Duração (min)"
+    },
+    "alerts": {
+      "focusDoneTitle": "Foco concluído",
+      "focusDoneBody": {
+        "shortBreak": "Hora de uma pausa curta de {{minutes}} min.",
+        "longBreak": "Ciclo completo! Pausa longa de {{minutes}} min."
+      },
+      "breakDoneTitle": "Pausa encerrada",
+      "breakDoneBody": "Pronto para o próximo foco?"
+    },
+    "stats": {
+      "title": "Resumo",
+      "today": "Hoje",
+      "week": "Semana",
+      "ofGoal": "h de {{goal}} h",
+      "streak": "Sequência",
+      "days_one": "dia",
+      "days_other": "dias",
+      "longest_one": "Maior: {{count}} dia",
+      "longest_other": "Maior: {{count}} dias",
+      "average": "Média diária",
+      "averageHint": "Últimos 30 dias",
+      "goalProgress": "Progresso da meta semanal",
+      "bySubject": "Horas por matéria",
+      "range": "Período",
+      "weekShort": "Semana",
+      "monthShort": "Mês",
+      "noData": "Nenhuma sessão no período.",
+      "loadError": "Não foi possível carregar as estatísticas."
+    },
+    "heatmap": {
+      "title": "Heatmap de foco",
+      "eyebrow": "Últimos 12 meses",
+      "label": "Heatmap de foco dos últimos 12 meses, {{hours}} h no total",
+      "cell": "{{duration}} em {{day}}",
+      "none": "Sem foco",
+      "empty": "Ainda não há sessões. Cada dia de foco acende um quadrado.",
+      "loadError": "Não foi possível carregar o heatmap."
+    },
+    "history": {
+      "title": "Sessões recentes",
+      "loadError": "Não foi possível carregar o histórico.",
+      "empty": "Nenhuma sessão ainda",
+      "emptyBody": "Inicie um foco ou registre uma sessão passada.",
+      "unknownSubject": "Matéria removida",
+      "manual": "manual",
+      "edit": "Editar sessão",
+      "delete": "Excluir sessão"
     }
   }
 }

@@ -3,6 +3,7 @@ package com.stackstudy.common.dev;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.stackstudy.auth.UserRepository;
+import com.stackstudy.session.StudySessionRepository;
 import com.stackstudy.subject.SemesterRepository;
 import com.stackstudy.subject.SubjectRepository;
 import com.stackstudy.support.IntegrationTest;
@@ -21,6 +22,7 @@ class DemoDataSeederIntegrationTest extends IntegrationTest {
   @Autowired SemesterRepository semesters;
   @Autowired SubjectRepository subjects;
   @Autowired TaskRepository tasks;
+  @Autowired StudySessionRepository sessions;
   @Autowired PasswordEncoder passwordEncoder;
   @Autowired Clock clock;
   @Autowired TransactionTemplate tx;
@@ -34,7 +36,7 @@ class DemoDataSeederIntegrationTest extends IntegrationTest {
   @Test
   void seedCreatesVariedDataOnceAndIsIdempotent() {
     DemoDataSeeder seeder =
-        new DemoDataSeeder(users, semesters, subjects, tasks, passwordEncoder, clock);
+        new DemoDataSeeder(users, semesters, subjects, tasks, sessions, passwordEncoder, clock);
 
     Boolean first = tx.execute(s -> seeder.seed());
     Boolean second = tx.execute(s -> seeder.seed());
@@ -47,5 +49,6 @@ class DemoDataSeederIntegrationTest extends IntegrationTest {
     assertThat(owned).extracting(s -> s.getName()).contains("Anatomia", "Contabilidade");
     assertThat(semesters.findByUserIdAndCurrentTrue(user.getId())).isPresent();
     assertThat(tasks.count()).isGreaterThanOrEqualTo(10);
+    assertThat(sessions.count()).isGreaterThan(100);
   }
 }

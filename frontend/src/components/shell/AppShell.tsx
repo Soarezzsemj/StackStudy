@@ -7,6 +7,7 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { StatusBar } from './StatusBar';
 import { CommandPalette } from './CommandPalette';
+import { DeepWorkEngine } from '@/features/deepwork/DeepWorkEngine';
 
 export function AppShell() {
   const { t } = useTranslation();
@@ -67,6 +68,7 @@ export function AppShell() {
       </div>
       <StatusBar />
       <CommandPalette />
+      <DeepWorkEngine />
     </div>
   );
 }

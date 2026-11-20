@@ -18,7 +18,7 @@ Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 2
 | --- | --- | --- |
 | 0 | Fundação: monorepo, Docker, schema, auth, app shell, design system, CI | ✅ |
 | 1 | The Stack: semestres (atual/arquivar), matérias, tarefas por prazo, filtros, atalhos | ✅ |
-| 2 | Deep Work: timer no backend, modos, commit message, heatmap, metas, streak | ⏳ |
+| 2 | Deep Work: sessões no servidor (pausa/retomada), Pomodoro/Flow, heatmap, streak, meta | ✅ |
 | 3 | Flashcards: CRUD, Markdown + KaTeX, SM-2 (serviço puro), previsão 7 dias | ⏳ |
 | 4 | Grade Predictor: regras, nota necessária, what-if, faltas, CR/GPA, PDF | ⏳ |
 | 5 | Cockpit e polimento: dashboard, radar de risco, estados vazios, atalhos | ⏳ |
@@ -59,14 +59,19 @@ app/            App, router, NAV_ITEMS (rotas e breadcrumbs)
 components/ui/  Button, Card, Chip, ProgressBar, PageTitle, StatBlock, Heatmap, Icon, TextField,
                 SelectField, TextAreaField, Dialog, Loading/Error/EmptyState, Wordmark
 components/shell/ AppShell, Sidebar, Topbar, StatusBar, CommandPalette
-features/<x>/   telas e hooks por módulo (auth, stack)
+features/<x>/   telas e hooks por módulo (auth, stack, deepwork)
+features/deepwork/ DeepWorkPage, TimerCard, InsightsSections (stats, heatmap, histórico), dialogs;
+                DeepWorkEngine (montado no AppShell: fim do pomodoro, pausas, alertas, título da aba);
+                lógica pura e testada em clock.ts, pomodoro.ts, heatmapGrid.ts, format.ts
 features/stack/ StackPage, SubjectPanel, TaskToolbar (filtros + criação rápida), TaskList,
                 Task/Subject/Semester dialogs; lógica pura e testada em due.ts, grouping.ts,
                 filters.ts, shortcuts.ts; queries.ts (TanStack Query)
-lib/api/        client.ts (fetch, refresh automático, retry de GET), auth.ts, stack.ts, types.ts,
+lib/api/        client.ts (fetch, refresh automático, retry de GET), auth.ts, stack.ts, deepwork.ts,
+                types.ts,
                 config.ts (VITE_API_URL, tempos), slow.ts (aviso de lentidão), wake.ts (wake-up ping)
-stores/         Zustand: authStore, uiStore, sessionStore, networkStore, stackStore (filtros,
-                seleção e diálogo aberto do The Stack)
+stores/         Zustand: authStore, uiStore, networkStore, stackStore (filtros, seleção e diálogo
+                do The Stack), deepWorkStore (modo, matéria, ciclo e pausa; persistido no localStorage)
+lib/            keyboard.ts (guardas dos atalhos), useNow.ts (re-render do timer), useDebouncedValue.ts
 i18n/           react-i18next; locales/pt-BR.json (padrão) e en.json
 styles/         tokens.css (design tokens) e index.css (base + componentes)
 test/           setup.ts e utils.tsx (`mockApi` roteia o fetch por "MÉTODO /caminho")
@@ -162,6 +167,23 @@ Frontend: grupos Atrasadas / Hoje / Esta semana (até domingo) / Depois / Sem pr
 anteriores" se mostrar feitas), calculados no fuso local. Atalhos: `Ctrl K` (Nova tarefa, Nova
 matéria, Novo semestre, navegação), `N` nova, `E` editar selecionada, `Espaço` feita, setas/`j k`
 para navegar. Nunca disparam dentro de campos.
+
+## Deep Work (Fase 2)
+
+API (`/api/deepwork`, tudo do usuário logado; de outro usuário = 404):
+
+- `GET /sessions/active` (204 se não houver), `POST /sessions` (`SESSION_ALREADY_ACTIVE` 409),
+  `POST /sessions/{id}/pause|resume` (idempotentes), `/complete` (`note` = commit message,
+  `focusRating` 1–5), `/cancel` (descarta). Encerrada: `SESSION_NOT_ACTIVE` 409.
+- `POST /sessions/manual`, `PUT /sessions/{id}` (só encerrada), `DELETE /sessions/{id}`,
+  `GET /sessions` (histórico paginado). `GET/PUT /settings` (25/5/15, longa a cada 4, meta 10 h).
+- `GET /heatmap?from=&to=&tz=` (padrão: últimos 12 meses; máx. 400 dias) e `GET /stats?tz=`.
+  `tz` é nome IANA (offset solto é recusado); o frontend manda o fuso do navegador.
+
+Tempo efetivo = (fim ou agora) − início − pausas (`paused_seconds` + pausa em aberto). Pomodoro
+nunca passa do planejado; qualquer sessão no máximo 12 h. O frontend calcula o timer pelos
+timestamps (+ diferença de relógio via `serverTime`); o `setInterval` só redesenha. Atalhos: Espaço
+inicia/pausa na tela; Ctrl K "Iniciar foco em <matéria>".
 
 ## Auth (como funciona)
 
@@ -284,3 +306,18 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
     API após 250 ms sem digitar. Índice `(user_id, status, due_date)` cobre o filtro padrão.
 34. **Seed de demonstração** só em `@Profile("dev & !prod")` + `SEED_DEMO=true`; um teste garante
     que o bean não existe fora do dev.
+35. **Sessão de foco vive no servidor; pausas do pomodoro (curta/longa) só no navegador.** A
+    pausa é um timestamp no `deepWorkStore` (localStorage): sobrevive a recarregar, mas não
+    sincroniza entre abas/aparelhos. Pausa não vira registro no banco.
+36. **Dia da sessão = dia local em que ela começou** (`started_at AT TIME ZONE tz`). Uma sessão
+    que cruza a meia-noite conta inteira no dia do início. Streak, "hoje", semana (seg–dom), mês
+    e média (últimos 30 dias ÷ 30) usam o mesmo fuso. Sequência atual vale até o fim do dia
+    seguinte ao último estudo.
+37. **Fim do pomodoro com o app fechado**: ao reabrir, o `DeepWorkEngine` conclui sozinho e o
+    servidor limita o efetivo ao planejado. Duas abas concluindo juntas: a segunda recebe 409 e
+    só ressincroniza.
+38. **Heatmap com faixas fixas** (0, ≤30 min, ≤1 h, ≤2 h, >2 h) em vez de relativas ao máximo:
+    o mesmo dia não muda de cor quando surge um dia recorde.
+39. `deep_work_settings` é criada sob demanda (sem linha = padrões). `sessionStore` saiu: a
+    sessão ativa vem do TanStack Query (`useActiveSession`), inclusive na status bar.
+40. Seed de demo (dev) inclui ~5 meses de sessões manuais determinísticas para o heatmap.

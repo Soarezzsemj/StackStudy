@@ -4,9 +4,9 @@ import { cleanup } from '@testing-library/react';
 import i18n from '@/i18n';
 import { useAuthStore } from '@/stores/authStore';
 import { useUiStore } from '@/stores/uiStore';
-import { useSessionStore } from '@/stores/sessionStore';
 import { useNetworkStore } from '@/stores/networkStore';
 import { useStackStore } from '@/stores/stackStore';
+import { useDeepWorkStore } from '@/stores/deepWorkStore';
 import { DEFAULT_FILTERS } from '@/features/stack/filters';
 import { __resetClientForTests } from '@/lib/api/client';
 import { __resetWakeForTests } from '@/lib/api/wake';
@@ -37,7 +37,14 @@ afterEach(() => {
   cleanup();
   useAuthStore.setState({ status: 'unknown', accessToken: null, user: null });
   useUiStore.setState({ paletteOpen: false, mobileNavOpen: false });
-  useSessionStore.setState({ active: null });
+  useDeepWorkStore.setState({
+    mode: 'POMODORO',
+    subjectId: '',
+    taskId: '',
+    completedFocus: 0,
+    breakState: null,
+  });
+  localStorage.clear();
   useNetworkStore.setState({ slowRequests: 0 });
   useStackStore.setState({ filters: DEFAULT_FILTERS, selectedTaskId: null, dialog: null });
   __resetClientForTests();

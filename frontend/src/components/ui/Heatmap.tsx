@@ -8,6 +8,8 @@ export interface HeatmapProps {
   label: string;
   /** Valor do nível máximo; o padrão é o maior valor da matriz. */
   max?: number;
+  /** Nível (0–4) de cada valor; substitui a escala relativa ao máximo (ex.: faixas fixas). */
+  level?: (value: number) => number;
   cellSize?: number;
   gap?: number;
   /** Texto do tooltip de cada célula, ex.: "2h em seg 05/12". */
@@ -19,6 +21,7 @@ export function Heatmap({
   values,
   label,
   max,
+  level: levelOf,
   cellSize = 12,
   gap = 3,
   cellTitle,
@@ -44,7 +47,7 @@ export function Heatmap({
         >
           {values.map((row, r) =>
             row.map((value, c) => {
-              const level = heatLevel(value, top);
+              const level = levelOf ? levelOf(value) : heatLevel(value, top);
               return (
                 <rect
                   key={`${r}-${c}`}

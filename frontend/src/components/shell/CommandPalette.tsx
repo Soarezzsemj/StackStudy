@@ -7,6 +7,14 @@ import { Icon } from '@/components/ui';
 import { useUiStore } from '@/stores/uiStore';
 import { useStackStore, type StackDialog } from '@/stores/stackStore';
 import type { IconName } from '@/components/ui';
+import { useCurrentSubjects } from '@/features/stack/queries';
+import { DEFAULT_SETTINGS } from '@/features/deepwork/pomodoro';
+import {
+  useActiveSession,
+  useDeepWorkSettings,
+  useSessionActions,
+} from '@/features/deepwork/queries';
+import { useDeepWorkStore } from '@/stores/deepWorkStore';
 
 const ITEM_CLASS =
   'flex min-h-11 cursor-pointer items-center gap-3 rounded-inner px-3 text-sm text-text-secondary data-[selected=true]:bg-surface-raised data-[selected=true]:text-text';
@@ -28,6 +36,23 @@ export function CommandPalette() {
   const setOpen = useUiStore((s) => s.setPaletteOpen);
   const toggle = useUiStore((s) => s.togglePalette);
   const openDialog = useStackStore((s) => s.openDialog);
+  const { list: subjects } = useCurrentSubjects();
+  const { data: active } = useActiveSession();
+  const { data: settings = DEFAULT_SETTINGS } = useDeepWorkSettings();
+  const { start } = useSessionActions();
+
+  /** Inicia foco na matéria no modo escolhido na tela Deep Work e abre a tela. */
+  function startFocus(subjectId: string) {
+    const store = useDeepWorkStore.getState();
+    store.setSubject(subjectId);
+    store.setBreak(null);
+    navigate('/deep-work');
+    start.mutate({
+      subjectId,
+      mode: store.mode,
+      plannedMinutes: store.mode === 'POMODORO' ? settings.focusMinutes : undefined,
+    });
+  }
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -82,6 +107,37 @@ export function CommandPalette() {
               <span className="flex-1">{t(action.key)}</span>
             </Command.Item>
           ))}
+        </Command.Group>
+        <Command.Group heading={t('palette.focus')} className={GROUP_CLASS}>
+          {active ? (
+            <Command.Item
+              value={t('palette.goToSession')}
+              onSelect={() => run(() => navigate('/deep-work'))}
+              className={ITEM_CLASS}
+            >
+              <Icon name="deepWork" size={18} />
+              <span className="flex-1">{t('palette.goToSession')}</span>
+            </Command.Item>
+          ) : (
+            subjects.map((subject) => {
+              const label = t('palette.startFocus', { subject: subject.name });
+              return (
+                <Command.Item
+                  key={subject.id}
+                  value={label}
+                  onSelect={() => run(() => startFocus(subject.id))}
+                  className={ITEM_CLASS}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="ml-1 mr-1 h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: subject.color }}
+                  />
+                  <span className="flex-1">{label}</span>
+                </Command.Item>
+              );
+            })
+          )}
         </Command.Group>
         <Command.Group heading={t('palette.navigate')} className={GROUP_CLASS}>
           {NAV_ITEMS.map((item) => {

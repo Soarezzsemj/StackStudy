@@ -44,7 +44,9 @@
     "remaining": "{{time}} left",
     "week": "Week {{hours}}h",
     "gpa": "GPA {{value}}",
-    "gpaEmpty": "GPA —"
+    "gpaEmpty": "GPA —",
+    "session": "Focus session",
+    "paused": "paused"
   },
   "palette": {
     "label": "Command palette",
@@ -55,7 +57,10 @@
     "actions": "Actions",
     "newTask": "New task",
     "newSubject": "New subject",
-    "newSemester": "New semester"
+    "newSemester": "New semester",
+    "focus": "Focus",
+    "startFocus": "Start focus on {{subject}}",
+    "goToSession": "Go to the active session"
   },
   "auth": {
     "tagline": "The student's cockpit.",
@@ -88,7 +93,10 @@
     "NOT_FOUND": "Not found.",
     "MALFORMED_REQUEST": "Some value sent is invalid.",
     "CONFLICT": "Another change happened at the same time. Please try again.",
-    "SEMESTER_ARCHIVED": "An archived semester cannot be the current one."
+    "SEMESTER_ARCHIVED": "An archived semester cannot be the current one.",
+    "SESSION_ALREADY_ACTIVE": "There is already a focus session running.",
+    "SESSION_NOT_ACTIVE": "This session has already ended.",
+    "SESSION_STILL_ACTIVE": "Finish the session before editing it."
   },
   "pages": {
     "cockpit": {
@@ -101,7 +109,7 @@
     },
     "deepWork": {
       "title": "Deep Work",
-      "description": "Pomodoro and Flow linked to a subject, with a session commit message."
+      "description": "Pomodoro or Flow tied to a subject, with heatmap, streak and weekly goal."
     },
     "flashcards": {
       "title": "Flashcards",
@@ -298,6 +306,109 @@
     "shortcuts": {
       "label": "Keyboard shortcuts",
       "hint": "N new · E edit · Space done · ↑ ↓ move"
+    }
+  },
+  "deepWork": {
+    "mode": {
+      "label": "Timer mode",
+      "POMODORO": "Pomodoro",
+      "FLOW": "Flow"
+    },
+    "phase": {
+      "idle": "Ready",
+      "focus": "Focus",
+      "paused": "Paused",
+      "shortBreak": "Short break",
+      "longBreak": "Long break"
+    },
+    "timerLabel": "Timer: {{time}}",
+    "cycle": "{{done}} of {{total}} focus blocks in this cycle",
+    "subject": "Subject",
+    "chooseSubject": "Choose a subject",
+    "task": "Task",
+    "noTask": "No task",
+    "start": "Start focus",
+    "skipBreak": "Skip break",
+    "pause": "Pause",
+    "resume": "Resume",
+    "complete": "Complete",
+    "cancel": "Discard",
+    "noSubjects": "Create a subject in The Stack to start tracking focus.",
+    "loadError": "Could not load the session.",
+    "shortcutHint": "Space starts or pauses · Ctrl K to start focus on a subject",
+    "completeTitle": "Complete session",
+    "note": "Session commit message",
+    "noteHint": "What did you do? Optional.",
+    "focusRating": "How was your focus?",
+    "ratingOption": "{{n}} of 5",
+    "settings": {
+      "title": "Deep Work preferences",
+      "open": "Preferences",
+      "focus": "Focus (min)",
+      "shortBreak": "Short break (min)",
+      "longBreak": "Long break (min)",
+      "longEvery": "Long break every (focus blocks)",
+      "weeklyGoal": "Weekly goal (h)",
+      "alerts": "Alerts",
+      "sound": "Play a sound when time is up",
+      "notifications": "Browser notification",
+      "notificationsDenied": "The browser blocked notifications. Allow them in the site settings."
+    },
+    "manual": {
+      "title": "Log session",
+      "editTitle": "Edit session",
+      "add": "Log session",
+      "date": "Date",
+      "time": "Start",
+      "minutes": "Duration (min)"
+    },
+    "alerts": {
+      "focusDoneTitle": "Focus complete",
+      "focusDoneBody": {
+        "shortBreak": "Time for a {{minutes}}-minute short break.",
+        "longBreak": "Cycle complete! {{minutes}}-minute long break."
+      },
+      "breakDoneTitle": "Break is over",
+      "breakDoneBody": "Ready for the next focus block?"
+    },
+    "stats": {
+      "title": "Summary",
+      "today": "Today",
+      "week": "Week",
+      "ofGoal": "h of {{goal}} h",
+      "streak": "Streak",
+      "days_one": "day",
+      "days_other": "days",
+      "longest_one": "Longest: {{count}} day",
+      "longest_other": "Longest: {{count}} days",
+      "average": "Daily average",
+      "averageHint": "Last 30 days",
+      "goalProgress": "Weekly goal progress",
+      "bySubject": "Hours by subject",
+      "range": "Period",
+      "weekShort": "Week",
+      "monthShort": "Month",
+      "noData": "No sessions in this period.",
+      "loadError": "Could not load stats."
+    },
+    "heatmap": {
+      "title": "Focus heatmap",
+      "eyebrow": "Last 12 months",
+      "label": "Focus heatmap for the last 12 months, {{hours}} h in total",
+      "cell": "{{duration}} on {{day}}",
+      "none": "No focus",
+      "empty": "No sessions yet. Every day of focus lights up a square.",
+      "loadError": "Could not load the heatmap."
+    },
+    "history": {
+      "title": "Recent sessions",
+      "loadError": "Could not load the history.",
+      "empty": "No sessions yet",
+      "emptyBody": "Start a focus block or log a past session.",
+      "unknownSubject": "Deleted subject",
+      "manual": "manual",
+      "edit": "Edit session",
+      "delete": "Delete session"
     }
   }
 }

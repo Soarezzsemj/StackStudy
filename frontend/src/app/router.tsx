@@ -6,6 +6,7 @@ import { RegisterPage } from '@/features/auth/RegisterPage';
 import { PlaceholderPage } from '@/pages/PlaceholderPage';
 import { DesignPage } from '@/pages/DesignPage';
 import { StackPage } from '@/features/stack/StackPage';
+import { DeepWorkPage } from '@/features/deepwork/DeepWorkPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 
 export const routes: RouteObject[] = [
@@ -26,7 +27,7 @@ export const routes: RouteObject[] = [
         children: [
           { path: '/', element: <PlaceholderPage pageKey="cockpit" phase={5} /> },
           { path: '/stack', element: <StackPage /> },
-          { path: '/deep-work', element: <PlaceholderPage pageKey="deepWork" phase={2} /> },
+          { path: '/deep-work', element: <DeepWorkPage /> },
           { path: '/flashcards', element: <PlaceholderPage pageKey="flashcards" phase={3} /> },
           { path: '/grades', element: <PlaceholderPage pageKey="grades" phase={4} /> },
           { path: '*', element: <NotFoundPage /> },

@@ -2,6 +2,8 @@ package com.stackstudy.common.dev;
 
 import com.stackstudy.auth.User;
 import com.stackstudy.auth.UserRepository;
+import com.stackstudy.session.StudySession;
+import com.stackstudy.session.StudySessionRepository;
 import com.stackstudy.subject.Semester;
 import com.stackstudy.subject.SemesterRepository;
 import com.stackstudy.subject.Subject;
@@ -51,6 +53,7 @@ public class DemoDataSeeder implements ApplicationRunner {
   private final SemesterRepository semesters;
   private final SubjectRepository subjects;
   private final TaskRepository tasks;
+  private final StudySessionRepository sessions;
   private final PasswordEncoder passwordEncoder;
   private final Clock clock;
 
@@ -59,12 +62,14 @@ public class DemoDataSeeder implements ApplicationRunner {
       SemesterRepository semesters,
       SubjectRepository subjects,
       TaskRepository tasks,
+      StudySessionRepository sessions,
       PasswordEncoder passwordEncoder,
       Clock clock) {
     this.users = users;
     this.semesters = semesters;
     this.subjects = subjects;
     this.tasks = tasks;
+    this.sessions = sessions;
     this.passwordEncoder = passwordEncoder;
     this.clock = clock;
   }
@@ -205,8 +210,31 @@ public class DemoDataSeeder implements ApplicationRunner {
         false,
         Status.TODO);
 
+    seedSessions(user, created, today);
+
     log.info("Demo data created: {} / {}", DEMO_EMAIL, DEMO_PASSWORD);
     return true;
+  }
+
+  /**
+   * Histórico de foco dos últimos ~5 meses para o heatmap: padrão determinístico (sem aleatório),
+   * com dias de folga, para os testes e a demo serem sempre iguais.
+   */
+  private void seedSessions(User user, List<Subject> subjects, LocalDate today) {
+    for (int back = 150; back >= 1; back--) {
+      LocalDate day = today.minusDays(back);
+      // Folga em alguns dias (sábados e a cada 7 dias um "buraco").
+      if (day.getDayOfWeek().getValue() == 6 || back % 7 == 3) {
+        continue;
+      }
+      int sessionsToday = 1 + (back % 3);
+      for (int i = 0; i < sessionsToday; i++) {
+        Subject subject = subjects.get((back + i) % subjects.size());
+        Instant start = day.atTime(9 + i * 3, 0).toInstant(ZoneOffset.UTC);
+        int minutes = 25 + ((back * 7 + i * 11) % 4) * 15;
+        sessions.save(StudySession.manual(user.getId(), subject.getId(), null, start, minutes));
+      }
+    }
   }
 
   private Instant endOfDay(LocalDate day) {

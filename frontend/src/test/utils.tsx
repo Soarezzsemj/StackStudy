@@ -56,6 +56,10 @@ export function mockApi(handlers: Record<string, Handler> = {}) {
       return jsonResponse(200, []);
     }
     if (method === 'GET' && path === '/api/tasks') return jsonResponse(200, emptyPage);
+    // Deep Work: sem sessão ativa (204) e histórico vazio.
+    if (method === 'GET' && path === '/api/deepwork/sessions/active')
+      return new Response(null, { status: 204 });
+    if (method === 'GET' && path === '/api/deepwork/sessions') return jsonResponse(200, emptyPage);
     return jsonResponse(404, { code: 'NOT_FOUND', message: 'Not found' });
   });
 }
