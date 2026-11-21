@@ -26,8 +26,16 @@ export const PROFILE_ITEM: NavItem = {
   icon: 'user',
 };
 
+/** Painel do admin: o link só aparece para quem tem papel ADMIN. */
+export const ADMIN_ITEM: NavItem = {
+  to: '/admin/status',
+  labelKey: 'nav.admin',
+  slug: 'admin/status',
+  icon: 'globe',
+};
+
 export function findNavItem(pathname: string): NavItem | undefined {
-  return [...NAV_ITEMS, PROFILE_ITEM].find((item) =>
+  return [...NAV_ITEMS, PROFILE_ITEM, ADMIN_ITEM].find((item) =>
     item.to === '/' ? pathname === '/' : pathname === item.to || pathname.startsWith(`${item.to}/`),
   );
 }

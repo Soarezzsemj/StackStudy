@@ -32,7 +32,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
-    return !props.enabled() || !"POST".equals(request.getMethod()) || rule(request) == null;
+    return !props.enabled() || rule(request) == null;
   }
 
   @Override
@@ -40,7 +40,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
     RateLimitProperties.Rule rule = rule(request);
-    String key = request.getRequestURI() + ":" + request.getRemoteAddr();
+    // O painel inteiro conta junto (uma chave por IP); auth, por rota.
+    String route =
+        request.getRequestURI().startsWith("/api/admin/") ? "/api/admin" : request.getRequestURI();
+    String key = route + ":" + request.getRemoteAddr();
     RateLimiter.Decision decision = limiter.acquire(key, rule.limit(), rule.window());
     if (!decision.allowed()) {
       writeTooMany(response, decision.retryAfterSeconds());
@@ -50,7 +53,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
   }
 
   private RateLimitProperties.Rule rule(HttpServletRequest request) {
-    return switch (request.getRequestURI()) {
+    String uri = request.getRequestURI();
+    if (uri.startsWith("/api/admin/")) {
+      return props.admin();
+    }
+    if (!"POST".equals(request.getMethod())) {
+      return null;
+    }
+    return switch (uri) {
       case "/api/auth/login" -> props.login();
       case "/api/auth/register" -> props.register();
       case "/api/auth/refresh" -> props.refresh();

@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { NAV_ITEMS, PROFILE_ITEM } from '@/app/routes';
+import { ADMIN_ITEM, NAV_ITEMS, PROFILE_ITEM } from '@/app/routes';
 import { Avatar, Button, Icon, Wordmark } from '@/components/ui';
 import { accountApi } from '@/lib/api/account';
 import { useAuthStore } from '@/stores/authStore';
@@ -48,7 +48,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
       <nav aria-label={t('nav.label')}>
         <ul className="m-0 flex list-none flex-col gap-1 p-0">
-          {NAV_ITEMS.map((item) => (
+          {[...NAV_ITEMS, ...(user?.role === 'ADMIN' ? [ADMIN_ITEM] : [])].map((item) => (
             <li key={item.to}>
               <NavLink
                 to={item.to}

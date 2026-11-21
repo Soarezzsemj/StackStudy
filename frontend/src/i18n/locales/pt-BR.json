@@ -24,7 +24,8 @@
     "flashcards": "Flashcards",
     "grades": "Grade Predictor",
     "design": "Design system",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "admin": "Administração"
   },
   "shell": {
     "root": "~/stackstudy",
@@ -1089,7 +1090,7 @@
     "backToApp": "Voltar ao app",
     "backToLogin": "Entrar",
     "updated": "Atualizado em {{date}}",
-    "date": "21 de novembro de 2026",
+    "date": "21 de novembro de 2026 (métricas de operação)",
     "terms": {
       "short": "Termos",
       "title": "Termos de uso",
@@ -1179,18 +1180,148 @@
           ]
         },
         {
-          "title": "7. Segurança",
+          "title": "7. Métricas de operação",
+          "body": [
+            "Para operar o serviço, registramos de forma agregada: a última vez que cada conta usou o app (no máximo uma atualização por minuto), os dias em que houve atividade (um registro por dia, em UTC) e a contagem de erros por rota e hora (só o padrão da rota, como \"POST /api/auth/refresh\", e o código de erro; nunca o conteúdo, parâmetros, e-mails ou senhas).",
+            "Só o administrador do StackStudy vê esses números, num painel de acesso restrito, sempre agregados; a única informação individual é a lista dos últimos cadastros com o e-mail mascarado (ex.: an***@dominio.com) e o curso. Cada acesso ao painel fica registrado. Contagens de erro são apagadas em 7 dias, os registros de acesso ao painel em 90 dias e os dias de atividade em cerca de 13 meses; tudo some com a exclusão da conta e aparece na exportação dos seus dados."
+          ]
+        },
+        {
+          "title": "8. Segurança",
           "body": [
             "Conexão sempre criptografada (HTTPS), senha com hash, sessões que você pode encerrar, limite de tentativas de login e acesso aos dados só pela sua conta."
           ]
         },
         {
-          "title": "8. Contato",
+          "title": "9. Contato",
           "body": [
             "Responsável pelo tratamento: o mantenedor do StackStudy. Dúvidas ou pedidos sobre seus dados: privacidade@seu-dominio.com (substitua pelo contato real antes de divulgar)."
           ]
         }
       ]
+    }
+  },
+  "admin": {
+    "title": "Admin: Status",
+    "description": "Saúde do serviço e uso agregado. Nenhum dado pessoal além do e-mail mascarado.",
+    "restricted": "Acesso restrito: só administradores. O papel é conferido no servidor a cada requisição e cada acesso fica registrado.",
+    "loading": "Carregando o painel…",
+    "loadError": "Não foi possível carregar estes dados.",
+    "empty": "Ainda sem dados.",
+    "refresh": "Atualizar",
+    "refreshing": "Atualizando…",
+    "exportCsv": "Exportar CSV",
+    "updatedAt": "Atualizado às {{time}}",
+    "autoRefresh": "atualiza sozinho a cada 60 s com a aba visível",
+    "range": {
+      "label": "Período",
+      "24h": "24 h",
+      "7d": "7 dias",
+      "30d": "30 dias"
+    },
+    "online": {
+      "eyebrow": "Online agora",
+      "unit_one": "pessoa",
+      "unit_other": "pessoas",
+      "hint": "Atividade nos últimos 5 minutos. Gráfico: ativos por dia (7 dias)."
+    },
+    "kpi": {
+      "label": "Indicadores",
+      "users": "Usuários cadastrados",
+      "newInRange_one": "{{count}} novo em {{range}}",
+      "newInRange_other": "{{count}} novos em {{range}}",
+      "dau": "Ativos hoje (DAU)",
+      "vsYesterday": "vs. ontem",
+      "wau": "Ativos na semana (WAU)",
+      "vsLastWeek": "vs. semana anterior",
+      "retention": "Retenção D7",
+      "retentionHint_one": "coorte de {{count}} cadastro (30 dias)",
+      "retentionHint_other": "coorte de {{count}} cadastros (30 dias)",
+      "noCompare": "sem comparação",
+      "up": "de alta",
+      "down": "de queda",
+      "flat": "sem variação"
+    },
+    "charts": {
+      "sparkline": "Ativos por dia nos últimos {{days}} dias: mínimo {{min}}, máximo {{max}}.",
+      "activity": "Usuários ativos por dia nos últimos {{days}} dias (pico de {{peak}}) e {{signups}} novos cadastros no período.",
+      "active": "Ativos",
+      "signups": "Novos cadastros"
+    },
+    "activity": {
+      "title": "Usuários ativos por dia",
+      "focus": "Média de {{hours}} h de foco por usuário ativo em {{range}}."
+    },
+    "funnel": {
+      "title": "Funil de ativação",
+      "hint": "Cadastros dos últimos 30 dias.",
+      "registered": "Cadastro",
+      "firstSubject": "1ª matéria",
+      "firstFocusSession": "1ª sessão de foco",
+      "returned7d": "Voltou em até 7 dias"
+    },
+    "usage": {
+      "title": "Uso por função",
+      "hint_one": "Dos {{count}} ativo da semana, quantos usaram cada módulo.",
+      "hint_other": "Dos {{count}} ativos da semana, quantos usaram cada módulo.",
+      "stack": "The Stack",
+      "deepWork": "Deep Work",
+      "flashcards": "Flashcards",
+      "grades": "Grade Predictor"
+    },
+    "health": {
+      "title": "Saúde do sistema",
+      "db": "Banco",
+      "up": "No ar",
+      "down": "Fora do ar",
+      "dbSize": "Tamanho do banco",
+      "postgres": "PostgreSQL",
+      "uptime": "Uptime do app",
+      "heap": "Memória (heap)",
+      "version": "Versão",
+      "starts": "Inicializações (24 h)"
+    },
+    "providers": {
+      "title": "Limites do plano grátis",
+      "hint": "O app não mede horas do Render, CU-horas do Neon nem tráfego da Vercel sem tokens desses serviços. Confira no painel de cada um.",
+      "open": "Abrir painel",
+      "newTab": "(abre em nova aba)",
+      "notConfigured": "Link não configurado ({{env}}).",
+      "render": {
+        "name": "Render",
+        "what": "Horas de instância e logs do backend"
+      },
+      "neon": {
+        "name": "Neon",
+        "what": "CU-horas e armazenamento do banco"
+      },
+      "vercel": {
+        "name": "Vercel",
+        "what": "Tráfego e deploys do frontend"
+      },
+      "backup": {
+        "name": "Backup",
+        "what": "Execuções do workflow de backup (GitHub Actions)"
+      }
+    },
+    "signups": {
+      "title": "Últimos cadastros",
+      "email": "E-mail (mascarado)",
+      "course": "Curso",
+      "date": "Data"
+    },
+    "errors": {
+      "title": "Erros nas últimas 24 h",
+      "none": "Nenhum erro registrado nas últimas 24 h.",
+      "route": "Rota",
+      "status": "Status",
+      "count": "Ocorrências",
+      "last": "Última vez"
+    },
+    "forbidden": {
+      "title": "403",
+      "body": "Esta área é só para administradores do StackStudy.",
+      "back": "Voltar ao Cockpit"
     }
   }
 }

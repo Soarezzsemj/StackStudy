@@ -89,3 +89,17 @@ stackstudy:
       password-failures:
         limit: 5
         window: PT15M
+      # Painel do admin (/api/admin/**), por IP: o painel faz 4 chamadas por minuto.
+      admin:
+        limit: 60
+        window: PT1M
+  # Painel de status (Fase 8). ADMIN_EMAILS: contas JÁ EXISTENTES que viram ADMIN ao iniciar.
+  admin:
+    emails: ${ADMIN_EMAILS:}
+    # O Render injeta RENDER_GIT_COMMIT; fora dele, APP_COMMIT (opcional).
+    commit: ${RENDER_GIT_COMMIT:${APP_COMMIT:}}
+    links:
+      render: ${ADMIN_LINK_RENDER:}
+      neon: ${ADMIN_LINK_NEON:}
+      vercel: ${ADMIN_LINK_VERCEL:}
+      backup: ${ADMIN_LINK_BACKUP:}

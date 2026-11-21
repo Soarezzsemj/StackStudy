@@ -6,6 +6,7 @@ import { RegisterPage } from '@/features/auth/RegisterPage';
 import { RouteErrorPage } from '@/pages/RouteErrorPage';
 import { PublicPage } from '@/pages/PublicPage';
 import {
+  AdminStatusPage,
   CockpitPage,
   DeckPage,
   DeepWorkPage,
@@ -56,6 +57,8 @@ export const routes: RouteObject[] = [
               { path: '/flashcards/review', element: <ReviewPage /> },
               { path: '/grades', element: <GradesPage /> },
               { path: '/profile', element: <ProfilePage /> },
+              // A página confere o papel (403 sem piscar); o servidor confere de novo.
+              { path: '/admin/status', element: <AdminStatusPage /> },
               { path: '*', element: <NotFoundPage /> },
             ],
           },

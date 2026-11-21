@@ -16,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
  * @param refresh POST /api/auth/refresh por IP
  * @param loginFailures senhas erradas por e-mail (bloqueia o e-mail até a janela passar)
  * @param passwordFailures senha atual errada por usuário em /api/me (e-mail, senha, excluir)
+ * @param admin qualquer método em /api/admin/** por IP
  */
 @Validated
 @ConfigurationProperties(prefix = "stackstudy.security.rate-limit")
@@ -25,7 +26,8 @@ public record RateLimitProperties(
     @Valid @NotNull Rule register,
     @Valid @NotNull Rule refresh,
     @Valid @NotNull Rule loginFailures,
-    @Valid @NotNull Rule passwordFailures) {
+    @Valid @NotNull Rule passwordFailures,
+    @Valid @NotNull Rule admin) {
 
   /** {@code limit} pedidos a cada {@code window}. */
   public record Rule(@Min(1) int limit, @NotNull Duration window) {}

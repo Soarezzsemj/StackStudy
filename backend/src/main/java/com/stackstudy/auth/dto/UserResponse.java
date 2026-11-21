@@ -8,6 +8,8 @@ import java.util.UUID;
  * Usuário logado com o perfil. Nunca inclui o hash da senha.
  *
  * @param timeZone fuso IANA preferido (ausente = o do navegador)
+ * @param role USER ou ADMIN (só leitura: o frontend mostra o link do painel; o servidor confere de
+ *     novo no banco a cada requisição de /api/admin)
  */
 public record UserResponse(
     UUID id,
@@ -20,7 +22,8 @@ public record UserResponse(
     String currentPeriod,
     String bio,
     String avatarColor,
-    String timeZone) {
+    String timeZone,
+    String role) {
 
   public static UserResponse from(User user) {
     return new UserResponse(
@@ -34,6 +37,7 @@ public record UserResponse(
         user.getCurrentPeriod(),
         user.getBio(),
         user.getAvatarColor(),
-        user.getTimeZone());
+        user.getTimeZone(),
+        user.getRole());
   }
 }

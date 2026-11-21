@@ -35,6 +35,9 @@ export const NotFoundPage = lazy(() =>
 export const DesignPage = lazy(() =>
   import('@/pages/DesignPage').then((m) => ({ default: m.DesignPage })),
 );
+export const AdminStatusPage = lazy(() =>
+  import('@/features/admin/AdminStatusPage').then((m) => ({ default: m.AdminStatusPage })),
+);
 export const LegalPage = lazy(() =>
   import('@/pages/LegalPage').then((m) => ({ default: m.LegalPage })),
 );

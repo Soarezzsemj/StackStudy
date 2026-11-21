@@ -38,13 +38,20 @@ services:
       REFRESH_COOKIE_SAME_SITE: ${REFRESH_COOKIE_SAME_SITE:-Strict}
       # Dados de demonstração (só perfil dev): demo@stackstudy.local / demo-password
       SEED_DEMO: ${SEED_DEMO:-false}
+      # Painel do admin: contas JÁ existentes que viram ADMIN ao iniciar (ex.: demo@stackstudy.local)
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      ADMIN_LINK_RENDER: ${ADMIN_LINK_RENDER:-}
+      ADMIN_LINK_NEON: ${ADMIN_LINK_NEON:-}
+      ADMIN_LINK_VERCEL: ${ADMIN_LINK_VERCEL:-}
+      ADMIN_LINK_BACKUP: ${ADMIN_LINK_BACKUP:-}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     volumes:
       - ./backend:/app
       - maven-repo:/root/.m2
     healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:8080/actuator/health || exit 1"]
+      # Liveness: o agregado /actuator/health pede login desde a Fase 7.
+      test: ["CMD-SHELL", "curl -fs http://localhost:8080/actuator/health/liveness || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 30

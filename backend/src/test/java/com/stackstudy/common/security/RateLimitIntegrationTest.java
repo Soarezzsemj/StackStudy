@@ -31,7 +31,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
       "stackstudy.security.rate-limit.register.limit=2",
       "stackstudy.security.rate-limit.refresh.limit=3",
       "stackstudy.security.rate-limit.login-failures.limit=3",
-      "stackstudy.security.rate-limit.password-failures.limit=2"
+      "stackstudy.security.rate-limit.password-failures.limit=2",
+      "stackstudy.security.rate-limit.admin.limit=3"
     })
 class RateLimitIntegrationTest extends IntegrationTest {
 
@@ -167,5 +168,27 @@ class RateLimitIntegrationTest extends IntegrationTest {
                     json.writeValueAsString(
                         Map.of("currentPassword", "ana-password", "newPassword", "new-pass-123"))))
         .andExpect(status().isTooManyRequests());
+  }
+
+  @Test
+  void adminRoutesAreLimitedPerIpBeforeAuth() throws Exception {
+    String ip = ip();
+    // Conta antes da autenticação: nem quem está sem token consegue martelar o painel.
+    for (String path :
+        java.util.List.of(
+            "/api/admin/status/health", "/api/admin/status/errors", "/api/admin/status/signups")) {
+      mvc.perform(
+              from(
+                  org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(path),
+                  ip))
+          .andExpect(status().isUnauthorized());
+    }
+    mvc.perform(
+            from(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get(
+                    "/api/admin/status/overview"),
+                ip))
+        .andExpect(status().isTooManyRequests())
+        .andExpect(header().exists(HttpHeaders.RETRY_AFTER));
   }
 }

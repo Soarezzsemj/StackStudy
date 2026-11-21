@@ -44,3 +44,15 @@ services:
       # Opcional: flags extras da JVM
       - key: JAVA_TOOL_OPTIONS
         sync: false
+      # Painel do admin: e-mails de contas JÁ criadas (ver DEPLOY.md, "Painel do admin")
+      - key: ADMIN_EMAILS
+        sync: false
+      # Links (https) para os painéis do Render, Neon, Vercel e do workflow de backup
+      - key: ADMIN_LINK_RENDER
+        sync: false
+      - key: ADMIN_LINK_NEON
+        sync: false
+      - key: ADMIN_LINK_VERCEL
+        sync: false
+      - key: ADMIN_LINK_BACKUP
+        sync: false

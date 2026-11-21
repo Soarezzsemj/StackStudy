@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { Command } from 'cmdk';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { NAV_ITEMS, PROFILE_ITEM } from '@/app/routes';
+import { ADMIN_ITEM, NAV_ITEMS, PROFILE_ITEM } from '@/app/routes';
+import { useAuthStore } from '@/stores/authStore';
 import { authApi } from '@/lib/api/auth';
 import { Icon } from '@/components/ui';
 import { useUiStore } from '@/stores/uiStore';
@@ -51,6 +52,7 @@ export function CommandPalette() {
   const { data: active } = useActiveSession();
   const { data: settings = DEFAULT_SETTINGS } = useDeepWorkSettings();
   const { start } = useSessionActions();
+  const isAdmin = useAuthStore((s) => s.user?.role === 'ADMIN');
 
   /** Inicia foco na matéria no modo escolhido na tela Deep Work e abre a tela. */
   function startFocus(subjectId: string) {
@@ -203,7 +205,7 @@ export function CommandPalette() {
           </Command.Item>
         </Command.Group>
         <Command.Group heading={t('palette.navigate')} className={GROUP_CLASS}>
-          {[...NAV_ITEMS, PROFILE_ITEM].map((item) => {
+          {[...NAV_ITEMS, PROFILE_ITEM, ...(isAdmin ? [ADMIN_ITEM] : [])].map((item) => {
             const label = t('palette.goTo', { page: t(item.labelKey) });
             return (
               <Command.Item

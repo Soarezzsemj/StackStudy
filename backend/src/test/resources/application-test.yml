@@ -20,6 +20,8 @@ stackstudy:
         limit: 100000
       password-failures:
         limit: 100000
+      admin:
+        limit: 100000
 
 logging:
   level:

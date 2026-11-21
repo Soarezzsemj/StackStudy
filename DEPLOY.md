@@ -33,7 +33,8 @@ GitHub Actions ── pg_dump semanal (criptografado) ──► artifact privado
 - [ ] 5. Teste ponta a ponta: cadastro, login, refresh, logout e cookie `HttpOnly` + `Secure`
 - [ ] 6. GitHub: repositório **privado**, secrets do backup criados, backup rodado uma vez à mão
 - [ ] 7. Monitor gratuito chamando `/actuator/health/liveness` a cada 5–10 min (opcional, recomendado)
-- [ ] 8. Leu "O que fazer se…"
+- [ ] 8. Painel do admin: conta criada **antes**, depois `ADMIN_EMAILS` no Render (opcional)
+- [ ] 9. Leu "O que fazer se…"
 
 ---
 
@@ -249,6 +250,45 @@ O Render free hiberna depois de ~15 min sem tráfego, e acordar leva 1,5–2 min
 
 ---
 
+## 8. Painel do admin (`/admin/status`)
+
+O painel mostra saúde do serviço e uso agregado (ativos, retenção, funil, erros). Só quem tem papel **ADMIN** abre; o papel é conferido no banco a cada requisição e cada acesso fica registrado (`admin_access_log`, 90 dias).
+
+### Virar admin (na ordem certa)
+
+1. **Crie a sua conta primeiro**, pelo próprio app (cadastro normal), com o e-mail que vai ser o do admin.
+2. No Render: **Environment → `ADMIN_EMAILS`** = esse e-mail. Vários admins: separe por vírgula (`dono@x.com,outra@y.com`).
+3. **Save Changes** (o Render reinicia o serviço). Na inicialização, o backend:
+   - promove a ADMIN **só contas que já existem** com esses e-mails;
+   - rebaixa para USER quem era ADMIN e saiu da lista (lista vazia = nenhum admin).
+4. Saia e entre de novo no app: o link **Administração** aparece na barra lateral.
+
+> ⚠️ **Por que a ordem importa:** o cadastro nunca dá papel de admin. Se você configurasse a variável antes de criar a conta, alguém poderia registrar o seu e-mail primeiro e virar admin no próximo reinício. Criando a conta antes, o e-mail já é seu (o cadastro de outra pessoa com ele falha).
+>
+> Confira no log do boot a linha `Admin roles synced from ADMIN_EMAILS: 1 listed, 1 promoted, 0 demoted` (só contagens; e-mail não vai para o log).
+
+Localmente: ponha `ADMIN_EMAILS=demo@stackstudy.local` no `.env`, suba com `SEED_DEMO=true docker compose up` e **reinicie o backend uma vez** depois que a conta de demonstração for criada (`docker compose restart backend`).
+
+### Links para os painéis dos provedores
+
+O app **não consegue medir** horas do Render, CU-horas do Neon nem tráfego da Vercel sem tokens desses serviços, e nenhum token é pedido. O painel mostra só o que mede (tamanho do banco, latência, memória, inicializações) e, para o resto, cartões com link. Configure no Render (todas opcionais, precisam começar com `https://`):
+
+| Variável | Exemplo |
+| --- | --- |
+| `ADMIN_LINK_RENDER` | `https://dashboard.render.com/web/srv-xxxxxxxx` |
+| `ADMIN_LINK_NEON` | `https://console.neon.tech/app/projects/<projeto>` |
+| `ADMIN_LINK_VERCEL` | `https://vercel.com/<time>/<projeto>` |
+| `ADMIN_LINK_BACKUP` | `https://github.com/<você>/<repo>/actions/workflows/db-backup.yml` |
+
+Sem a variável, o cartão diz qual falta. O commit em produção aparece sozinho (o Render injeta `RENDER_GIT_COMMIT`).
+
+### Custo no plano grátis
+
+- Nada roda em segundo plano. "Última atividade" grava no máximo **1 vez por minuto por usuário**; erros são contados em memória e gravados no máximo 1 vez por minuto; a limpeza de dados antigos roda junto de uma dessas escritas, **no máximo 1 vez por dia**.
+- O painel se atualiza a cada 60 s **só com a aba visível**: deixá-lo aberto num canto não mantém o Render e o Neon acordados.
+
+---
+
 ## O que fazer se…
 
 **O primeiro acesso demora muito (cold start).**
@@ -329,6 +369,8 @@ Quando o cold start incomodar, troque o plano do Render: serviço → **Settings
 | `SWAGGER_ENABLED` | não | `true` liga o Swagger em prod (padrão `false`). |
 | `REFRESH_COOKIE_SECURE` | não | Cookie só em HTTPS (padrão `true`). Em prod, `false` **impede o boot**. |
 | `REFRESH_COOKIE_SAME_SITE` | não | SameSite do cookie (padrão `Lax`). Só `Strict`, `Lax` ou `None` (este exige Secure). |
+| `ADMIN_EMAILS` | não | E-mails (vírgula) de contas **já criadas** que viram ADMIN ao iniciar. Ver "Painel do admin". |
+| `ADMIN_LINK_RENDER` / `_NEON` / `_VERCEL` / `_BACKUP` | não | Links `https://` para os painéis dos provedores no Admin: Status. |
 | `RATE_LIMIT_ENABLED` | não | Limite de tentativas em login/cadastro/refresh (padrão `true`). Em prod, `false` **impede o boot**. |
 | `JWT_ACCESS_TTL` / `JWT_REFRESH_TTL` | não | Validade dos tokens (padrão `PT15M` / `P14D`). |
 | `PORT` | automática | Porta HTTP, definida pelo próprio Render. |

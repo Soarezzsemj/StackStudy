@@ -36,7 +36,7 @@ public class DataExportService {
     QUERIES.put(
         "profile",
         "SELECT id, name, email, locale, time_zone, course, institution, current_period, bio,"
-            + " avatar_color, created_at, updated_at FROM users WHERE id = ?");
+            + " avatar_color, role, last_seen_at, created_at, updated_at FROM users WHERE id = ?");
     QUERIES.put(
         "sessions",
         "SELECT id, user_agent, created_at, last_used_at, expires_at, revoked_at"
@@ -64,6 +64,13 @@ public class DataExportService {
     QUERIES.put("deepWorkSettings", "SELECT * FROM deep_work_settings WHERE user_id = ?");
     QUERIES.put("gradeSettings", "SELECT * FROM grade_settings WHERE user_id = ?");
     QUERIES.put("flashcardSettings", "SELECT * FROM flashcard_settings WHERE user_id = ?");
+    // Métricas de operação (Fase 8): dias com atividade e, para admins, acessos ao painel.
+    QUERIES.put(
+        "activityDays", "SELECT day FROM user_activity_daily WHERE user_id = ? ORDER BY day");
+    QUERIES.put(
+        "adminAccessLog",
+        "SELECT endpoint, allowed, accessed_at FROM admin_access_log WHERE user_id = ?"
+            + " ORDER BY accessed_at");
   }
 
   private final JdbcTemplate jdbc;

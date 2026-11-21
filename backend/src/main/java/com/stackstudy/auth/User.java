@@ -43,6 +43,16 @@ public class User extends BaseEntity {
   @Column(name = "time_zone", length = 64)
   private String timeZone;
 
+  /**
+   * USER ou ADMIN. Só leitura para o JPA (nem insert nem update): nenhuma rota consegue mudar o
+   * papel. Quem grava é o AdminBootstrap, por SQL, a partir da variável ADMIN_EMAILS.
+   */
+  @Column(nullable = false, length = 10, insertable = false, updatable = false)
+  private String role = ROLE_USER;
+
+  public static final String ROLE_USER = "USER";
+  public static final String ROLE_ADMIN = "ADMIN";
+
   protected User() {}
 
   public User(String name, String email, String passwordHash, String locale) {
@@ -81,6 +91,14 @@ public class User extends BaseEntity {
 
   public void setTimeZone(String timeZone) {
     this.timeZone = timeZone;
+  }
+
+  public String getRole() {
+    return role;
+  }
+
+  public boolean isAdmin() {
+    return ROLE_ADMIN.equals(role);
   }
 
   public String getName() {

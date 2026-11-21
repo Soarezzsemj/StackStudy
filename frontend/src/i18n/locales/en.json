@@ -24,7 +24,8 @@
     "flashcards": "Flashcards",
     "grades": "Grade Predictor",
     "design": "Design system",
-    "profile": "Profile"
+    "profile": "Profile",
+    "admin": "Administration"
   },
   "shell": {
     "root": "~/stackstudy",
@@ -1089,7 +1090,7 @@
     "backToApp": "Back to the app",
     "backToLogin": "Sign in",
     "updated": "Updated on {{date}}",
-    "date": "November 21, 2026",
+    "date": "November 21, 2026 (operational metrics)",
     "terms": {
       "short": "Terms",
       "title": "Terms of use",
@@ -1179,18 +1180,148 @@
           ]
         },
         {
-          "title": "7. Security",
+          "title": "7. Operational metrics",
+          "body": [
+            "To run the service we keep aggregated records: the last time each account used the app (updated at most once a minute), the days with activity (one record per day, in UTC) and error counts per route and hour (only the route pattern, such as \"POST /api/auth/refresh\", and the error code; never content, parameters, emails or passwords).",
+            "Only the StackStudy administrator sees these numbers, in a restricted dashboard, always aggregated; the only per-person information is the list of latest sign-ups with a masked email (e.g. an***@domain.com) and the program. Every access to the dashboard is logged. Error counts are deleted after 7 days, dashboard access logs after 90 days and activity days after about 13 months; everything goes away when the account is deleted and shows up in your data export."
+          ]
+        },
+        {
+          "title": "8. Security",
           "body": [
             "Always-encrypted connection (HTTPS), hashed passwords, sessions you can end, sign-in attempt limits and data access only through your account."
           ]
         },
         {
-          "title": "8. Contact",
+          "title": "9. Contact",
           "body": [
             "Controller: the StackStudy maintainer. Questions or requests about your data: privacy@your-domain.com (replace with the real contact before launch)."
           ]
         }
       ]
+    }
+  },
+  "admin": {
+    "title": "Admin: Status",
+    "description": "Service health and aggregated usage. No personal data beyond masked emails.",
+    "restricted": "Restricted access: administrators only. The role is checked on the server on every request and every access is logged.",
+    "loading": "Loading the dashboard…",
+    "loadError": "Could not load this data.",
+    "empty": "No data yet.",
+    "refresh": "Refresh",
+    "refreshing": "Refreshing…",
+    "exportCsv": "Export CSV",
+    "updatedAt": "Updated at {{time}}",
+    "autoRefresh": "refreshes every 60 s while the tab is visible",
+    "range": {
+      "label": "Period",
+      "24h": "24 h",
+      "7d": "7 days",
+      "30d": "30 days"
+    },
+    "online": {
+      "eyebrow": "Online now",
+      "unit_one": "person",
+      "unit_other": "people",
+      "hint": "Activity in the last 5 minutes. Chart: active users per day (7 days)."
+    },
+    "kpi": {
+      "label": "Indicators",
+      "users": "Registered users",
+      "newInRange_one": "{{count}} new in {{range}}",
+      "newInRange_other": "{{count}} new in {{range}}",
+      "dau": "Active today (DAU)",
+      "vsYesterday": "vs. yesterday",
+      "wau": "Active this week (WAU)",
+      "vsLastWeek": "vs. last week",
+      "retention": "D7 retention",
+      "retentionHint_one": "cohort of {{count}} sign-up (30 days)",
+      "retentionHint_other": "cohort of {{count}} sign-ups (30 days)",
+      "noCompare": "no comparison",
+      "up": "up",
+      "down": "down",
+      "flat": "no change"
+    },
+    "charts": {
+      "sparkline": "Active users per day in the last {{days}} days: minimum {{min}}, maximum {{max}}.",
+      "activity": "Active users per day in the last {{days}} days (peak of {{peak}}) and {{signups}} new sign-ups in the period.",
+      "active": "Active",
+      "signups": "New sign-ups"
+    },
+    "activity": {
+      "title": "Active users per day",
+      "focus": "Average of {{hours}} focus hours per active user in {{range}}."
+    },
+    "funnel": {
+      "title": "Activation funnel",
+      "hint": "Sign-ups of the last 30 days.",
+      "registered": "Sign-up",
+      "firstSubject": "1st subject",
+      "firstFocusSession": "1st focus session",
+      "returned7d": "Came back within 7 days"
+    },
+    "usage": {
+      "title": "Usage by feature",
+      "hint_one": "Of the {{count}} active user this week, how many used each module.",
+      "hint_other": "Of the {{count}} active users this week, how many used each module.",
+      "stack": "The Stack",
+      "deepWork": "Deep Work",
+      "flashcards": "Flashcards",
+      "grades": "Grade Predictor"
+    },
+    "health": {
+      "title": "System health",
+      "db": "Database",
+      "up": "Up",
+      "down": "Down",
+      "dbSize": "Database size",
+      "postgres": "PostgreSQL",
+      "uptime": "App uptime",
+      "heap": "Memory (heap)",
+      "version": "Version",
+      "starts": "Starts (24 h)"
+    },
+    "providers": {
+      "title": "Free plan limits",
+      "hint": "The app cannot measure Render hours, Neon CU-hours or Vercel traffic without tokens for those services. Check each dashboard.",
+      "open": "Open dashboard",
+      "newTab": "(opens in a new tab)",
+      "notConfigured": "Link not configured ({{env}}).",
+      "render": {
+        "name": "Render",
+        "what": "Instance hours and backend logs"
+      },
+      "neon": {
+        "name": "Neon",
+        "what": "Database CU-hours and storage"
+      },
+      "vercel": {
+        "name": "Vercel",
+        "what": "Frontend traffic and deploys"
+      },
+      "backup": {
+        "name": "Backup",
+        "what": "Backup workflow runs (GitHub Actions)"
+      }
+    },
+    "signups": {
+      "title": "Latest sign-ups",
+      "email": "Email (masked)",
+      "course": "Program",
+      "date": "Date"
+    },
+    "errors": {
+      "title": "Errors in the last 24 h",
+      "none": "No errors recorded in the last 24 h.",
+      "route": "Route",
+      "status": "Status",
+      "count": "Count",
+      "last": "Last seen"
+    },
+    "forbidden": {
+      "title": "403",
+      "body": "This area is for StackStudy administrators only.",
+      "back": "Back to the Cockpit"
     }
   }
 }

@@ -13,6 +13,8 @@ export interface User {
   avatarColor?: string;
   /** Fuso IANA preferido; ausente = o do navegador. */
   timeZone?: string;
+  /** USER ou ADMIN. Só decide se o link do painel aparece; o servidor confere de novo. */
+  role?: 'USER' | 'ADMIN';
 }
 
 export interface AuthResponse {

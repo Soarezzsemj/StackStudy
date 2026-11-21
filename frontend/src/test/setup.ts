@@ -45,6 +45,7 @@ vi.mock('@/app/lazyPages', async () => {
     notFound,
     design,
     legal,
+    adminStatus,
   ] = await Promise.all([
     import('@/features/cockpit/CockpitPage'),
     import('@/features/stack/StackPage'),
@@ -57,6 +58,7 @@ vi.mock('@/app/lazyPages', async () => {
     import('@/pages/NotFoundPage'),
     import('@/pages/DesignPage'),
     import('@/pages/LegalPage'),
+    import('@/features/admin/AdminStatusPage'),
   ]);
   return {
     CockpitPage: cockpit.CockpitPage,
@@ -70,6 +72,7 @@ vi.mock('@/app/lazyPages', async () => {
     NotFoundPage: notFound.NotFoundPage,
     DesignPage: design.DesignPage,
     LegalPage: legal.LegalPage,
+    AdminStatusPage: adminStatus.AdminStatusPage,
   };
 });
 

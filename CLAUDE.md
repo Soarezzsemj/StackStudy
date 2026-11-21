@@ -24,6 +24,7 @@ Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 2
 | 5 | Perfil e preferências: perfil, padrões das fases, e-mail/senha, sessões, exportar/excluir (LGPD) | ✅ |
 | 6 | Cockpit: home agregada (1 chamada), próximo passo, radar de risco, primeiros passos, Ctrl K | ✅ |
 | 7 | Polimento: rate limit, cabeçalhos, rotas públicas, a11y, code splitting, EXPLAIN, erros/offline, termos/LGPD, backup testado | ✅ |
+| 8 | Admin: Status: papel ADMIN (ADMIN_EMAILS), métricas agregadas, saúde, erros, painel com Recharts | ✅ |
 
 ## Estrutura
 
@@ -41,7 +42,7 @@ DEPLOY.md            passo a passo do deploy (Neon + Render + Vercel) e backup
 ### Backend (`com.stackstudy`)
 
 Pacotes por feature: `auth` (inclui `AuthSession`), `account` (perfil, preferências, conta,
-exportação), `cockpit` (home agregada), `subject` (inclui semestres), `task`, `session`, `flashcard`, `grade`, `common`. Em cada feature: `*Controller` → `*Service` → `*Repository`, DTOs em `dto/` (records),
+exportação), `cockpit` (home agregada), `admin` (papel, métricas e painel de status), `subject` (inclui semestres), `task`, `session`, `flashcard`, `grade`, `common`. Em cada feature: `*Controller` → `*Service` → `*Repository`, DTOs em `dto/` (records),
 entidades JPA nunca saem do service.
 
 - `common.error`: `ApiException` + `ErrorCode` + `GlobalExceptionHandler`. Toda resposta de erro
@@ -80,6 +81,9 @@ features/deepwork/ DeepWorkPage, TimerCard, InsightsSections (stats, heatmap, hi
 features/stack/ StackPage, SubjectPanel, TaskToolbar (filtros + criação rápida), TaskList,
                 Task/Subject/Semester dialogs; lógica pura e testada em due.ts, grouping.ts,
                 filters.ts, shortcuts.ts; queries.ts (TanStack Query)
+features/admin/ AdminStatusPage (403 antes de qualquer consulta para quem não é ADMIN),
+                AdminSections, AdminCharts (Recharts, só neste chunk), ForbiddenPage, queries.ts
+                (60 s, pausa com a aba escondida); lógica pura em adminLogic.ts (variação, CSV)
 features/cockpit/ CockpitPage, NextStepCard (hero), CockpitSections (resumo, prazos, radar,
                 prova, mini heatmap, primeiros passos, ações rápidas), CockpitSkeleton; lógica
                 pura e testada em nextStep.ts (próximo passo, saudação, checklist)
@@ -373,6 +377,46 @@ lateral (grava na conta). Fuso por `useTimeZone()` nas consultas de heatmap, est
   com a pessoa logada = `clear('expired')` e o login mostra "Sua sessão expirou"; sem rede ou 429
   no refresh, a sessão **não** cai. Destino pós-login passa por `safeRedirect` (só caminho interno).
 
+## Painel do admin (Fase 8)
+
+**Papel**: `users.role` (USER/ADMIN, V9). Mapeado no JPA com `insertable = false, updatable =
+false`: nenhuma rota ou DTO consegue gravar (campos desconhecidos no JSON são ignorados; teste em
+`AdminIntegrationTest.noRouteCanChangeTheRole`). Só o `AdminBootstrap` grava, por SQL, na
+inicialização: promove as contas **já existentes** de `ADMIN_EMAILS` e rebaixa quem saiu da lista.
+Nunca no cadastro.
+
+**Porta**: `/api/admin/**` pede token (401) e o `AdminAccessInterceptor` lê o papel **do banco** a
+cada requisição (403 se não for ADMIN; rebaixar vale na hora). Toda tentativa (permitida ou não)
+grava `admin_access_log` (quem, quando, rota-modelo). Rate limit próprio: 60/min por IP.
+
+**Métricas** (sem dado pessoal novo, sem job de fundo):
+- `users.last_seen_at` e `user_activity_daily (user_id, day UTC)`: `ActivityTracker`, chamado
+  depois de requisição autenticada com sucesso; no máximo 1 escrita por usuário por minuto (trava
+  em memória + condição no UPDATE).
+- `error_events (rota-modelo, status, hora, contagem)`: `ErrorEventFilter` (antes da segurança,
+  vê 401/403/429) + `ErrorEventRecorder` (agrega em memória, grava no máximo 1 vez por minuto, no
+  desligamento e antes do painel ler). Só o padrão da rota; nunca caminho real, corpo ou parâmetro.
+- `app_starts`: uma linha por boot ("starts nas últimas 24 h").
+- Limpeza (`MaintenanceService`): junto de uma escrita, no máximo 1 vez por dia (trava na linha
+  `maintenance_runs`). Retenção: erros e starts 7 dias, acessos ao painel 90, atividade 400.
+- Funil e uso por função vêm das tabelas que já existiam (matérias, sessões, cartas, notas).
+
+**API** (`/api/admin/status`, só leitura, números fixos de consultas):
+- `GET /overview?range=24h|7d|30d`: total, novos (período e anterior), online (5 min), DAU (vs
+  ontem), WAU (vs semana anterior), retenção D7 (coortes de 30 dias que já completaram 7; voltou
+  em algum dos 7 dias seguintes), série diária (7 dias; 30 no 30d), funil dos cadastros de 30 dias,
+  uso por módulo entre os ativos da semana, horas de foco por ativo no período.
+- `GET /health`: ping e latência do banco, tamanho (`pg_database_size`), versão do Postgres,
+  uptime e heap da JVM, versão e data do build (`build-info`), commit (`RENDER_GIT_COMMIT`),
+  starts em 24 h e links `ADMIN_LINK_*` (só `https`). Nada que o app não meça.
+- `GET /signups`: últimos 20, só e-mail mascarado (`EmailMask`: 2 letras + `***@` + domínio),
+  curso e data. `GET /errors`: últimas 24 h por rota e status.
+
+**Adicionar métrica nova**: use tabela que já existe ou agregada (nada por requisição sem
+throttle), mantenha só números no DTO e confira o teste de vazamento
+(`signupsAreMaskedAndNoResponseLeaksPersonalData`). Tabela nova com `user_id` entra também na
+exportação LGPD (o teste de cobertura falha sem isso).
+
 ## Segurança e robustez (Fase 7)
 
 - **Rotas públicas**: só `POST /api/auth/{register,login,refresh,logout}` e
@@ -462,8 +506,8 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
 11. `/_design` é pública (não mostra dados), para conferência visual sem login.
 12. **Testcontainers 1.21.4** (override no pom): versões anteriores falham com Docker Engine 29+
     (versão mínima de API).
-13. Gráficos são SVG/CSS próprios (`<Heatmap>`, barras). O Recharts previsto aqui nunca foi usado
-    e saiu das dependências na Fase 7.
+13. Gráficos do app são SVG/CSS próprios (`<Heatmap>`, barras). O Recharts saiu na Fase 7 (sem
+    uso) e voltou na Fase 8 só para o painel do admin (ver Decisão 75).
 14. Idioma da interface: preferência salva em `localStorage` (`stackstudy.lang`), padrão pt-BR; o
     `locale` do usuário é enviado no cadastro.
 15. Corrida entre abas: duas abas fazendo refresh ao mesmo tempo podem disparar a detecção de reuso
@@ -594,3 +638,17 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
     para o navegador; atualizar numa fase própria (mudanças grandes de API).
 69. **Índice `idx_cards_user_deck` (V8)**: achado pelo EXPLAIN; as contagens por deck varriam a
     tabela `cards` inteira porque os índices existentes eram parciais.
+70. **ADMIN_EMAILS sincroniza nos dois sentidos** (promove e rebaixa): tirar alguém da lista e
+    reiniciar é o jeito de revogar. Lista vazia = nenhum admin (falha segura).
+71. **Papel lido do banco a cada requisição de admin** (1 consulta) em vez de claim no JWT:
+    rebaixar vale na hora, sem esperar o token expirar.
+72. **Sem 2FA nesta fase** (o mockup menciona). O painel é só leitura e agregado; 2FA (TOTP) fica
+    como melhoria antes de qualquer ação de escrita no admin.
+73. **Online = `last_seen_at` nos últimos 5 min**; com o throttle de 1 min a precisão é de ±1 min.
+    O "mini gráfico" do cartão usa os ativos por dia (não há histórico de "online").
+74. **Erros 4xx também contam** (401 em refresh, 429, 404): são os sinais de abuso e de bug no
+    frontend que o painel deve mostrar; 5xx aparece em vermelho.
+75. **Recharts volta só para o painel**: fica no chunk lazy da rota (≈ 140 kB gzip) que só admin
+    baixa; o resto do app continua com gráficos SVG próprios.
+76. Healthcheck do `docker-compose.yml` passou para o liveness (o agregado responde 401 desde a
+    Fase 7 e deixava o container de dev "unhealthy").

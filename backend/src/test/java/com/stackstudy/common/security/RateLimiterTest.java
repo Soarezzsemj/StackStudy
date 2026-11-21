@@ -87,8 +87,8 @@ class RateLimiterTest {
   @Test
   void prodGuardRefusesInsecureConfig() {
     RateLimitProperties.Rule r = new RateLimitProperties.Rule(10, MINUTE);
-    RateLimitProperties on = new RateLimitProperties(true, r, r, r, r, r);
-    RateLimitProperties off = new RateLimitProperties(false, r, r, r, r, r);
+    RateLimitProperties on = new RateLimitProperties(true, r, r, r, r, r, r);
+    RateLimitProperties off = new RateLimitProperties(false, r, r, r, r, r, r);
     SecurityProperties secure = props(true, "Lax", List.of());
     SecurityProperties insecure = props(false, "Lax", List.of());
 
