@@ -8,12 +8,21 @@ import type { BreakState } from '@/features/deepwork/pomodoro';
  * escolhidos, focos concluídos no ciclo e a pausa em andamento (com timestamp, sobrevive a recarregar).
  * A sessão de foco em si é do servidor.
  */
+/** Tópico de roadmap escolhido no "Tópico atual" para a próxima sessão. */
+export interface FocusTopic {
+  id: string;
+  title: string;
+  slug: string;
+}
+
 interface DeepWorkState {
   mode: SessionMode;
   subjectId: string;
   taskId: string;
   completedFocus: number;
   breakState: BreakState | null;
+  topic: FocusTopic | null;
+  setTopic: (topic: FocusTopic | null) => void;
   setMode: (mode: SessionMode) => void;
   setSubject: (subjectId: string) => void;
   setTask: (taskId: string) => void;
@@ -30,6 +39,8 @@ export const useDeepWorkStore = create<DeepWorkState>()(
       taskId: '',
       completedFocus: 0,
       breakState: null,
+      topic: null,
+      setTopic: (topic) => set({ topic }),
       setMode: (mode) => set({ mode }),
       setSubject: (subjectId) => set({ subjectId, taskId: '' }),
       setTask: (taskId) => set({ taskId }),

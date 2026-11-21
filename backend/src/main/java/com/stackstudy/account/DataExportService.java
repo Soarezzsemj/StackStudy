@@ -64,6 +64,15 @@ public class DataExportService {
     QUERIES.put("deepWorkSettings", "SELECT * FROM deep_work_settings WHERE user_id = ?");
     QUERIES.put("gradeSettings", "SELECT * FROM grade_settings WHERE user_id = ?");
     QUERIES.put("flashcardSettings", "SELECT * FROM flashcard_settings WHERE user_id = ?");
+    // Roadmaps (Fase 9): quais segue, progresso por tópico e sugestões enviadas.
+    QUERIES.put(
+        "roadmapsFollowed", "SELECT * FROM user_roadmaps WHERE user_id = ? ORDER BY started_at");
+    QUERIES.put(
+        "roadmapProgress",
+        "SELECT * FROM user_node_progress WHERE user_id = ? ORDER BY created_at");
+    QUERIES.put(
+        "roadmapSuggestions",
+        "SELECT * FROM roadmap_suggestions WHERE user_id = ? ORDER BY created_at");
     // Métricas de operação (Fase 8): dias com atividade e, para admins, acessos ao painel.
     QUERIES.put(
         "activityDays", "SELECT day FROM user_activity_daily WHERE user_id = ? ORDER BY day");

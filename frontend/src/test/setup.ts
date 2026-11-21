@@ -46,6 +46,7 @@ vi.mock('@/app/lazyPages', async () => {
     design,
     legal,
     adminStatus,
+    roadmaps,
   ] = await Promise.all([
     import('@/features/cockpit/CockpitPage'),
     import('@/features/stack/StackPage'),
@@ -59,6 +60,7 @@ vi.mock('@/app/lazyPages', async () => {
     import('@/pages/DesignPage'),
     import('@/pages/LegalPage'),
     import('@/features/admin/AdminStatusPage'),
+    import('@/features/roadmaps/RoadmapsPage'),
   ]);
   return {
     CockpitPage: cockpit.CockpitPage,
@@ -73,6 +75,7 @@ vi.mock('@/app/lazyPages', async () => {
     DesignPage: design.DesignPage,
     LegalPage: legal.LegalPage,
     AdminStatusPage: adminStatus.AdminStatusPage,
+    RoadmapsPage: roadmaps.RoadmapsPage,
   };
 });
 
@@ -94,6 +97,7 @@ afterEach(() => {
     taskId: '',
     completedFocus: 0,
     breakState: null,
+    topic: null,
   });
   localStorage.clear();
   useNetworkStore.setState({ slowRequests: 0 });

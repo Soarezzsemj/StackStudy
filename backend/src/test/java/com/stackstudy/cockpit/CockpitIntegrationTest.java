@@ -32,7 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 class CockpitIntegrationTest extends IntegrationTest {
 
   /** Consultas do GET /api/cockpit (ver o javadoc de CockpitService). */
-  static final long EXPECTED_QUERIES = 16;
+  static final long EXPECTED_QUERIES = 17;
 
   @Autowired MockMvc mvc;
   @Autowired ObjectMapper json;

@@ -25,7 +25,8 @@
     "grades": "Grade Predictor",
     "design": "Design system",
     "profile": "Perfil",
-    "admin": "Administração"
+    "admin": "Administração",
+    "roadmaps": "Roadmaps"
   },
   "shell": {
     "root": "~/stackstudy",
@@ -113,7 +114,8 @@
     "ABSENCE_ALREADY_REGISTERED": "Já existe falta registrada nesta data. Exclua o registro e lance de novo.",
     "REVIEW_NOT_LATEST": "Esta não é a última resposta da carta; só ela pode ser desfeita.",
     "INVALID_CURRENT_PASSWORD": "A senha atual está incorreta.",
-    "RATE_LIMITED": "Muitas tentativas seguidas. Espere alguns minutos e tente de novo."
+    "RATE_LIMITED": "Muitas tentativas seguidas. Espere alguns minutos e tente de novo.",
+    "ROADMAP_STAGE_LOCKED": "Esta etapa ainda não está disponível no seu plano."
   },
   "pages": {
     "cockpit": {
@@ -432,7 +434,9 @@
       "manual": "manual",
       "edit": "Editar sessão",
       "delete": "Excluir sessão"
-    }
+    },
+    "topic": "Tópico: {{title}}",
+    "removeTopic": "Tirar tópico"
   },
   "grades": {
     "semester": "Semestre",
@@ -1066,6 +1070,13 @@
           "action": "Iniciar foco"
         }
       }
+    },
+    "roadmap": {
+      "title": "Roadmap",
+      "open": "Abrir trilha",
+      "progress": "{{percent}}% ({{done}} de {{total}} tópicos)",
+      "next": "Próximo: {{title}} (etapa {{stage}})",
+      "none": "Nenhum tópico aberto pela frente."
     }
   },
   "errorPage": {
@@ -1090,7 +1101,7 @@
     "backToApp": "Voltar ao app",
     "backToLogin": "Entrar",
     "updated": "Atualizado em {{date}}",
-    "date": "21 de novembro de 2026 (métricas de operação)",
+    "date": "21 de novembro de 2026 (roadmaps)",
     "terms": {
       "short": "Termos",
       "title": "Termos de uso",
@@ -1187,13 +1198,20 @@
           ]
         },
         {
-          "title": "8. Segurança",
+          "title": "8. Progresso de estudo e sugestões",
+          "body": [
+            "Se você seguir um roadmap, guardamos quais trilhas segue, a meta semanal, o status de cada tópico (a fazer, em andamento, concluído), as horas que você lança e as horas das sessões de Deep Work ligadas a um tópico.",
+            "Sugestões de roadmap que você envia ficam guardadas com a sua conta para o administrador ler; nenhum e-mail é enviado. Tudo isso aparece na exportação dos seus dados e é apagado com a exclusão da conta. Parar de seguir um roadmap mantém o progresso guardado, para você poder voltar."
+          ]
+        },
+        {
+          "title": "9. Segurança",
           "body": [
             "Conexão sempre criptografada (HTTPS), senha com hash, sessões que você pode encerrar, limite de tentativas de login e acesso aos dados só pela sua conta."
           ]
         },
         {
-          "title": "9. Contato",
+          "title": "10. Contato",
           "body": [
             "Responsável pelo tratamento: o mantenedor do StackStudy. Dúvidas ou pedidos sobre seus dados: privacidade@seu-dominio.com (substitua pelo contato real antes de divulgar)."
           ]
@@ -1322,6 +1340,139 @@
       "title": "403",
       "body": "Esta área é só para administradores do StackStudy.",
       "back": "Voltar ao Cockpit"
+    }
+  },
+  "roadmaps": {
+    "title": "Roadmaps",
+    "description": "Escolha a trilha do seu curso e marque o que já estudou.",
+    "loading": "Carregando roadmaps…",
+    "loadError": "Não foi possível carregar os roadmaps.",
+    "notFound": "Roadmap não encontrado.",
+    "aside": "Meta, outros roadmaps e sugestões",
+    "launch": "Lançamento: tudo grátis por tempo limitado.",
+    "sample": "Exemplo",
+    "sampleNote": "Conteúdo de exemplo, ainda em revisão por especialistas da área. Confira com o currículo do seu curso.",
+    "primary": "Principal",
+    "following": "Seguindo",
+    "follow": "Seguir este roadmap",
+    "unfollow": "Parar de seguir",
+    "makePrimary": "Tornar principal",
+    "optional": "opcional",
+    "stage": "Etapa {{position}} · {{title}}",
+    "stageProgress": "{{done}}/{{total}}",
+    "hoursShort": "{{hours}} h",
+    "hoursLeft_one": "{{hours}} hora restante",
+    "hoursLeft_other": "{{hours}} horas restantes",
+    "state": {
+      "done": "concluído",
+      "current": "em andamento",
+      "pending": "a fazer",
+      "locked": "bloqueado"
+    },
+    "status": {
+      "TODO": "A fazer",
+      "DOING": "Em andamento",
+      "DONE": "Concluído"
+    },
+    "access": {
+      "FREE": "Grátis",
+      "PREMIUM": "Premium",
+      "locked": "Premium"
+    },
+    "resourceKind": {
+      "ARTICLE": "Artigo",
+      "VIDEO": "Vídeo",
+      "BOOK": "Livro",
+      "COURSE": "Curso",
+      "EXERCISE": "Exercícios",
+      "OTHER": "Link"
+    },
+    "empty": {
+      "title": "Você ainda não segue nenhum roadmap",
+      "body": "Escolha a trilha do seu curso em \"Explorar roadmaps\" e comece pelo primeiro tópico."
+    },
+    "summary": {
+      "label": "Resumo de {{title}}",
+      "topics": "{{done}} de {{total}} tópicos",
+      "progress": "Progresso do roadmap: {{percent}}%",
+      "done": "Horas feitas",
+      "left": "Horas restantes",
+      "eta": "Conclusão estimada",
+      "noGoal": "Defina uma meta semanal",
+      "completed": "Concluído",
+      "preview_one": "{{count}} tópico, cerca de {{hours}} h.",
+      "preview_other": "{{count}} tópicos, cerca de {{hours}} h."
+    },
+    "current": {
+      "title": "Tópico atual",
+      "progress": "{{spent}} de {{total}} horas",
+      "details": "Ver detalhes do tópico",
+      "allDone": "Você concluiu todos os tópicos. Parabéns!",
+      "noneOpen": "Os próximos tópicos ainda não estão disponíveis."
+    },
+    "actions": {
+      "label": "Estudar este tópico",
+      "task": "Criar tarefa",
+      "focus": "Iniciar foco",
+      "cards": "Criar flashcards"
+    },
+    "trail": {
+      "title": "Mapa da trilha",
+      "hint": "Clique num tópico para ver materiais e marcar o progresso. Setas do teclado andam pela trilha.",
+      "view": "Visualização",
+      "map": "Mapa",
+      "list": "Lista"
+    },
+    "map": {
+      "label": "Tópicos da trilha"
+    },
+    "node": {
+      "estimated": "Estimado",
+      "spent": "Feito",
+      "left": "Falta",
+      "focus": "Inclui {{hours}} h de sessões de Deep Work neste tópico.",
+      "resources": "Materiais",
+      "noResources": "Sem materiais sugeridos ainda.",
+      "newTab": "(abre em nova aba)",
+      "manualHours": "Horas extras",
+      "manualHint": "Fora do Deep Work",
+      "hoursError": "Use de 0 a 500 horas.",
+      "saveHours": "Salvar horas",
+      "status": "Status do tópico"
+    },
+    "locked": {
+      "title": "Etapa Premium",
+      "body": "Esta etapa faz parte do plano Premium.",
+      "plans": "Ver planos",
+      "soon": "Planos em breve."
+    },
+    "goal": {
+      "title": "Meta semanal",
+      "label": "Horas por semana",
+      "current_one": "Meta atual: {{count}} hora por semana.",
+      "current_other": "Meta atual: {{count}} horas por semana.",
+      "none": "Com uma meta, calculamos quando você termina.",
+      "error": "Use de 1 a 80 horas.",
+      "save": "Salvar meta"
+    },
+    "explore": {
+      "title": "Explorar roadmaps",
+      "area": "Área",
+      "allAreas": "Todas as áreas",
+      "search": "Buscar",
+      "empty": "Nenhum roadmap encontrado.",
+      "meta_one": "{{area}} · {{count}} tópico · {{hours}} h",
+      "meta_other": "{{area}} · {{count}} tópicos · {{hours}} h"
+    },
+    "suggest": {
+      "title": "Sugerir roadmap",
+      "hint": "Não achou o seu curso? Conte qual trilha falta.",
+      "name": "Curso ou tema",
+      "area": "Área (opcional)",
+      "details": "Detalhes (opcional)",
+      "send": "Enviar sugestão",
+      "thanks": "Obrigado! Sua sugestão foi registrada.",
+      "fieldError": "Use só texto (sem < ou >) e respeite o tamanho."
     }
   }
 }

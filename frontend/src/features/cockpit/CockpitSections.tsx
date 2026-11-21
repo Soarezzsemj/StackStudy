@@ -329,6 +329,49 @@ export function NextExamCard({ data, now }: { data: CockpitData; now: Date }) {
 }
 
 // ---------------------------------------------------------------------------
+// roadmap
+// ---------------------------------------------------------------------------
+
+/** Roadmap principal: percentual e próximo tópico. Quem não segue nenhum não vê o cartão. */
+export function RoadmapCard({ data }: { data: CockpitData }) {
+  const { t, i18n } = useTranslation();
+  const r = data.roadmap;
+  if (!r) return null;
+  const pct = new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 1 }).format(r.percent);
+  return (
+    <Card
+      title={t('cockpit.roadmap.title')}
+      aria-label={t('cockpit.roadmap.title')}
+      actions={
+        <Link
+          to={`/roadmaps/${r.slug}`}
+          className="text-sm font-semibold text-action hover:underline"
+        >
+          {t('cockpit.roadmap.open')}
+        </Link>
+      }
+    >
+      <p className="font-semibold">{r.title}</p>
+      <ProgressBar
+        value={r.percent}
+        label={t('cockpit.roadmap.progress', {
+          percent: pct,
+          done: r.doneTopics,
+          total: r.totalTopics,
+        })}
+        showValue
+        className="mt-3"
+      />
+      <p className="mt-3 text-sm text-text-secondary">
+        {r.nextNodeTitle
+          ? t('cockpit.roadmap.next', { title: r.nextNodeTitle, stage: r.nextStagePosition })
+          : t('cockpit.roadmap.none')}
+      </p>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // mini heatmap
 // ---------------------------------------------------------------------------
 

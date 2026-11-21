@@ -10,6 +10,7 @@ import {
   DeadlinesCard,
   MiniHeatmapCard,
   NextExamCard,
+  RoadmapCard,
   OnboardingCard,
   QuickActions,
   RiskCard,
@@ -101,6 +102,7 @@ export function CockpitPage() {
                   ) && <OnboardingCard data={cockpit.data} onStep={setup} />}
                   <RiskCard data={cockpit.data} />
                   <NextExamCard data={cockpit.data} now={now} />
+                  <RoadmapCard data={cockpit.data} />
                 </aside>
               </div>
             </>

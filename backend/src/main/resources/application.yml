@@ -103,3 +103,10 @@ stackstudy:
       neon: ${ADMIN_LINK_NEON:}
       vercel: ${ADMIN_LINK_VERCEL:}
       backup: ${ADMIN_LINK_BACKUP:}
+  # Roadmaps (Fase 9). false = lançamento: tudo grátis, mesmo o marcado como PREMIUM.
+  roadmaps:
+    premium-enabled: ${ROADMAPS_PREMIUM_ENABLED:false}
+    # Sugestões de roadmap por usuário.
+    suggestions:
+      limit: 5
+      window: P1D

@@ -9,6 +9,8 @@ export interface StudySession {
   id: string;
   subjectId: string;
   taskId?: string;
+  /** Tópico de roadmap ligado (as horas somam no progresso dele). */
+  roadmapNodeId?: string;
   mode: SessionMode;
   source: 'TIMER' | 'MANUAL';
   plannedMinutes?: number;
@@ -78,6 +80,7 @@ export interface StartInput {
   taskId?: string | null;
   mode: SessionMode;
   plannedMinutes?: number;
+  roadmapNodeId?: string | null;
 }
 
 export interface CompleteInput {

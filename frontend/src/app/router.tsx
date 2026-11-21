@@ -7,6 +7,7 @@ import { RouteErrorPage } from '@/pages/RouteErrorPage';
 import { PublicPage } from '@/pages/PublicPage';
 import {
   AdminStatusPage,
+  RoadmapsPage,
   CockpitPage,
   DeckPage,
   DeepWorkPage,
@@ -57,6 +58,8 @@ export const routes: RouteObject[] = [
               { path: '/flashcards/review', element: <ReviewPage /> },
               { path: '/grades', element: <GradesPage /> },
               { path: '/profile', element: <ProfilePage /> },
+              { path: '/roadmaps', element: <RoadmapsPage /> },
+              { path: '/roadmaps/:slug', element: <RoadmapsPage /> },
               // A página confere o papel (403 sem piscar); o servidor confere de novo.
               { path: '/admin/status', element: <AdminStatusPage /> },
               { path: '*', element: <NotFoundPage /> },

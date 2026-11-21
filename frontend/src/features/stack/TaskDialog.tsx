@@ -22,13 +22,21 @@ interface TaskDialogProps {
   subjects: Subject[];
   /** Matéria pré-selecionada ao criar (ex.: filtro ativo). */
   defaultSubjectId?: string;
+  /** Título sugerido ao criar. */
+  defaultTitle?: string;
   onClose: () => void;
 }
 
-export function TaskDialog({ task, subjects, defaultSubjectId, onClose }: TaskDialogProps) {
+export function TaskDialog({
+  task,
+  subjects,
+  defaultSubjectId,
+  defaultTitle,
+  onClose,
+}: TaskDialogProps) {
   const { t } = useTranslation();
   const initialDue = fromDue(task?.dueAt, task?.dueAllDay ?? false);
-  const [title, setTitle] = useState(task?.title ?? '');
+  const [title, setTitle] = useState(task?.title ?? defaultTitle ?? '');
   const [description, setDescription] = useState(task?.description ?? '');
   const [subjectId, setSubjectId] = useState(task?.subjectId ?? defaultSubjectId ?? '');
   const [type, setType] = useState<TaskType>(task?.type ?? 'OTHER');

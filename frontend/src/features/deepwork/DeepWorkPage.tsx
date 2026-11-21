@@ -35,15 +35,21 @@ export function DeepWorkPage() {
   const session = active.data ?? null;
 
   function startFocus() {
-    const { mode, subjectId, taskId, setBreak } = useDeepWorkStore.getState();
+    const { mode, subjectId, taskId, topic, setBreak, setTopic } = useDeepWorkStore.getState();
     if (!subjectId) return;
     setBreak(null);
-    start.mutate({
-      subjectId,
-      taskId: taskId || null,
-      mode,
-      plannedMinutes: mode === 'POMODORO' ? settings.focusMinutes : undefined,
-    });
+    start.mutate(
+      {
+        subjectId,
+        taskId: taskId || null,
+        mode,
+        plannedMinutes: mode === 'POMODORO' ? settings.focusMinutes : undefined,
+        // Só manda o campo com tópico escolhido no roadmap.
+        ...(topic ? { roadmapNodeId: topic.id } : {}),
+      },
+      // A sessão leva o tópico; a próxima começa sem ele.
+      { onSuccess: () => setTopic(null) },
+    );
   }
 
   // Espaço: inicia, pausa ou retoma (fora de campos e botões).

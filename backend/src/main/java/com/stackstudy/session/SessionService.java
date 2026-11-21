@@ -4,6 +4,7 @@ import com.stackstudy.common.error.ApiException;
 import com.stackstudy.common.error.ErrorCode;
 import com.stackstudy.common.security.CurrentUser;
 import com.stackstudy.common.web.PageResponse;
+import com.stackstudy.roadmap.RoadmapService;
 import com.stackstudy.session.SessionEnums.Mode;
 import com.stackstudy.session.dto.SessionRequests;
 import com.stackstudy.session.dto.SessionResponses.Session;
@@ -31,6 +32,7 @@ public class SessionService {
   private final SubjectRepository subjects;
   private final TaskRepository tasks;
   private final DeepWorkSettingsService settings;
+  private final RoadmapService roadmaps;
   private final CurrentUser currentUser;
   private final Clock clock;
 
@@ -39,12 +41,14 @@ public class SessionService {
       SubjectRepository subjects,
       TaskRepository tasks,
       DeepWorkSettingsService settings,
+      RoadmapService roadmaps,
       CurrentUser currentUser,
       Clock clock) {
     this.sessions = sessions;
     this.subjects = subjects;
     this.tasks = tasks;
     this.settings = settings;
+    this.roadmaps = roadmaps;
     this.currentUser = currentUser;
     this.clock = clock;
   }
@@ -62,6 +66,7 @@ public class SessionService {
       throw alreadyActive();
     }
     checkReferences(userId, request.subjectId(), request.taskId());
+    checkNode(userId, request.roadmapNodeId());
     Integer planned = null;
     if (request.mode() == Mode.POMODORO) {
       planned =
@@ -73,6 +78,7 @@ public class SessionService {
     StudySession session =
         StudySession.start(
             userId, request.subjectId(), request.taskId(), request.mode(), planned, now);
+    session.linkRoadmapNode(request.roadmapNodeId());
     try {
       // Corrida entre duas abas: o índice único parcial barra a segunda sessão ativa.
       return Session.from(sessions.saveAndFlush(session), now);
@@ -105,6 +111,8 @@ public class SessionService {
         now,
         request == null ? null : blankToNull(request.note()),
         request == null ? null : request.focusRating());
+    sessions.flush();
+    roadmaps.refreshFocus(session.getUserId(), session.getRoadmapNodeId());
     return Session.from(session, now);
   }
 
@@ -118,6 +126,7 @@ public class SessionService {
   public Session createManual(SessionRequests.Manual request) {
     UUID userId = currentUser.id();
     checkReferences(userId, request.subjectId(), request.taskId());
+    checkNode(userId, request.roadmapNodeId());
     checkNotInFuture(request);
     StudySession session =
         StudySession.manual(
@@ -127,7 +136,10 @@ public class SessionService {
             request.startedAt(),
             request.durationMinutes());
     session.describe(blankToNull(request.note()), request.focusRating());
-    return Session.from(sessions.save(session), clock.instant());
+    session.linkRoadmapNode(request.roadmapNodeId());
+    Session saved = Session.from(sessions.saveAndFlush(session), clock.instant());
+    roadmaps.refreshFocus(userId, request.roadmapNodeId());
+    return saved;
   }
 
   /** Edita uma sessão encerrada (cronometrada ou manual). A ativa não pode ser editada. */
@@ -139,16 +151,28 @@ public class SessionService {
       throw new ApiException(ErrorCode.SESSION_STILL_ACTIVE, "Active session cannot be edited");
     }
     checkReferences(userId, request.subjectId(), request.taskId());
+    checkNode(userId, request.roadmapNodeId());
     checkNotInFuture(request);
+    UUID previousNode = session.getRoadmapNodeId();
+    if (request.roadmapNodeId() != null) {
+      // Sem o campo, a ligação continua (o diálogo de edição não conhece o tópico).
+      session.linkRoadmapNode(request.roadmapNodeId());
+    }
     session.edit(
         request.subjectId(), request.taskId(), request.startedAt(), request.durationMinutes());
     session.describe(blankToNull(request.note()), request.focusRating());
-    return Session.from(sessions.saveAndFlush(session), clock.instant());
+    Session saved = Session.from(sessions.saveAndFlush(session), clock.instant());
+    roadmaps.refreshFocus(userId, previousNode, session.getRoadmapNodeId());
+    return saved;
   }
 
   @Transactional
   public void delete(UUID id) {
-    sessions.delete(findOwned(id));
+    StudySession session = findOwned(id);
+    UUID node = session.getRoadmapNodeId();
+    sessions.delete(session);
+    sessions.flush();
+    roadmaps.refreshFocus(session.getUserId(), node);
   }
 
   @Transactional(readOnly = true)
@@ -170,6 +194,13 @@ public class SessionService {
     }
     if (taskId != null && tasks.findByIdAndUserId(taskId, userId).isEmpty()) {
       throw ApiException.notFound("Task");
+    }
+  }
+
+  /** Tópico de roadmap ligado à sessão: precisa existir e estar aberto (regra do Premium). */
+  private void checkNode(UUID userId, UUID nodeId) {
+    if (nodeId != null) {
+      roadmaps.requireFocusNode(userId, nodeId);
     }
   }
 

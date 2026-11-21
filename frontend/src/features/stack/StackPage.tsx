@@ -192,6 +192,7 @@ function StackDialogs({
           task={task}
           subjects={options}
           defaultSubjectId={defaultSubjectId}
+          defaultTitle={dialog.title}
           onClose={close}
         />
       );

@@ -54,6 +54,20 @@ export interface CockpitData {
     hasFocusSession: boolean;
     hasDeck: boolean;
   };
+  /** Roadmap principal (ausente para quem não segue nenhum). */
+  roadmap?: CockpitRoadmap;
+}
+
+export interface CockpitRoadmap {
+  slug: string;
+  title: string;
+  percent: number;
+  doneTopics: number;
+  totalTopics: number;
+  nextNodeId?: string;
+  nextNodeTitle?: string;
+  nextStageTitle?: string;
+  nextStagePosition?: number;
 }
 
 export const cockpitApi = {

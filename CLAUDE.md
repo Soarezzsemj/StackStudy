@@ -12,7 +12,8 @@ Todas as alterações ficam apenas no working tree; o dono do projeto revisa e c
 
 Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 27). Módulos:
 **Cockpit** (`/`), **The Stack** (`/stack`), **Deep Work** (`/deep-work`), **Flashcards**
-(`/flashcards`), **Grade Predictor** (`/grades`). Rota interna `/_design` mostra o design system.
+(`/flashcards`), **Grade Predictor** (`/grades`), **Roadmaps** (`/roadmaps`). Rota interna
+`/_design` mostra o design system.
 
 | Fase | Escopo | Status |
 | --- | --- | --- |
@@ -25,6 +26,7 @@ Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 2
 | 6 | Cockpit: home agregada (1 chamada), próximo passo, radar de risco, primeiros passos, Ctrl K | ✅ |
 | 7 | Polimento: rate limit, cabeçalhos, rotas públicas, a11y, code splitting, EXPLAIN, erros/offline, termos/LGPD, backup testado | ✅ |
 | 8 | Admin: Status: papel ADMIN (ADMIN_EMAILS), métricas agregadas, saúde, erros, painel com Recharts | ✅ |
+| 9 | Roadmaps: trilhas por curso (seed de exemplo), mapa/lista, progresso, meta, sugestões, Premium preparado (desligado) | ✅ |
 
 ## Estrutura
 
@@ -42,7 +44,7 @@ DEPLOY.md            passo a passo do deploy (Neon + Render + Vercel) e backup
 ### Backend (`com.stackstudy`)
 
 Pacotes por feature: `auth` (inclui `AuthSession`), `account` (perfil, preferências, conta,
-exportação), `cockpit` (home agregada), `admin` (papel, métricas e painel de status), `subject` (inclui semestres), `task`, `session`, `flashcard`, `grade`, `common`. Em cada feature: `*Controller` → `*Service` → `*Repository`, DTOs em `dto/` (records),
+exportação), `cockpit` (home agregada), `admin` (papel, métricas e painel de status), `roadmap` (catálogo, acesso Premium, progresso), `subject` (inclui semestres), `task`, `session`, `flashcard`, `grade`, `common`. Em cada feature: `*Controller` → `*Service` → `*Repository`, DTOs em `dto/` (records),
 entidades JPA nunca saem do service.
 
 - `common.error`: `ApiException` + `ErrorCode` + `GlobalExceptionHandler`. Toda resposta de erro
@@ -81,6 +83,10 @@ features/deepwork/ DeepWorkPage, TimerCard, InsightsSections (stats, heatmap, hi
 features/stack/ StackPage, SubjectPanel, TaskToolbar (filtros + criação rápida), TaskList,
                 Task/Subject/Semester dialogs; lógica pura e testada em due.ts, grouping.ts,
                 filters.ts, shortcuts.ts; queries.ts (TanStack Query)
+features/roadmaps/ RoadmapsPage (/roadmaps → principal; /roadmaps/:slug), RoadmapMap (mapa CSS,
+                roving tabindex), RoadmapList (etapas expansíveis), NodeDialog, RoadmapCards
+                (resumo, tópico atual, meta, explorar, sugerir), TopicActions (tarefa, foco,
+                flashcards), StageBadge; lógica pura e testada em roadmapLogic.ts
 features/admin/ AdminStatusPage (403 antes de qualquer consulta para quem não é ADMIN),
                 AdminSections, AdminCharts (Recharts, só neste chunk), ForbiddenPage, queries.ts
                 (60 s, pausa com a aba escondida); lógica pura em adminLogic.ts (variação, CSV)
@@ -90,12 +96,13 @@ features/cockpit/ CockpitPage, NextStepCard (hero), CockpitSections (resumo, pra
 features/profile/ ProfilePage (Perfil, Preferências, Conta, Privacidade), *Section, queries.ts;
                 lógica pura e testada em helpers.ts (formulário ↔ PATCH, User-Agent, fusos, download)
 lib/api/        client.ts (fetch, refresh automático, retry de GET), auth.ts, stack.ts, deepwork.ts,
-                grades.ts, flashcards.ts, account.ts (/api/me/...),
+                grades.ts, flashcards.ts, account.ts (/api/me/...), admin.ts, roadmaps.ts,
                 types.ts,
                 config.ts (VITE_API_URL, tempos), slow.ts (aviso de lentidão), wake.ts (wake-up ping)
 stores/         Zustand: authStore, uiStore, networkStore, flashcardStore (diálogo aberto, também
                 pelo Ctrl K), stackStore (filtros, seleção e diálogo
-                do The Stack), deepWorkStore (modo, matéria, ciclo e pausa; persistido no localStorage)
+                do The Stack), deepWorkStore (modo, matéria, ciclo, pausa e tópico de roadmap da
+                próxima sessão; persistido no localStorage)
 lib/            keyboard.ts (guardas dos atalhos), useNow.ts (re-render do timer), useDebouncedValue.ts,
                 useTimeZone.ts (fuso do perfil ou do navegador), syncUserLanguage.ts (idioma da
                 conta ao entrar), initials.ts (avatar)
@@ -322,7 +329,7 @@ Regras (`flashcard.Sm2`, puro e testado):
   trancadas ficam de fora. A matéria vem inteira e a mensagem sai de `gradeHeadline`.
 - Primeiros passos: semestre, matéria, tarefa, sessão de foco (e deck), numa consulta `EXISTS`.
 
-**16 consultas fixas**, qualquer volume de dados (lista no javadoc de `CockpitService`);
+**17 consultas fixas** (a 17ª é o roadmap principal, Fase 9), qualquer volume de dados (lista no javadoc de `CockpitService`);
 `CockpitIntegrationTest` mede com as estatísticas do Hibernate e falha se o número mudar ou
 crescer com os dados. Índices já existentes: tasks (user_id, status, due_date), study_sessions
 (user_id, started_at), cards (user_id, due_on).
@@ -376,6 +383,55 @@ lateral (grava na conta). Fuso por `useTimeZone()` nas consultas de heatmap, est
   No carregamento, `useSessionBootstrap` tenta restaurar a sessão pelo cookie. Refresh recusado
   com a pessoa logada = `clear('expired')` e o login mostra "Sua sessão expirou"; sem rede ou 429
   no refresh, a sessão **não** cai. Destino pós-login passa por `safeRedirect` (só caminho interno).
+
+## Roadmaps (Fase 9)
+
+**Conteúdo estático** (V10 cria, V11 semeia 3 roadmaps **de exemplo**, `sample = true`: Ciência da
+Computação, Direito e Medicina; 4 etapas e 15 nós cada, a última etapa PREMIUM). Mudou conteúdo =
+migration nova. `RoadmapCatalog` lê tudo uma vez por instância (4 consultas) e serve da memória;
+só roadmaps `active`. Recursos são links externos: `CHECK` no banco aceita só `http(s)://` sem
+espaço, aspas ou `< >`.
+
+- `roadmap_nodes`: `MAIN` (centro da trilha, sem pai nem lado) ou `SUB` (com `parent_id` e
+  `side` LEFT/RIGHT), `optional` (fora do percentual), `estimated_hours`.
+- Ordem da trilha: etapa → tópico → subtópicos dele (`StageContent.allNodes`).
+
+**Acesso (regra única em `RoadmapAccessService`)**: `ROADMAPS_PREMIUM_ENABLED=false` (padrão)
+abre tudo. Ligada: etapa (ou roadmap) PREMIUM só abre com `PremiumEntitlements.hasPremium`; hoje
+só existe `NoPremiumEntitlements` (sempre false). **Ponto de extensão**: um bean novo com
+`@Primary` lendo a assinatura. Bloqueada: `locked: true`, sem descrição nem materiais, e escrita
+(progresso, sessão de foco ligada) responde 403 `ROADMAP_STAGE_LOCKED`. Nada de pagamento.
+
+API (`/api/roadmaps`, tudo do usuário logado; sem rota pública):
+
+- `GET /?area=&q=` (busca sem acento; `areas` para o filtro; `percent` de quem segue),
+  `GET /{slug}` (etapas, nós, recursos, `locked`, progresso, `following`, `summary`).
+- `POST|DELETE /{slug}/follow` (`{ primary }`; o primeiro seguido vira principal; parar de seguir
+  o principal promove o mais antigo; o progresso fica guardado).
+- `PUT /{slug}/nodes/{nodeId}/progress` (`status`, `manualHours` 0–500 com 2 casas; nó de outro
+  roadmap = 404). Escrever segue o roadmap automaticamente.
+- `PUT /{slug}/goal` (1–80 h/semana), `POST /suggestions` (texto puro, `< >` recusados,
+  5/dia por usuário via `RateLimiter`, guardada para o admin; sem e-mail).
+
+**Tópico atual** (`user_roadmaps.current_node_id`): ao seguir, o primeiro pendente aberto; DOING
+num nó o torna atual; concluir o atual avança para o próximo não opcional, não concluído e aberto
+(voltando ao início); sem nenhum, null. Na leitura, se o guardado já não vale, calcula o próximo.
+
+**Resumo** (`RoadmapProgressCalculator`, puro, UTC): tópicos = não opcionais; % = concluídos ÷
+tópicos (1 casa, para baixo; 0 tópicos = 0); horas feitas = todas (manual + Deep Work); restantes =
+Σ max(0, estimado − gasto) dos não concluídos; estimativa = hoje + teto(restantes × 7 ÷ meta) dias
+(sem meta ou concluído: nenhuma).
+
+**Deep Work**: `study_sessions.roadmap_node_id` (opcional, em `POST /sessions` e manual).
+`user_node_progress.focus_seconds` é **recalculado** da soma das sessões encerradas do tópico ao
+concluir, criar manual, editar (o campo ausente mantém a ligação) e apagar; `hours_spent` é
+coluna gerada (manual + foco). Foco num tópico a fazer o põe em andamento.
+
+**Frontend**: mapa (CSS puro, linha pontilhada, subtópicos laterais que descem no mobile,
+opcionais tracejados, estados com ícone + texto, roving tabindex com setas/Home/End) e lista
+expansível; painel do nó (Dialog). "Tópico atual": criar tarefa (`stackStore` com `title`), iniciar
+foco (`deepWorkStore.topic`, enviado no próximo start) e criar flashcard (`flashcardStore` com
+`tags`). Cockpit mostra o cartão só para quem segue.
 
 ## Painel do admin (Fase 8)
 
@@ -450,7 +506,8 @@ exportação LGPD (o teste de cobertura falha sem isso).
 
 Ver `.env.example`. Principais: `JWT_SECRET` (obrigatório, ≥ 32 chars), `DB_URL`, `DB_USERNAME`,
 `DB_PASSWORD`, `JWT_ACCESS_TTL` (PT15M), `JWT_REFRESH_TTL` (P14D), `CORS_ALLOWED_ORIGINS`,
-`REFRESH_COOKIE_SECURE`, `REFRESH_COOKIE_SAME_SITE`, `RATE_LIMIT_ENABLED`, `VITE_API_PROXY_TARGET`,
+`REFRESH_COOKIE_SECURE`, `REFRESH_COOKIE_SAME_SITE`, `RATE_LIMIT_ENABLED`, `ADMIN_EMAILS`,
+`ADMIN_LINK_*`, `ROADMAPS_PREMIUM_ENABLED` (padrão false), `VITE_API_PROXY_TARGET`,
 `VITE_API_URL`
 (padrão `/api`), `VITE_WAKE_URL`.
 Perfis Spring: `dev` (padrão, logs DEBUG), `prod` (ver abaixo), `test`.
@@ -652,3 +709,17 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
     baixa; o resto do app continua com gráficos SVG próprios.
 76. Healthcheck do `docker-compose.yml` passou para o liveness (o agregado responde 401 desde a
     Fase 7 e deixava o container de dev "unhealthy").
+77. **Conteúdo dos roadmaps por migration** (não há editor): versionado no git, igual em todos os
+    ambientes e cacheado em memória sem invalidação (só muda com deploy). Coluna `version` existe
+    para cache do cliente e para migrações de progresso futuras.
+78. **Premium só preparado**: `access` em roadmap e etapa + flag + `RoadmapAccessService`. Com a
+    flag ligada sem assinatura, ninguém abre a última etapa; por isso o padrão é false.
+79. **Etapa bloqueada mostra só os títulos** (vitrine) e esconde descrição e materiais.
+80. **Horas do Deep Work recalculadas** (soma das sessões) em vez de somadas por incremento: editar
+    ou apagar sessão não deixa o tópico com horas erradas. Horas manuais ficam numa coluna à parte.
+81. **Escrever progresso ou meta segue o roadmap** automaticamente (menos atrito que exigir o
+    "Seguir" antes); parar de seguir não apaga o progresso.
+82. **Roadmaps exigem login** (como o resto da API), apesar do "se logado" do pedido: evita abrir
+    rota pública nova (Fase 7) só para a vitrine. Dá para abrir `GET` depois, se for útil.
+83. **Sugestões sem tela no admin**: ficam em `roadmap_suggestions` (texto livre do usuário); ler
+    pelo banco por ora. Uma lista no painel exigiria revisar o teste de vazamento de dados pessoais.

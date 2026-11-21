@@ -3,7 +3,8 @@ import { DEFAULT_FILTERS, type TaskFilters } from '@/features/stack/filters';
 
 /** Qual diálogo do The Stack está aberto. Ids apontam para dados do TanStack Query. */
 export type StackDialog =
-  | { kind: 'task'; taskId?: string }
+  // title: sugestão ao criar (ex.: tópico atual de um roadmap).
+  | { kind: 'task'; taskId?: string; title?: string }
   | { kind: 'subject'; subjectId?: string }
   | { kind: 'semesters' }
   | { kind: 'semesterForm'; semesterId?: string };

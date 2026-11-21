@@ -44,6 +44,8 @@ services:
       ADMIN_LINK_NEON: ${ADMIN_LINK_NEON:-}
       ADMIN_LINK_VERCEL: ${ADMIN_LINK_VERCEL:-}
       ADMIN_LINK_BACKUP: ${ADMIN_LINK_BACKUP:-}
+      # Roadmaps: true bloqueia as etapas PREMIUM (sem assinatura nesta fase, ninguém tem direito)
+      ROADMAPS_PREMIUM_ENABLED: ${ROADMAPS_PREMIUM_ENABLED:-false}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     volumes:

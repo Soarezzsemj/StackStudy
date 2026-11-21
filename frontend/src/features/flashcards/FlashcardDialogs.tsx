@@ -36,7 +36,15 @@ export function FlashcardDialogHost() {
   const list = decks.data ?? [];
   switch (dialog.kind) {
     case 'card':
-      return <CardDialog card={dialog.card} deckId={dialog.deckId} decks={list} onClose={close} />;
+      return (
+        <CardDialog
+          card={dialog.card}
+          deckId={dialog.deckId}
+          defaultTags={dialog.tags}
+          decks={list}
+          onClose={close}
+        />
+      );
     case 'deck':
       return <DeckDialog deck={list.find((d) => d.id === dialog.deckId)} onClose={close} />;
     case 'settings':
@@ -59,11 +67,13 @@ export function FlashcardDialogHost() {
 function CardDialog({
   card,
   deckId,
+  defaultTags,
   decks,
   onClose,
 }: {
   card?: Card;
   deckId?: string;
+  defaultTags?: string[];
   decks: Deck[];
   onClose: () => void;
 }) {
@@ -80,7 +90,7 @@ function CardDialog({
   const [deck, setDeck] = useState(initialDeck);
   const [front, setFront] = useState(card?.front ?? '');
   const [back, setBack] = useState(card?.back ?? '');
-  const [tags, setTags] = useState(card?.tags.join(' ') ?? '');
+  const [tags, setTags] = useState(card?.tags.join(' ') ?? defaultTags?.join(' ') ?? '');
   const [preview, setPreview] = useState(false);
   const [savedCount, setSavedCount] = useState(0);
   const save = useSaveCard();

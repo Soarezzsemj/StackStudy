@@ -22,7 +22,8 @@ public final class SessionRequests {
       @NotNull UUID subjectId,
       UUID taskId,
       @NotNull Mode mode,
-      @Min(1) @Max(180) Integer plannedMinutes) {}
+      @Min(1) @Max(180) Integer plannedMinutes,
+      UUID roadmapNodeId) {}
 
   /** Conclui a sessão ativa, com a "commit message" e a nota de foco opcionais. */
   public record Complete(@Size(max = 500) String note, @Min(1) @Max(5) Short focusRating) {}
@@ -34,7 +35,8 @@ public final class SessionRequests {
       @NotNull Instant startedAt,
       @NotNull @Min(1) @Max(720) Integer durationMinutes,
       @Size(max = 500) String note,
-      @Min(1) @Max(5) Short focusRating) {}
+      @Min(1) @Max(5) Short focusRating,
+      UUID roadmapNodeId) {}
 
   /** Preferências do pomodoro e meta semanal. */
   public record Settings(

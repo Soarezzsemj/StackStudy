@@ -92,6 +92,8 @@ export function useSessionActions() {
       qc.invalidateQueries({ queryKey: ['deepwork', 'stats'] }),
       qc.invalidateQueries({ queryKey: ['deepwork', 'heatmap'] }),
       qc.invalidateQueries({ queryKey: deepWorkKeys.history }),
+      // Horas de foco somam no tópico de roadmap ligado.
+      qc.invalidateQueries({ queryKey: ['roadmaps'] }),
     ]);
   // Conflito (outra aba já mexeu): busca o estado real.
   const resync = () => qc.invalidateQueries({ queryKey: deepWorkKeys.active });
@@ -134,7 +136,11 @@ export function useSaveManualSession() {
   return useMutation({
     mutationFn: ({ id, input }: { id?: string; input: ManualInput }) =>
       id ? deepWorkApi.update(id, input) : deepWorkApi.createManual(input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: deepWorkKeys.all }),
+    onSuccess: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: deepWorkKeys.all }),
+        qc.invalidateQueries({ queryKey: ['roadmaps'] }),
+      ]),
   });
 }
 
@@ -142,7 +148,11 @@ export function useDeleteSession() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deepWorkApi.remove(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: deepWorkKeys.all }),
+    onSuccess: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: deepWorkKeys.all }),
+        qc.invalidateQueries({ queryKey: ['roadmaps'] }),
+      ]),
   });
 }
 

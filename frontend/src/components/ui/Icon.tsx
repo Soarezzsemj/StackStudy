@@ -122,6 +122,34 @@ const paths = {
       <path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z" />
     </>
   ),
+  roadmap: (
+    <>
+      <circle cx="6" cy="5" r="2" />
+      <circle cx="18" cy="12" r="2" />
+      <circle cx="6" cy="19" r="2" />
+      <path d="M8 5h4a4 4 0 0 1 4 4v1M16 14v1a4 4 0 0 1-4 4H8" />
+    </>
+  ),
+  lock: (
+    <>
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </>
+  ),
+  list: <path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" />,
+  external: (
+    <>
+      <path d="M14 4h6v6" />
+      <path d="M20 4l-9 9" />
+      <path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" />
+    </>
+  ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
 } as const;
 
 export type IconName = keyof typeof paths;

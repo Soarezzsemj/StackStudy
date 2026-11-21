@@ -16,6 +16,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/deep-work', labelKey: 'nav.deepWork', slug: 'deep-work', icon: 'deepWork' },
   { to: '/flashcards', labelKey: 'nav.flashcards', slug: 'flashcards', icon: 'flashcards' },
   { to: '/grades', labelKey: 'nav.grades', slug: 'grades', icon: 'grades' },
+  { to: '/roadmaps', labelKey: 'nav.roadmaps', slug: 'roadmaps', icon: 'roadmap' },
 ];
 
 /** Perfil: fora do menu principal (fica no bloco do usuário, na barra lateral). */

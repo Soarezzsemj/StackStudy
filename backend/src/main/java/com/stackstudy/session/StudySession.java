@@ -28,6 +28,10 @@ public class StudySession extends BaseEntity {
   @Column(name = "task_id")
   private UUID taskId;
 
+  // Tópico de roadmap (opcional): as horas somam no progresso dele.
+  @Column(name = "roadmap_node_id")
+  private UUID roadmapNodeId;
+
   @Column(name = "started_at", nullable = false)
   private Instant startedAt;
 
@@ -85,6 +89,14 @@ public class StudySession extends BaseEntity {
     s.source = Source.MANUAL;
     s.edit(subjectId, taskId, startedAt, durationMinutes);
     return s;
+  }
+
+  public UUID getRoadmapNodeId() {
+    return roadmapNodeId;
+  }
+
+  public void linkRoadmapNode(UUID nodeId) {
+    this.roadmapNodeId = nodeId;
   }
 
   public boolean isActive() {

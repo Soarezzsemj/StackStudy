@@ -1,6 +1,7 @@
 package com.stackstudy.cockpit.dto;
 
 import com.stackstudy.grade.dto.GradeResponses.SubjectGrades;
+import com.stackstudy.roadmap.dto.RoadmapResponses.CockpitRoadmap;
 import com.stackstudy.session.dto.SessionResponses.DayTotal;
 import com.stackstudy.task.TaskEnums.Priority;
 import com.stackstudy.task.TaskEnums.Status;
@@ -14,6 +15,7 @@ import java.util.UUID;
  * Tudo da tela inicial numa resposta (o backend e o banco dormem no plano grátis: uma chamada só).
  *
  * @param today dia local no fuso pedido
+ * @param roadmap roadmap principal e o próximo tópico (null se não segue nenhum)
  */
 public record CockpitResponse(
     String timeZone,
@@ -24,7 +26,8 @@ public record CockpitResponse(
     TaskItem nextExam,
     Flashcards flashcards,
     List<RiskSubject> atRisk,
-    Onboarding onboarding) {
+    Onboarding onboarding,
+    CockpitRoadmap roadmap) {
 
   /**
    * Foco (sessões encerradas; a sessão em andamento entra quando termina).

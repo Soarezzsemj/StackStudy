@@ -44,6 +44,8 @@ export function TimerCard({
   const completedFocus = useDeepWorkStore((s) => s.completedFocus);
   const breakState = useDeepWorkStore((s) => s.breakState);
   const setBreak = useDeepWorkStore((s) => s.setBreak);
+  const topic = useDeepWorkStore((s) => s.topic);
+  const setTopic = useDeepWorkStore((s) => s.setTopic);
   const now = useNow(!!active || !!breakState);
   const { start, pause, resume, cancel } = useSessionActions();
   const timerId = useId();
@@ -141,6 +143,18 @@ export function TimerCard({
           </div>
         )}
       </div>
+
+      {!active && topic && (
+        <p className="flex flex-wrap items-center justify-center gap-2 text-sm text-text-secondary">
+          <Chip tone="action">
+            <Icon name="roadmap" size={14} />
+            {t('deepWork.topic', { title: topic.title })}
+          </Chip>
+          <Button variant="ghost" onClick={() => setTopic(null)}>
+            {t('deepWork.removeTopic')}
+          </Button>
+        </p>
+      )}
 
       {!active && (
         <div className="grid gap-4 sm:grid-cols-2">

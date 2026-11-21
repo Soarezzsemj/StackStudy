@@ -25,7 +25,8 @@
     "grades": "Grade Predictor",
     "design": "Design system",
     "profile": "Profile",
-    "admin": "Administration"
+    "admin": "Administration",
+    "roadmaps": "Roadmaps"
   },
   "shell": {
     "root": "~/stackstudy",
@@ -113,7 +114,8 @@
     "ABSENCE_ALREADY_REGISTERED": "An absence is already recorded on this date. Delete it and record again.",
     "REVIEW_NOT_LATEST": "This is not the card's latest answer; only that one can be undone.",
     "INVALID_CURRENT_PASSWORD": "The current password is incorrect.",
-    "RATE_LIMITED": "Too many attempts in a row. Wait a few minutes and try again."
+    "RATE_LIMITED": "Too many attempts in a row. Wait a few minutes and try again.",
+    "ROADMAP_STAGE_LOCKED": "This stage is not available on your plan yet."
   },
   "pages": {
     "cockpit": {
@@ -432,7 +434,9 @@
       "manual": "manual",
       "edit": "Edit session",
       "delete": "Delete session"
-    }
+    },
+    "topic": "Topic: {{title}}",
+    "removeTopic": "Remove topic"
   },
   "grades": {
     "semester": "Semester",
@@ -1066,6 +1070,13 @@
           "action": "Start focus"
         }
       }
+    },
+    "roadmap": {
+      "title": "Roadmap",
+      "open": "Open trail",
+      "progress": "{{percent}}% ({{done}} of {{total}} topics)",
+      "next": "Next: {{title}} (stage {{stage}})",
+      "none": "No open topic ahead."
     }
   },
   "errorPage": {
@@ -1090,7 +1101,7 @@
     "backToApp": "Back to the app",
     "backToLogin": "Sign in",
     "updated": "Updated on {{date}}",
-    "date": "November 21, 2026 (operational metrics)",
+    "date": "November 21, 2026 (roadmaps)",
     "terms": {
       "short": "Terms",
       "title": "Terms of use",
@@ -1187,13 +1198,20 @@
           ]
         },
         {
-          "title": "8. Security",
+          "title": "8. Study progress and suggestions",
+          "body": [
+            "If you follow a roadmap, we keep which trails you follow, the weekly goal, the status of each topic (to do, in progress, done), the hours you log and the hours of Deep Work sessions linked to a topic.",
+            "Roadmap suggestions you send are stored with your account for the administrator to read; no email is sent. All of it shows up in your data export and is deleted with the account. Unfollowing a roadmap keeps the progress, so you can come back."
+          ]
+        },
+        {
+          "title": "9. Security",
           "body": [
             "Always-encrypted connection (HTTPS), hashed passwords, sessions you can end, sign-in attempt limits and data access only through your account."
           ]
         },
         {
-          "title": "9. Contact",
+          "title": "10. Contact",
           "body": [
             "Controller: the StackStudy maintainer. Questions or requests about your data: privacy@your-domain.com (replace with the real contact before launch)."
           ]
@@ -1322,6 +1340,139 @@
       "title": "403",
       "body": "This area is for StackStudy administrators only.",
       "back": "Back to the Cockpit"
+    }
+  },
+  "roadmaps": {
+    "title": "Roadmaps",
+    "description": "Pick the trail for your program and check off what you have studied.",
+    "loading": "Loading roadmaps…",
+    "loadError": "Could not load the roadmaps.",
+    "notFound": "Roadmap not found.",
+    "aside": "Goal, other roadmaps and suggestions",
+    "launch": "Launch: everything is free for a limited time.",
+    "sample": "Sample",
+    "sampleNote": "Sample content, still being reviewed by subject experts. Check it against your program curriculum.",
+    "primary": "Main",
+    "following": "Following",
+    "follow": "Follow this roadmap",
+    "unfollow": "Stop following",
+    "makePrimary": "Make main",
+    "optional": "optional",
+    "stage": "Stage {{position}} · {{title}}",
+    "stageProgress": "{{done}}/{{total}}",
+    "hoursShort": "{{hours}} h",
+    "hoursLeft_one": "{{hours}} hour left",
+    "hoursLeft_other": "{{hours}} hours left",
+    "state": {
+      "done": "done",
+      "current": "in progress",
+      "pending": "to do",
+      "locked": "locked"
+    },
+    "status": {
+      "TODO": "To do",
+      "DOING": "In progress",
+      "DONE": "Done"
+    },
+    "access": {
+      "FREE": "Free",
+      "PREMIUM": "Premium",
+      "locked": "Premium"
+    },
+    "resourceKind": {
+      "ARTICLE": "Article",
+      "VIDEO": "Video",
+      "BOOK": "Book",
+      "COURSE": "Course",
+      "EXERCISE": "Exercises",
+      "OTHER": "Link"
+    },
+    "empty": {
+      "title": "You are not following any roadmap yet",
+      "body": "Pick the trail for your program in \"Explore roadmaps\" and start with the first topic."
+    },
+    "summary": {
+      "label": "{{title}} summary",
+      "topics": "{{done}} of {{total}} topics",
+      "progress": "Roadmap progress: {{percent}}%",
+      "done": "Hours done",
+      "left": "Hours left",
+      "eta": "Estimated completion",
+      "noGoal": "Set a weekly goal",
+      "completed": "Completed",
+      "preview_one": "{{count}} topic, about {{hours}} h.",
+      "preview_other": "{{count}} topics, about {{hours}} h."
+    },
+    "current": {
+      "title": "Current topic",
+      "progress": "{{spent}} of {{total}} hours",
+      "details": "See topic details",
+      "allDone": "You finished every topic. Congratulations!",
+      "noneOpen": "The next topics are not available yet."
+    },
+    "actions": {
+      "label": "Study this topic",
+      "task": "Create task",
+      "focus": "Start focus",
+      "cards": "Create flashcards"
+    },
+    "trail": {
+      "title": "Trail map",
+      "hint": "Click a topic to see materials and track progress. Arrow keys move along the trail.",
+      "view": "View",
+      "map": "Map",
+      "list": "List"
+    },
+    "map": {
+      "label": "Trail topics"
+    },
+    "node": {
+      "estimated": "Estimated",
+      "spent": "Done",
+      "left": "Left",
+      "focus": "Includes {{hours}} h of Deep Work sessions on this topic.",
+      "resources": "Materials",
+      "noResources": "No suggested materials yet.",
+      "newTab": "(opens in a new tab)",
+      "manualHours": "Extra hours",
+      "manualHint": "Outside Deep Work",
+      "hoursError": "Use 0 to 500 hours.",
+      "saveHours": "Save hours",
+      "status": "Topic status"
+    },
+    "locked": {
+      "title": "Premium stage",
+      "body": "This stage is part of the Premium plan.",
+      "plans": "See plans",
+      "soon": "Plans coming soon."
+    },
+    "goal": {
+      "title": "Weekly goal",
+      "label": "Hours per week",
+      "current_one": "Current goal: {{count}} hour per week.",
+      "current_other": "Current goal: {{count}} hours per week.",
+      "none": "With a goal, we estimate when you will finish.",
+      "error": "Use 1 to 80 hours.",
+      "save": "Save goal"
+    },
+    "explore": {
+      "title": "Explore roadmaps",
+      "area": "Area",
+      "allAreas": "All areas",
+      "search": "Search",
+      "empty": "No roadmap found.",
+      "meta_one": "{{area}} · {{count}} topic · {{hours}} h",
+      "meta_other": "{{area}} · {{count}} topics · {{hours}} h"
+    },
+    "suggest": {
+      "title": "Suggest a roadmap",
+      "hint": "Did not find your program? Tell us which trail is missing.",
+      "name": "Program or topic",
+      "area": "Area (optional)",
+      "details": "Details (optional)",
+      "send": "Send suggestion",
+      "thanks": "Thank you! Your suggestion was saved.",
+      "fieldError": "Use plain text only (no < or >) and keep within the length limit."
     }
   }
 }

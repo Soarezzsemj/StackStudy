@@ -13,6 +13,7 @@ import com.stackstudy.grade.GradeCalculator.AttendanceStatus;
 import com.stackstudy.grade.GradeCalculator.Standing;
 import com.stackstudy.grade.GradeService;
 import com.stackstudy.grade.dto.GradeResponses.SubjectGrades;
+import com.stackstudy.roadmap.RoadmapService;
 import com.stackstudy.session.DeepWorkSettingsService;
 import com.stackstudy.session.DeepWorkStatsService;
 import com.stackstudy.session.StreakCalculator;
@@ -53,9 +54,10 @@ import org.springframework.transaction.annotation.Transactional;
  *       lista de decks).
  *   <li>Notas e faltas: a visão geral do Grade Predictor = 5.
  *   <li>Primeiros passos: 1 consulta com {@code EXISTS}.
+ *   <li>Roadmap principal com o progresso: 1 (o conteúdo vem do catálogo em memória).
  * </ul>
  *
- * Total: 16 (conferido em {@code CockpitIntegrationTest}). Índices usados: tasks (user_id, status,
+ * Total: 17 (conferido em {@code CockpitIntegrationTest}). Índices usados: tasks (user_id, status,
  * due_date), study_sessions (user_id, started_at), cards (user_id, due_on) e os por usuário.
  */
 @Service
@@ -77,6 +79,7 @@ public class CockpitService {
   private final FlashcardService flashcards;
   private final GradeService grades;
   private final OnboardingQuery onboarding;
+  private final RoadmapService roadmaps;
   private final CurrentUser currentUser;
   private final Clock clock;
 
@@ -87,6 +90,7 @@ public class CockpitService {
       FlashcardService flashcards,
       GradeService grades,
       OnboardingQuery onboarding,
+      RoadmapService roadmaps,
       CurrentUser currentUser,
       Clock clock) {
     this.sessions = sessions;
@@ -95,6 +99,7 @@ public class CockpitService {
     this.flashcards = flashcards;
     this.grades = grades;
     this.onboarding = onboarding;
+    this.roadmaps = roadmaps;
     this.currentUser = currentUser;
     this.clock = clock;
   }
@@ -178,7 +183,8 @@ public class CockpitService {
             cards.totalCards(),
             cards.decks()),
         atRisk,
-        onboarding.forUser(userId));
+        onboarding.forUser(userId),
+        roadmaps.cockpit(userId));
   }
 
   /** Meta do dia = semanal ÷ 7, para cima no minuto (600 min/semana → 86 min/dia). */

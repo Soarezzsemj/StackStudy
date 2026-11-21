@@ -34,7 +34,8 @@ GitHub Actions ── pg_dump semanal (criptografado) ──► artifact privado
 - [ ] 6. GitHub: repositório **privado**, secrets do backup criados, backup rodado uma vez à mão
 - [ ] 7. Monitor gratuito chamando `/actuator/health/liveness` a cada 5–10 min (opcional, recomendado)
 - [ ] 8. Painel do admin: conta criada **antes**, depois `ADMIN_EMAILS` no Render (opcional)
-- [ ] 9. Leu "O que fazer se…"
+- [ ] 9. Roadmaps: `ROADMAPS_PREMIUM_ENABLED` ausente ou `false` (lançamento, tudo grátis)
+- [ ] 10. Leu "O que fazer se…"
 
 ---
 
@@ -289,6 +290,21 @@ Sem a variável, o cartão diz qual falta. O commit em produção aparece sozinh
 
 ---
 
+## 9. Roadmaps e o futuro Premium (`ROADMAPS_PREMIUM_ENABLED`)
+
+Os roadmaps são conteúdo estático, versionado por migration (`V11__roadmaps_seed.sql`): o backend lê tudo uma vez por inicialização (4 consultas) e serve da memória, sem job em segundo plano. Para mudar ou acrescentar conteúdo, crie uma migration nova e faça deploy.
+
+| Valor | Efeito |
+| --- | --- |
+| `false` ou ausente (**padrão, recomendado agora**) | Lançamento: tudo liberado, inclusive as etapas marcadas como PREMIUM. A tela mostra "Lançamento: tudo grátis por tempo limitado". |
+| `true` | Etapas (ou roadmaps) PREMIUM vêm com `locked: true`: título visível, descrição e materiais escondidos, progresso e sessões de foco nelas recusados (403 `ROADMAP_STAGE_LOCKED`). O botão "Ver planos" aparece **desativado**. |
+
+> ⚠️ Não ligue a flag em produção antes de existir assinatura: nesta fase **ninguém** tem direito ao Premium (`NoPremiumEntitlements` responde sempre "não"), então todo mundo perderia acesso à última etapa de cada roadmap. O ponto de extensão está em `PremiumEntitlements` (ver CLAUDE.md, "Roadmaps").
+
+Para testar localmente: `ROADMAPS_PREMIUM_ENABLED=true docker compose up`.
+
+---
+
 ## O que fazer se…
 
 **O primeiro acesso demora muito (cold start).**
@@ -371,6 +387,7 @@ Quando o cold start incomodar, troque o plano do Render: serviço → **Settings
 | `REFRESH_COOKIE_SAME_SITE` | não | SameSite do cookie (padrão `Lax`). Só `Strict`, `Lax` ou `None` (este exige Secure). |
 | `ADMIN_EMAILS` | não | E-mails (vírgula) de contas **já criadas** que viram ADMIN ao iniciar. Ver "Painel do admin". |
 | `ADMIN_LINK_RENDER` / `_NEON` / `_VERCEL` / `_BACKUP` | não | Links `https://` para os painéis dos provedores no Admin: Status. |
+| `ROADMAPS_PREMIUM_ENABLED` | não | `false` (padrão): roadmaps todos grátis. `true` bloqueia as etapas PREMIUM; não ligue antes de existir assinatura. Ver "Roadmaps". |
 | `RATE_LIMIT_ENABLED` | não | Limite de tentativas em login/cadastro/refresh (padrão `true`). Em prod, `false` **impede o boot**. |
 | `JWT_ACCESS_TTL` / `JWT_REFRESH_TTL` | não | Validade dos tokens (padrão `PT15M` / `P14D`). |
 | `PORT` | automática | Porta HTTP, definida pelo próprio Render. |

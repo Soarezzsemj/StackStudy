@@ -3,7 +3,8 @@ import type { Card } from '@/lib/api/flashcards';
 
 /** Diálogo aberto na tela de Flashcards (também aberto pela paleta Ctrl K). */
 export type FlashcardDialog =
-  | { kind: 'card'; card?: Card; deckId?: string }
+  // tags: sugestão ao criar (ex.: tópico atual de um roadmap).
+  | { kind: 'card'; card?: Card; deckId?: string; tags?: string[] }
   | { kind: 'deck'; deckId?: string }
   | { kind: 'settings' }
   | { kind: 'import'; deckId: string }

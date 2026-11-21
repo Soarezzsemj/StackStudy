@@ -56,3 +56,6 @@ services:
         sync: false
       - key: ADMIN_LINK_BACKUP
         sync: false
+      # Roadmaps: deixe false (ou sem valor) enquanto não houver assinatura (ver DEPLOY.md)
+      - key: ROADMAPS_PREMIUM_ENABLED
+        sync: false
