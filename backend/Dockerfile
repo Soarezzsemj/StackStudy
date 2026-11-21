@@ -19,7 +19,7 @@ RUN mvn -B -q -DskipTests -Dspotless.check.skip=true package \
  && java -Djarmode=tools -jar app.jar extract --destination extracted
 
 # ---- prod: só a JRE 21, usuário sem root (é o estágio final, usado pelo Render) ----
-FROM eclipse-temurin:21-jre-alpine AS prod
+FROM eclipse-temurin:24-jre-alpine AS prod
 RUN addgroup -S app && adduser -S -G app -u 10001 app && mkdir /app && chown app:app /app
 WORKDIR /app
 COPY --from=build --chown=app:app /build/extracted ./
