@@ -90,6 +90,12 @@ const paths = {
       <path d="M3.5 10h17M8 3v4M16 3v4" />
     </>
   ),
+  user: (
+    <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20a8 8 0 0 1 16 0" />
+    </>
+  ),
   alert: (
     <>
       <path d="M12 4l9 16H3l9-16z" />

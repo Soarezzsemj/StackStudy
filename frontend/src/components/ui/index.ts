@@ -10,6 +10,7 @@ export { HEAT_LEVELS, clampPercent, heatLevel } from './scales';
 export { Icon, type IconName } from './Icon';
 export { TextField, type TextFieldProps } from './TextField';
 export { Wordmark } from './Wordmark';
+export { Avatar } from './Avatar';
 export { Dialog, type DialogProps } from './Dialog';
 export {
   SelectField,

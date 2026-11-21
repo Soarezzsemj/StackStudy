@@ -12,6 +12,7 @@ import { FlashcardsPage } from '@/features/flashcards/FlashcardsPage';
 import { DeckPage } from '@/features/flashcards/DeckPage';
 import { ReviewPage } from '@/features/flashcards/ReviewPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import { ProfilePage } from '@/features/profile/ProfilePage';
 
 export const routes: RouteObject[] = [
   {
@@ -29,13 +30,14 @@ export const routes: RouteObject[] = [
       {
         element: <AppShell />,
         children: [
-          { path: '/', element: <PlaceholderPage pageKey="cockpit" phase={5} /> },
+          { path: '/', element: <PlaceholderPage pageKey="cockpit" phase={6} /> },
           { path: '/stack', element: <StackPage /> },
           { path: '/deep-work', element: <DeepWorkPage /> },
           { path: '/flashcards', element: <FlashcardsPage /> },
           { path: '/flashcards/decks/:deckId', element: <DeckPage /> },
           { path: '/flashcards/review', element: <ReviewPage /> },
           { path: '/grades', element: <GradesPage /> },
+          { path: '/profile', element: <ProfilePage /> },
           { path: '*', element: <NotFoundPage /> },
         ],
       },

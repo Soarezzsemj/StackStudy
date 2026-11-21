@@ -21,9 +21,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private static final String BEARER = "Bearer ";
 
   private final JwtService jwtService;
+  private final SessionStatusChecker sessions;
 
-  public JwtAuthenticationFilter(JwtService jwtService) {
+  public JwtAuthenticationFilter(JwtService jwtService, SessionStatusChecker sessions) {
     this.jwtService = jwtService;
+    this.sessions = sessions;
   }
 
   @Override
@@ -34,6 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (header != null && header.startsWith(BEARER)) {
       jwtService
           .parse(header.substring(BEARER.length()).trim())
+          // Sessão encerrada (outro dispositivo, troca de senha, conta excluída) = token morto.
+          .filter(user -> sessions.isActive(user.sessionId(), user.id()))
           .ifPresent(
               user -> {
                 var auth = new UsernamePasswordAuthenticationToken(user, null, List.of());

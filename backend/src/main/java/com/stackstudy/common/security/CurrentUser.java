@@ -24,4 +24,9 @@ public class CurrentUser {
   public UUID id() {
     return get().id();
   }
+
+  /** Sessão (dispositivo) da requisição atual. */
+  public UUID sessionId() {
+    return get().sessionId();
+  }
 }

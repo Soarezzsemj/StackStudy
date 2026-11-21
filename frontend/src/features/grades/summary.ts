@@ -4,7 +4,7 @@ import { formatGrade } from './format';
 /*
  * Mensagem curta de cada matéria ("Precisa de 1,5 pontos para passar", "Precisa de 7,20 na P2
  * para passar direto"). É o ÚNICO lugar que transforma o resultado da calculadora em texto: o
- * cartão, a linha da The Stack, o simulador e (Fase 5) o Cockpit e o radar de risco usam isto.
+ * cartão, a linha da The Stack, o simulador e (Fase 6) o Cockpit e o radar de risco usam isto.
  * Nada aqui faz conta: só lê o resultado (da API ou do simulador, que usa a mesma calculadora).
  */
 

@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { browserTimeZone } from '@/lib/api/deepwork';
+import { useTimeZone } from '@/lib/useTimeZone';
 import {
   flashcardsApi,
   type CardInput,
@@ -27,7 +27,7 @@ function useIsAuthenticated() {
 }
 
 export function useDecks() {
-  const tz = browserTimeZone();
+  const tz = useTimeZone();
   return useQuery({
     queryKey: flashcardKeys.decks(tz),
     queryFn: () => flashcardsApi.decks(tz),
@@ -51,7 +51,7 @@ export function useCards(deckId: string | undefined, q: string, enabled = true) 
  * da revisão.
  */
 export function useQueue(deckId: string | undefined) {
-  const tz = browserTimeZone();
+  const tz = useTimeZone();
   return useQuery({
     queryKey: flashcardKeys.queue(tz, deckId),
     queryFn: () => flashcardsApi.queue(tz, deckId),
@@ -63,7 +63,7 @@ export function useQueue(deckId: string | undefined) {
 }
 
 export function useFlashcardStats() {
-  const tz = browserTimeZone();
+  const tz = useTimeZone();
   return useQuery({
     queryKey: flashcardKeys.stats(tz),
     queryFn: () => flashcardsApi.stats(tz),
@@ -142,7 +142,7 @@ export function useImportCsv() {
  * atualizadas ao sair da tela.
  */
 export function useReviewActions() {
-  const tz = browserTimeZone();
+  const tz = useTimeZone();
   return {
     review: useMutation({
       mutationFn: ({ cardId, rating }: { cardId: string; rating: Rating }) =>

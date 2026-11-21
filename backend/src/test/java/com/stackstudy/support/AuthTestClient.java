@@ -48,6 +48,19 @@ public final class AuthTestClient {
     return toSession(result);
   }
 
+  /** Login com outro "dispositivo" (User-Agent próprio); devolve a sessão nova. */
+  public Session login(String email, String password, String userAgent) throws Exception {
+    MvcResult result =
+        mvc.perform(
+                post("/api/auth/login")
+                    .header("User-Agent", userAgent)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(json.writeValueAsString(Map.of("email", email, "password", password))))
+            .andExpect(status().isOk())
+            .andReturn();
+    return toSession(result);
+  }
+
   public Session toSession(MvcResult result) throws Exception {
     JsonNode body = json.readTree(result.getResponse().getContentAsString());
     Cookie cookie = result.getResponse().getCookie(REFRESH_COOKIE);

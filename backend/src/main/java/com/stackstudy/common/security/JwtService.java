@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class JwtService {
 
   private static final String EMAIL_CLAIM = "email";
+  private static final String SESSION_CLAIM = "sid";
 
   private final SecretKey key;
   private final SecurityProperties.Jwt props;
@@ -29,12 +30,14 @@ public class JwtService {
     this.clock = clock;
   }
 
-  public String issueAccessToken(UUID userId, String email) {
+  /** Access token da sessão {@code sessionId} (claim {@code sid}). */
+  public String issueAccessToken(UUID userId, String email, UUID sessionId) {
     Instant now = clock.instant();
     return Jwts.builder()
         .issuer(props.issuer())
         .subject(userId.toString())
         .claim(EMAIL_CLAIM, email)
+        .claim(SESSION_CLAIM, sessionId.toString())
         .issuedAt(Date.from(now))
         .expiration(Date.from(now.plus(props.accessTokenTtl())))
         .signWith(key)
@@ -55,9 +58,16 @@ public class JwtService {
               .build()
               .parseSignedClaims(token)
               .getPayload();
+      // Token sem sessão (emitido antes da V7) não vale: o frontend renova pelo refresh.
+      String sid = claims.get(SESSION_CLAIM, String.class);
+      if (sid == null) {
+        return Optional.empty();
+      }
       return Optional.of(
           new AuthenticatedUser(
-              UUID.fromString(claims.getSubject()), claims.get(EMAIL_CLAIM, String.class)));
+              UUID.fromString(claims.getSubject()),
+              claims.get(EMAIL_CLAIM, String.class),
+              UUID.fromString(sid)));
     } catch (JwtException | IllegalArgumentException ex) {
       return Optional.empty();
     }

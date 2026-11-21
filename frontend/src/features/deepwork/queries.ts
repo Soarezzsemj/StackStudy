@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTimeZone } from '@/lib/useTimeZone';
 import {
-  browserTimeZone,
   deepWorkApi,
   withOffset,
   type ActiveSession,
@@ -53,7 +53,7 @@ export function useDeepWorkSettings() {
 }
 
 export function useStats() {
-  const tz = browserTimeZone();
+  const tz = useTimeZone();
   return useQuery({
     queryKey: deepWorkKeys.stats(tz),
     queryFn: () => deepWorkApi.stats(tz),
@@ -62,7 +62,7 @@ export function useStats() {
 }
 
 export function useHeatmap() {
-  const tz = browserTimeZone();
+  const tz = useTimeZone();
   return useQuery({
     queryKey: deepWorkKeys.heatmap(tz),
     queryFn: () => deepWorkApi.heatmap(tz),

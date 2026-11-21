@@ -21,7 +21,8 @@ Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 2
 | 2 | Deep Work: sessões no servidor (pausa/retomada), Pomodoro/Flow, heatmap, streak, meta | ✅ |
 | 3 | Grade Predictor: avaliações, nota necessária, exame final, what-if, faltas, CR/GPA | ✅ |
 | 4 | Flashcards: decks, cartas Markdown, SM-2 puro, fila diária com limites, revisão, CSV | ✅ |
-| 5 | Cockpit e polimento: dashboard, radar de risco, estados vazios, atalhos | ⏳ |
+| 5 | Perfil e preferências: perfil, padrões das fases, e-mail/senha, sessões, exportar/excluir (LGPD) | ✅ |
+| 6 | Cockpit e polimento: dashboard, radar de risco, estados vazios, atalhos | ⏳ |
 
 ## Estrutura
 
@@ -38,8 +39,8 @@ DEPLOY.md            passo a passo do deploy (Neon + Render + Vercel) e backup
 
 ### Backend (`com.stackstudy`)
 
-Pacotes por feature: `auth`, `subject` (inclui semestres), `task`, `session`, `flashcard`, `grade`,
-`common`. Em cada feature: `*Controller` → `*Service` → `*Repository`, DTOs em `dto/` (records),
+Pacotes por feature: `auth` (inclui `AuthSession`), `account` (perfil, preferências, conta,
+exportação), `subject` (inclui semestres), `task`, `session`, `flashcard`, `grade`, `common`. Em cada feature: `*Controller` → `*Service` → `*Repository`, DTOs em `dto/` (records),
 entidades JPA nunca saem do service.
 
 - `common.error`: `ApiException` + `ErrorCode` + `GlobalExceptionHandler`. Toda resposta de erro
@@ -75,14 +76,18 @@ features/deepwork/ DeepWorkPage, TimerCard, InsightsSections (stats, heatmap, hi
 features/stack/ StackPage, SubjectPanel, TaskToolbar (filtros + criação rápida), TaskList,
                 Task/Subject/Semester dialogs; lógica pura e testada em due.ts, grouping.ts,
                 filters.ts, shortcuts.ts; queries.ts (TanStack Query)
+features/profile/ ProfilePage (Perfil, Preferências, Conta, Privacidade), *Section, queries.ts;
+                lógica pura e testada em helpers.ts (formulário ↔ PATCH, User-Agent, fusos, download)
 lib/api/        client.ts (fetch, refresh automático, retry de GET), auth.ts, stack.ts, deepwork.ts,
-                grades.ts, flashcards.ts,
+                grades.ts, flashcards.ts, account.ts (/api/me/...),
                 types.ts,
                 config.ts (VITE_API_URL, tempos), slow.ts (aviso de lentidão), wake.ts (wake-up ping)
 stores/         Zustand: authStore, uiStore, networkStore, flashcardStore (diálogo aberto, também
                 pelo Ctrl K), stackStore (filtros, seleção e diálogo
                 do The Stack), deepWorkStore (modo, matéria, ciclo e pausa; persistido no localStorage)
-lib/            keyboard.ts (guardas dos atalhos), useNow.ts (re-render do timer), useDebouncedValue.ts
+lib/            keyboard.ts (guardas dos atalhos), useNow.ts (re-render do timer), useDebouncedValue.ts,
+                useTimeZone.ts (fuso do perfil ou do navegador), syncUserLanguage.ts (idioma da
+                conta ao entrar), initials.ts (avatar)
 i18n/           react-i18next; locales/pt-BR.json (padrão) e en.json
 styles/         tokens.css (design tokens) e index.css (base + componentes)
 test/           setup.ts e utils.tsx (`mockApi` roteia o fetch por "MÉTODO /caminho")
@@ -300,8 +305,37 @@ Regras (`flashcard.Sm2`, puro e testado):
   Secure, ambos por env).
 - Access token JWT HMAC-SHA (HS256–HS512, o jjwt escolhe pelo tamanho do `JWT_SECRET`), 15 min, só em memória no frontend (Zustand), nunca em localStorage.
 - Refresh token: 32 bytes aleatórios, guardado como SHA-256 no banco, **rotação** a cada
-  `POST /api/auth/refresh`. Reuso de um token já rotacionado revoga todos os tokens do usuário.
-- `POST /api/auth/logout` revoga e limpa o cookie. `GET /api/me` devolve o perfil.
+  `POST /api/auth/refresh`. Reuso de um token já rotacionado (numa sessão ainda ativa) encerra
+  todas as sessões do usuário. Token de sessão já encerrada só dá 401 (não é reuso).
+- **Sessões (V7)**: cada login cria uma `auth_sessions` (User-Agent cortado em 255, sem IP); os
+  refresh tokens giram dentro dela (`refresh_tokens.session_id`). O access token leva o claim
+  `sid`; o `JwtAuthenticationFilter` aceita só se a sessão não foi encerrada
+  (`SessionStatusChecker` → `ActiveSessionCache`, 30 s em memória e evict ao encerrar). Token sem
+  `sid` (antes da V7) é recusado e o frontend renova pelo refresh. Sessões encerradas/vencidas há
+  30 dias são apagadas no login (sem job de fundo).
+- `POST /api/auth/logout` revoga, encerra a sessão e limpa o cookie. `GET /api/me` devolve o perfil.
+
+## Perfil e conta (Fase 5)
+
+API (`/api/me`, sempre o usuário do token; sessão de outro usuário = 404):
+
+- `PUT /profile` (nome de exibição, curso, instituição, período, bio ≤ 280, `avatarColor` da paleta
+  das matérias; vazio = sem valor). Avatar = iniciais + cor (sem upload).
+- `GET/PATCH /preferences`: idioma e fuso (no usuário; `timeZone: ""` = navegador) e os padrões das
+  outras fases **gravados nos settings delas** (`grade_settings`, `deep_work_settings`,
+  `flashcard_settings`), numa transação. Campo ausente = mantém. Não há cópia: as telas das fases
+  continuam lendo os próprios settings.
+- `PUT /email` e `PUT /password` exigem `currentPassword` (`INVALID_CURRENT_PASSWORD` **400**, não
+  401, que o frontend usa para renovar a sessão). Senha nova encerra as outras sessões, gira o
+  refresh desta e devolve tokens + cookie novos.
+- `GET /sessions`, `DELETE /sessions/{id}`, `DELETE /sessions/others`, `DELETE /sessions` (todas,
+  inclusive esta; limpa o cookie).
+- `GET /export`: JSON com todas as tabelas do usuário (`DataExportService.QUERIES`), sem hash de
+  senha nem de token. Tabela nova com `user_id` precisa entrar lá (o teste confere).
+- `DELETE /` com `{ email, currentPassword }`: apaga o usuário; o banco apaga o resto em cascata.
+
+Frontend: idioma da conta aplicado ao entrar (`syncUserLanguage`) e trocado também pela barra
+lateral (grava na conta). Fuso por `useTimeZone()` nas consultas de heatmap, estatísticas e fila.
 - Frontend: `apiRequest` intercepta 401, faz **um** refresh compartilhado (dedupe) e repete a
   requisição; se o refresh falhar, limpa a sessão e `RequireAuth` manda para `/login`.
   No carregamento, `useSessionBootstrap` tenta restaurar a sessão pelo cookie.
@@ -466,3 +500,16 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
     do semestre não é nota 3. Médias seguem entrando como parciais.
 55. **Trocar de regra preserva dados**: peso, `maxPoints` e bônus ausentes no PUT de avaliações
     mantêm o valor gravado; a conta usa só os campos da regra efetiva.
+56. **Sessão como tabela própria** (`auth_sessions`) em vez de agrupar refresh tokens: os tokens
+    giram a cada 15 min, a sessão é o que o usuário reconhece ("Chrome no Windows").
+57. **Encerrar sessão corta o access token na hora** (claim `sid` + checagem no filtro com cache de
+    30 s). Custa uma consulta por sessão a cada 30 s; com várias instâncias o corte pode levar 30 s.
+58. **Preferências sem duplicar dados**: o Perfil é uma porta única (`PATCH /api/me/preferences`)
+    para os settings que já existiam em cada fase. Os padrões continuam os mesmos (nada muda para
+    quem nunca abriu o Perfil).
+59. **Excluir conta pede e-mail digitado e senha** (o pedido era só o e-mail; a senha evita
+    exclusão por quem pegou o computador desbloqueado). `DELETE` direto em `users` + cascade.
+60. **Exportação genérica por SQL** (colunas viram camelCase): uma coluna nova aparece sozinha;
+    hashes de senha/token são filtrados também por nome de coluna.
+61. Sem limite de tentativas na senha atual (como no login). Se virar problema, rate limit por
+    usuário nos endpoints de `/api/me` que pedem senha.

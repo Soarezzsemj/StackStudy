@@ -1,7 +1,8 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { NAV_ITEMS } from '@/app/routes';
-import { Button, Icon, Wordmark } from '@/components/ui';
+import { NAV_ITEMS, PROFILE_ITEM } from '@/app/routes';
+import { Avatar, Button, Icon, Wordmark } from '@/components/ui';
+import { accountApi } from '@/lib/api/account';
 import { useAuthStore } from '@/stores/authStore';
 import { authApi } from '@/lib/api/auth';
 import { changeLanguage, SUPPORTED_LANGUAGES, type Language } from '@/i18n';
@@ -21,6 +22,16 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     setFilters({ subject: id });
     navigate('/stack');
     onNavigate?.();
+  }
+
+  /** Troca o idioma na hora e grava na conta (vale no próximo login, em qualquer aparelho). */
+  function pickLanguage(lang: Language) {
+    void changeLanguage(lang);
+    const current = useAuthStore.getState().user;
+    if (current && current.locale !== lang) {
+      useAuthStore.getState().setUser({ ...current, locale: lang });
+      accountApi.updatePreferences({ locale: lang }).catch(() => undefined);
+    }
   }
 
   async function handleLogout() {
@@ -108,7 +119,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             <button
               key={lang}
               type="button"
-              onClick={() => void changeLanguage(lang)}
+              onClick={() => pickLanguage(lang)}
               aria-pressed={i18n.language === lang}
               className={cn(
                 'label min-h-11 rounded-pill px-3',
@@ -121,16 +132,18 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           ))}
         </div>
         <div className="flex items-center gap-3 px-2">
-          <span
-            aria-hidden="true"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-space-deep text-sm font-bold text-text-on-space"
+          <NavLink
+            to={PROFILE_ITEM.to}
+            onClick={onNavigate}
+            aria-label={t('shell.openProfile', { name: user?.name ?? '' })}
+            className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-pill pr-2 hover:bg-surface"
           >
-            {user?.name.charAt(0).toUpperCase() ?? '?'}
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold">{user?.name}</p>
-            <p className="truncate text-xs text-text-muted">{user?.email}</p>
-          </div>
+            <Avatar name={user?.name} color={user?.avatarColor} />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-semibold">{user?.name}</span>
+              <span className="block truncate text-xs text-text-muted">{user?.email}</span>
+            </span>
+          </NavLink>
           <Button
             variant="ghost"
             iconOnly

@@ -47,6 +47,10 @@ public final class Api {
     return send(withBody(MockMvcRequestBuilders.patch(path), body));
   }
 
+  public ResultActions delete(String path, Object body) throws Exception {
+    return send(withBody(MockMvcRequestBuilders.delete(path), body));
+  }
+
   public ResultActions delete(String path) throws Exception {
     return send(MockMvcRequestBuilders.delete(path));
   }

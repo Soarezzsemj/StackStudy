@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 class JwtServiceTest {
 
   private static final Instant NOW = Instant.parse("2026-11-19T12:00:00Z");
+  private static final UUID SID = UUID.fromString("00000000-0000-0000-0000-00000000005e");
 
   private static SecurityProperties props(String secret) {
     return new SecurityProperties(
@@ -31,22 +32,22 @@ class JwtServiceTest {
   @Test
   void issuedTokenRoundTrips() {
     UUID id = UUID.randomUUID();
-    String token = service(NOW, SECRET).issueAccessToken(id, "ada@example.com");
+    String token = service(NOW, SECRET).issueAccessToken(id, "ada@example.com", SID);
 
     assertThat(service(NOW.plusSeconds(60), SECRET).parse(token))
-        .contains(new AuthenticatedUser(id, "ada@example.com"));
+        .contains(new AuthenticatedUser(id, "ada@example.com", SID));
   }
 
   @Test
   void expiredTokenIsRejected() {
-    String token = service(NOW, SECRET).issueAccessToken(UUID.randomUUID(), "a@b.c");
+    String token = service(NOW, SECRET).issueAccessToken(UUID.randomUUID(), "a@b.c", SID);
 
     assertThat(service(NOW.plus(Duration.ofMinutes(16)), SECRET).parse(token)).isEmpty();
   }
 
   @Test
   void tokenSignedWithAnotherKeyIsRejected() {
-    String token = service(NOW, SECRET).issueAccessToken(UUID.randomUUID(), "a@b.c");
+    String token = service(NOW, SECRET).issueAccessToken(UUID.randomUUID(), "a@b.c", SID);
 
     assertThat(service(NOW, "another-secret-0123456789abcdef0123456789").parse(token)).isEmpty();
     assertThat(service(NOW, SECRET).parse("garbage")).isEmpty();

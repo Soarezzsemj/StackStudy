@@ -4,6 +4,15 @@ export interface User {
   email: string;
   locale: string;
   createdAt: string;
+  // Perfil (ausente = não preenchido).
+  course?: string;
+  institution?: string;
+  currentPeriod?: string;
+  bio?: string;
+  /** Cor do avatar de iniciais (paleta fixa). */
+  avatarColor?: string;
+  /** Fuso IANA preferido; ausente = o do navegador. */
+  timeZone?: string;
 }
 
 export interface AuthResponse {

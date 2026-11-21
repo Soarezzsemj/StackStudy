@@ -18,8 +18,16 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/grades', labelKey: 'nav.grades', slug: 'grades', icon: 'grades' },
 ];
 
+/** Perfil: fora do menu principal (fica no bloco do usuário, na barra lateral). */
+export const PROFILE_ITEM: NavItem = {
+  to: '/profile',
+  labelKey: 'nav.profile',
+  slug: 'profile',
+  icon: 'user',
+};
+
 export function findNavItem(pathname: string): NavItem | undefined {
-  return NAV_ITEMS.find((item) =>
+  return [...NAV_ITEMS, PROFILE_ITEM].find((item) =>
     item.to === '/' ? pathname === '/' : pathname === item.to || pathname.startsWith(`${item.to}/`),
   );
 }

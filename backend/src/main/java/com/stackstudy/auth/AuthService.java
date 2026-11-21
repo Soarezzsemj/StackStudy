@@ -9,8 +9,11 @@ import com.stackstudy.common.error.ErrorCode;
 import com.stackstudy.common.security.JwtService;
 import com.stackstudy.common.security.SecurityProperties;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,17 +21,26 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Cadastro, login, refresh e sessões. Cada login abre uma {@link AuthSession}; o refresh gira o
+ * token dentro dela. Nunca loga senha, token nem hash.
+ */
 @Service
 public class AuthService {
 
   private static final Logger log = LoggerFactory.getLogger(AuthService.class);
   private static final String DEFAULT_LOCALE = "pt-BR";
 
+  /** Sessões encerradas/vencidas há mais que isso são apagadas no login do usuário. */
+  private static final Duration STALE_SESSIONS = Duration.ofDays(30);
+
   /** Refresh token puro (vai no cookie) e o corpo da resposta. */
   public record AuthResult(AuthResponse body, String refreshToken) {}
 
   private final UserRepository users;
   private final RefreshTokenRepository refreshTokens;
+  private final AuthSessionRepository sessions;
+  private final ActiveSessionCache sessionCache;
   private final RefreshTokenGenerator tokenGenerator;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
@@ -38,6 +50,8 @@ public class AuthService {
   public AuthService(
       UserRepository users,
       RefreshTokenRepository refreshTokens,
+      AuthSessionRepository sessions,
+      ActiveSessionCache sessionCache,
       RefreshTokenGenerator tokenGenerator,
       PasswordEncoder passwordEncoder,
       JwtService jwtService,
@@ -45,6 +59,8 @@ public class AuthService {
       Clock clock) {
     this.users = users;
     this.refreshTokens = refreshTokens;
+    this.sessions = sessions;
+    this.sessionCache = sessionCache;
     this.tokenGenerator = tokenGenerator;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
@@ -53,7 +69,7 @@ public class AuthService {
   }
 
   @Transactional
-  public AuthResult register(RegisterRequest request) {
+  public AuthResult register(RegisterRequest request, String userAgent) {
     String email = normalizeEmail(request.email());
     if (users.existsByEmail(email)) {
       throw new ApiException(ErrorCode.EMAIL_ALREADY_REGISTERED, "Email already registered");
@@ -71,74 +87,160 @@ public class AuthService {
     } catch (DataIntegrityViolationException ex) {
       throw new ApiException(ErrorCode.EMAIL_ALREADY_REGISTERED, "Email already registered");
     }
-    return issueTokens(user);
+    return issueTokens(user, newSession(user, userAgent));
   }
 
   @Transactional
-  public AuthResult login(LoginRequest request) {
+  public AuthResult login(LoginRequest request, String userAgent) {
     User user =
         users
             .findByEmail(normalizeEmail(request.email()))
             .filter(u -> passwordEncoder.matches(request.password(), u.getPasswordHash()))
             .orElseThrow(
                 () -> new ApiException(ErrorCode.INVALID_CREDENTIALS, "Invalid email or password"));
-    return issueTokens(user);
+    sessions.deleteStale(user.getId(), clock.instant().minus(STALE_SESSIONS));
+    return issueTokens(user, newSession(user, userAgent));
   }
 
   /**
-   * Troca o refresh token por um novo. Se um token já revogado for usado de novo, revoga todos os
-   * tokens do usuário.
+   * Troca o refresh token por um novo, na mesma sessão. Se um token já revogado for usado de novo,
+   * encerra todas as sessões do usuário.
    */
   @Transactional(noRollbackFor = ApiException.class)
-  public AuthResult refresh(String rawToken) {
+  public AuthResult refresh(String rawToken, String userAgent) {
     RefreshToken current = findToken(rawToken).orElseThrow(AuthService::invalidRefreshToken);
     Instant now = clock.instant();
     if (current.isRevoked()) {
+      // Token de uma sessão já encerrada (logout, "sair deste dispositivo", troca de senha) não é
+      // roubo: só não vale mais. Reuso de verdade = token girado numa sessão ainda ativa.
+      boolean sessionEnded =
+          current.getSessionId() != null
+              && sessions
+                  .findById(current.getSessionId())
+                  .map(s -> s.getRevokedAt() != null)
+                  .orElse(true);
+      if (sessionEnded) {
+        throw invalidRefreshToken();
+      }
       log.warn("Refresh token reuse detected for user {}", current.getUserId());
-      refreshTokens.revokeAllForUser(current.getUserId());
+      endAllSessions(current.getUserId(), null);
       throw invalidRefreshToken();
     }
     if (current.isExpired(now)) {
       current.revoke();
       throw invalidRefreshToken();
     }
-    current.revoke();
     User user = users.findById(current.getUserId()).orElseThrow(AuthService::invalidRefreshToken);
-    return issueTokens(user);
+    AuthSession session;
+    if (current.getSessionId() == null) {
+      // Token de antes da V7: ganha uma sessão agora.
+      session = newSession(user, userAgent);
+    } else {
+      session = sessions.findById(current.getSessionId()).filter(s -> s.isActive(now)).orElse(null);
+      if (session == null) {
+        current.revoke();
+        throw invalidRefreshToken();
+      }
+    }
+    current.revoke();
+    return issueTokens(user, session);
   }
 
+  /** Sai deste dispositivo: revoga o token e encerra a sessão dele. */
   @Transactional
   public void logout(String rawToken) {
-    findToken(rawToken).ifPresent(RefreshToken::revoke);
+    findToken(rawToken)
+        .ifPresent(
+            token -> {
+              token.revoke();
+              if (token.getSessionId() != null) {
+                endSession(token.getUserId(), token.getSessionId());
+              }
+            });
   }
 
   @Transactional(readOnly = true)
-  public UserResponse me(java.util.UUID userId) {
+  public UserResponse me(UUID userId) {
     return users
         .findById(userId)
         .map(UserResponse::from)
         .orElseThrow(() -> ApiException.unauthorized("User no longer exists"));
   }
 
-  private java.util.Optional<RefreshToken> findToken(String rawToken) {
+  // -------------------------------------------------------------------------
+  // sessões (usadas também pela conta: troca de senha, dispositivos, exclusão)
+  // -------------------------------------------------------------------------
+
+  /** Encerra uma sessão do usuário e os tokens dela. Sessão de outro usuário = 404. */
+  @Transactional
+  public void endSession(UUID userId, UUID sessionId) {
+    AuthSession session =
+        sessions
+            .findByIdAndUserId(sessionId, userId)
+            .orElseThrow(() -> ApiException.notFound("Session"));
+    session.revoke(clock.instant());
+    refreshTokens.revokeAllForSession(sessionId);
+    sessionCache.evict(sessionId);
+  }
+
+  /** Encerra todas as sessões do usuário, menos {@code keep} (null = todas, inclusive a atual). */
+  @Transactional
+  public void endAllSessions(UUID userId, UUID keep) {
+    Instant now = clock.instant();
+    if (keep == null) {
+      sessions.revokeAll(userId, now);
+      refreshTokens.revokeAllForUser(userId);
+    } else {
+      sessions.revokeAllExcept(userId, keep, now);
+      refreshTokens.revokeAllForUserExcept(userId, keep);
+    }
+    sessionCache.evictUser(userId);
+  }
+
+  /**
+   * Emite um refresh token novo para a sessão atual, revogando os anteriores dela (troca de senha:
+   * o token antigo no cookie deixa de valer).
+   */
+  @Transactional
+  public AuthResult rotateSession(User user, UUID sessionId) {
+    AuthSession session =
+        sessions
+            .findByIdAndUserId(sessionId, user.getId())
+            .filter(s -> s.isActive(clock.instant()))
+            .orElseThrow(() -> ApiException.unauthorized("Session ended"));
+    refreshTokens.revokeAllForSession(sessionId);
+    return issueTokens(user, session);
+  }
+
+  private AuthSession newSession(User user, String userAgent) {
+    Instant now = clock.instant();
+    return sessions.save(
+        new AuthSession(
+            user.getId(), userAgent, now, now.plus(properties.jwt().refreshTokenTtl())));
+  }
+
+  private Optional<RefreshToken> findToken(String rawToken) {
     if (rawToken == null || rawToken.isBlank()) {
-      return java.util.Optional.empty();
+      return Optional.empty();
     }
     return refreshTokens.findByTokenHash(tokenGenerator.hash(rawToken));
   }
 
-  private AuthResult issueTokens(User user) {
+  private AuthResult issueTokens(User user, AuthSession session) {
     String raw = tokenGenerator.newToken();
-    Instant expiresAt = clock.instant().plus(properties.jwt().refreshTokenTtl());
-    refreshTokens.save(new RefreshToken(user.getId(), tokenGenerator.hash(raw), expiresAt));
-    String access = jwtService.issueAccessToken(user.getId(), user.getEmail());
+    Instant now = clock.instant();
+    Instant expiresAt = now.plus(properties.jwt().refreshTokenTtl());
+    refreshTokens.save(
+        new RefreshToken(user.getId(), session.getId(), tokenGenerator.hash(raw), expiresAt));
+    session.touch(now, expiresAt);
+    String access = jwtService.issueAccessToken(user.getId(), user.getEmail(), session.getId());
     AuthResponse body =
         new AuthResponse(
             access, "Bearer", jwtService.accessTokenTtlSeconds(), UserResponse.from(user));
     return new AuthResult(body, raw);
   }
 
-  private static String normalizeEmail(String email) {
+  public static String normalizeEmail(String email) {
     return email.trim().toLowerCase(Locale.ROOT);
   }
 

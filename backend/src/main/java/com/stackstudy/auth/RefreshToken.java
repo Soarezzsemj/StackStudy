@@ -24,10 +24,15 @@ public class RefreshToken extends BaseEntity {
   @Column(nullable = false)
   private boolean revoked;
 
+  /** Sessão (dispositivo) do token. Null só em tokens emitidos antes da V7. */
+  @Column(name = "session_id")
+  private UUID sessionId;
+
   protected RefreshToken() {}
 
-  public RefreshToken(UUID userId, String tokenHash, Instant expiresAt) {
+  public RefreshToken(UUID userId, UUID sessionId, String tokenHash, Instant expiresAt) {
     this.userId = userId;
+    this.sessionId = sessionId;
     this.tokenHash = tokenHash;
     this.expiresAt = expiresAt;
   }
@@ -38,6 +43,10 @@ public class RefreshToken extends BaseEntity {
 
   public void revoke() {
     this.revoked = true;
+  }
+
+  public UUID getSessionId() {
+    return sessionId;
   }
 
   public UUID getUserId() {

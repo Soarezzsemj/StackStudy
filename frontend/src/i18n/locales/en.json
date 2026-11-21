@@ -23,7 +23,8 @@
     "deepWork": "Deep Work",
     "flashcards": "Flashcards",
     "grades": "Grade Predictor",
-    "design": "Design system"
+    "design": "Design system",
+    "profile": "Profile"
   },
   "shell": {
     "root": "~/stackstudy",
@@ -36,7 +37,8 @@
     "logout": "Log out",
     "userMenu": "Account",
     "pending": "{{count}} pending",
-    "noSemester": "No current semester"
+    "noSemester": "No current semester",
+    "openProfile": "Open {{name}}’s profile"
   },
   "statusbar": {
     "label": "Status bar",
@@ -100,7 +102,8 @@
     "SESSION_NOT_ACTIVE": "This session has already ended.",
     "SESSION_STILL_ACTIVE": "Finish the session before editing it.",
     "ABSENCE_ALREADY_REGISTERED": "An absence is already recorded on this date. Delete it and record again.",
-    "REVIEW_NOT_LATEST": "This is not the card's latest answer; only that one can be undone."
+    "REVIEW_NOT_LATEST": "This is not the card's latest answer; only that one can be undone.",
+    "INVALID_CURRENT_PASSWORD": "The current password is incorrect."
   },
   "pages": {
     "cockpit": {
@@ -127,6 +130,10 @@
       "title": "404",
       "description": "This page does not exist.",
       "back": "Back to Cockpit"
+    },
+    "profile": {
+      "title": "Profile",
+      "description": "Your details, preferences, account security and privacy."
     }
   },
   "design": {
@@ -800,6 +807,102 @@
     },
     "export": {
       "open": "Export CSV"
+    }
+  },
+  "profile": {
+    "sectionsNav": "Profile sections",
+    "loadError": "Could not load. Try again.",
+    "saving": "Saving…",
+    "profile": {
+      "title": "Profile",
+      "name": "Display name",
+      "nameRequired": "Enter a name.",
+      "course": "Program",
+      "coursePlaceholder": "E.g. Law, Nursing, Civil Engineering",
+      "institution": "School",
+      "currentPeriod": "Current term",
+      "currentPeriodPlaceholder": "E.g. 3rd term",
+      "bio": "Short bio",
+      "bioHint_one": "{{count}} character left.",
+      "bioHint_other": "{{count}} characters left.",
+      "avatarColor": "Avatar color",
+      "avatarDefault": "Default (purple)",
+      "emptyHint": "Tell us your program and school.",
+      "save": "Save profile",
+      "saved": "Profile saved"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "hint": "These are the defaults for the other screens: Deep Work uses the durations, Grade Predictor the scale and passing grade, Flashcards the daily limits.",
+      "general": "General",
+      "timeZone": "Time zone",
+      "timeZoneHint": "Used to split days in the heatmap, stats and the flashcard queue.",
+      "timeZoneAuto": "Automatic (browser: {{zone}})",
+      "grades": "Grades",
+      "gradeMethod": "Default grading rule",
+      "gradeScaleMax": "Highest grade (scale)",
+      "passingGrade": "Passing grade",
+      "maxAbsencePct": "Absence limit (%)",
+      "deepWork": "Deep Work",
+      "focusMinutes": "Focus (min)",
+      "shortBreakMinutes": "Short break (min)",
+      "longBreakMinutes": "Long break (min)",
+      "longBreakEvery": "Long break every (cycles)",
+      "weeklyGoalHours": "Weekly focus goal (hours)",
+      "flashcards": "Flashcards",
+      "newCardsPerDay": "New cards per day",
+      "reviewsPerDay": "Reviews per day",
+      "number": "Enter a number.",
+      "save": "Save preferences",
+      "saved": "Preferences saved"
+    },
+    "account": {
+      "title": "Account",
+      "email": "Email",
+      "newEmail": "Account email",
+      "currentPassword": "Current password",
+      "wrongPassword": "Incorrect current password.",
+      "changeEmail": "Change email",
+      "emailChanged": "Email changed",
+      "password": "Password",
+      "passwordHint": "Changing the password signs out your other devices; this one stays signed in.",
+      "newPassword": "New password",
+      "confirmPassword": "Repeat the new password",
+      "passwordLength": "Use 8 to 72 characters.",
+      "passwordMismatch": "The passwords do not match.",
+      "passwordInvalid": "Use a new password with 8 to 72 characters.",
+      "changePassword": "Change password",
+      "passwordChanged": "Password changed; other devices were signed out"
+    },
+    "sessions": {
+      "title": "Signed-in devices",
+      "empty": "No active sessions.",
+      "device": "{{browser}} on {{os}}",
+      "unknownDevice": "Unknown device",
+      "current": "This device",
+      "lastUsed": "Last used: {{when}}",
+      "end": "Sign out",
+      "endNamed": "Sign out {{name}}",
+      "endOthers": "Sign out other devices",
+      "endAll": "Sign out everywhere",
+      "confirmEndAll": "Confirm: sign out everywhere",
+      "endAllWarning": "Including this one: you will need to sign in again."
+    },
+    "privacy": {
+      "title": "Privacy and data",
+      "exportTitle": "Export my data",
+      "exportHint": "Downloads a JSON file with everything that is yours: profile, terms, subjects, tasks, focus sessions, grades, absences, flashcards and preferences. Passwords and tokens never leave.",
+      "export": "Export as JSON",
+      "exporting": "Preparing…",
+      "exported": "File downloaded",
+      "deleteTitle": "Delete my account",
+      "deleteHint": "Deletes the account and all its data, on every device. This cannot be undone; export first if you want.",
+      "delete": "Delete account",
+      "deleteDialogTitle": "Delete the account forever?",
+      "deleteDialogBody": "Everything in {{email}} will be deleted now and cannot be recovered.",
+      "typeEmail": "Type {{email}} to confirm",
+      "emailMismatch": "Type this account’s email.",
+      "deleteConfirm": "Delete everything"
     }
   }
 }

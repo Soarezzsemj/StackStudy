@@ -4,6 +4,7 @@ import com.stackstudy.common.security.JsonSecurityErrorWriter;
 import com.stackstudy.common.security.JwtAuthenticationFilter;
 import com.stackstudy.common.security.JwtService;
 import com.stackstudy.common.security.SecurityProperties;
+import com.stackstudy.common.security.SessionStatusChecker;
 import java.time.Clock;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
@@ -39,7 +40,11 @@ public class SecurityConfig {
 
   @Bean
   SecurityFilterChain securityFilterChain(
-      HttpSecurity http, JwtService jwtService, JsonSecurityErrorWriter errors) throws Exception {
+      HttpSecurity http,
+      JwtService jwtService,
+      SessionStatusChecker sessions,
+      JsonSecurityErrorWriter errors)
+      throws Exception {
     http
         // API sem sessão: o login vai no header Authorization. O único cookie (refresh) é
         // HttpOnly, SameSite e só vale em /api/auth, então não precisa de CSRF.
@@ -66,7 +71,8 @@ public class SecurityConfig {
                     .anyRequest()
                     .authenticated())
         .addFilterBefore(
-            new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+            new JwtAuthenticationFilter(jwtService, sessions),
+            UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
 

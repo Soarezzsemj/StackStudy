@@ -34,20 +34,23 @@ public class AuthController {
 
   @PostMapping("/register")
   @Operation(summary = "Create an account and start a session")
-  public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-    return withCookie(HttpStatus.CREATED, authService.register(request));
+  public ResponseEntity<AuthResponse> register(
+      @Valid @RequestBody RegisterRequest request, HttpServletRequest http) {
+    return withCookie(HttpStatus.CREATED, authService.register(request, userAgent(http)));
   }
 
   @PostMapping("/login")
   @Operation(summary = "Authenticate with email and password")
-  public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-    return withCookie(HttpStatus.OK, authService.login(request));
+  public ResponseEntity<AuthResponse> login(
+      @Valid @RequestBody LoginRequest request, HttpServletRequest http) {
+    return withCookie(HttpStatus.OK, authService.login(request, userAgent(http)));
   }
 
   @PostMapping("/refresh")
   @Operation(summary = "Rotate the refresh-token cookie and get a new access token")
   public ResponseEntity<AuthResponse> refresh(HttpServletRequest request) {
-    return withCookie(HttpStatus.OK, authService.refresh(readRefreshCookie(request)));
+    return withCookie(
+        HttpStatus.OK, authService.refresh(readRefreshCookie(request), userAgent(request)));
   }
 
   @PostMapping("/logout")
@@ -66,7 +69,12 @@ public class AuthController {
         .body(result.body());
   }
 
-  private String readRefreshCookie(HttpServletRequest request) {
+  /** User-Agent só para listar o dispositivo na tela de sessões. */
+  static String userAgent(HttpServletRequest request) {
+    return request.getHeader(HttpHeaders.USER_AGENT);
+  }
+
+  String readRefreshCookie(HttpServletRequest request) {
     Cookie[] all = request.getCookies();
     if (all == null) {
       return null;

@@ -23,7 +23,8 @@
     "deepWork": "Deep Work",
     "flashcards": "Flashcards",
     "grades": "Grade Predictor",
-    "design": "Design system"
+    "design": "Design system",
+    "profile": "Perfil"
   },
   "shell": {
     "root": "~/stackstudy",
@@ -36,7 +37,8 @@
     "logout": "Sair",
     "userMenu": "Conta",
     "pending": "{{count}} pendentes",
-    "noSemester": "Nenhum semestre atual"
+    "noSemester": "Nenhum semestre atual",
+    "openProfile": "Abrir perfil de {{name}}"
   },
   "statusbar": {
     "label": "Barra de status",
@@ -100,7 +102,8 @@
     "SESSION_NOT_ACTIVE": "Esta sessão já foi encerrada.",
     "SESSION_STILL_ACTIVE": "Conclua a sessão antes de editá-la.",
     "ABSENCE_ALREADY_REGISTERED": "Já existe falta registrada nesta data. Exclua o registro e lance de novo.",
-    "REVIEW_NOT_LATEST": "Esta não é a última resposta da carta; só ela pode ser desfeita."
+    "REVIEW_NOT_LATEST": "Esta não é a última resposta da carta; só ela pode ser desfeita.",
+    "INVALID_CURRENT_PASSWORD": "A senha atual está incorreta."
   },
   "pages": {
     "cockpit": {
@@ -127,6 +130,10 @@
       "title": "404",
       "description": "Esta página não existe.",
       "back": "Voltar ao Cockpit"
+    },
+    "profile": {
+      "title": "Perfil",
+      "description": "Seus dados, preferências, segurança da conta e privacidade."
     }
   },
   "design": {
@@ -800,6 +807,102 @@
     },
     "export": {
       "open": "Exportar CSV"
+    }
+  },
+  "profile": {
+    "sectionsNav": "Seções do perfil",
+    "loadError": "Não foi possível carregar. Tente de novo.",
+    "saving": "Salvando…",
+    "profile": {
+      "title": "Perfil",
+      "name": "Nome de exibição",
+      "nameRequired": "Informe um nome.",
+      "course": "Curso",
+      "coursePlaceholder": "Ex.: Direito, Enfermagem, Engenharia Civil",
+      "institution": "Instituição",
+      "currentPeriod": "Período atual",
+      "currentPeriodPlaceholder": "Ex.: 3º período",
+      "bio": "Bio curta",
+      "bioHint_one": "Resta {{count}} caractere.",
+      "bioHint_other": "Restam {{count}} caracteres.",
+      "avatarColor": "Cor do avatar",
+      "avatarDefault": "Padrão (roxo)",
+      "emptyHint": "Conte seu curso e instituição.",
+      "save": "Salvar perfil",
+      "saved": "Perfil salvo"
+    },
+    "preferences": {
+      "title": "Preferências",
+      "hint": "São os padrões das outras telas: o Deep Work usa as durações, o Grade Predictor a escala e a nota mínima, os Flashcards os limites do dia.",
+      "general": "Geral",
+      "timeZone": "Fuso horário",
+      "timeZoneHint": "Usado para separar os dias no heatmap, nas estatísticas e na fila de flashcards.",
+      "timeZoneAuto": "Automático (navegador: {{zone}})",
+      "grades": "Notas",
+      "gradeMethod": "Regra de cálculo padrão",
+      "gradeScaleMax": "Nota máxima (escala)",
+      "passingGrade": "Nota mínima de aprovação",
+      "maxAbsencePct": "Limite de faltas (%)",
+      "deepWork": "Deep Work",
+      "focusMinutes": "Foco (min)",
+      "shortBreakMinutes": "Pausa curta (min)",
+      "longBreakMinutes": "Pausa longa (min)",
+      "longBreakEvery": "Pausa longa a cada (ciclos)",
+      "weeklyGoalHours": "Meta semanal de foco (horas)",
+      "flashcards": "Flashcards",
+      "newCardsPerDay": "Cartas novas por dia",
+      "reviewsPerDay": "Revisões por dia",
+      "number": "Informe um número.",
+      "save": "Salvar preferências",
+      "saved": "Preferências salvas"
+    },
+    "account": {
+      "title": "Conta",
+      "email": "E-mail",
+      "newEmail": "E-mail da conta",
+      "currentPassword": "Senha atual",
+      "wrongPassword": "Senha atual incorreta.",
+      "changeEmail": "Alterar e-mail",
+      "emailChanged": "E-mail alterado",
+      "password": "Senha",
+      "passwordHint": "Ao trocar a senha, os outros dispositivos saem da conta; este continua conectado.",
+      "newPassword": "Nova senha",
+      "confirmPassword": "Repita a nova senha",
+      "passwordLength": "Use de 8 a 72 caracteres.",
+      "passwordMismatch": "As senhas não são iguais.",
+      "passwordInvalid": "Use uma senha nova, de 8 a 72 caracteres.",
+      "changePassword": "Alterar senha",
+      "passwordChanged": "Senha alterada; os outros dispositivos saíram"
+    },
+    "sessions": {
+      "title": "Dispositivos conectados",
+      "empty": "Nenhuma sessão ativa.",
+      "device": "{{browser}} no {{os}}",
+      "unknownDevice": "Dispositivo desconhecido",
+      "current": "Este dispositivo",
+      "lastUsed": "Último uso: {{when}}",
+      "end": "Desconectar",
+      "endNamed": "Desconectar {{name}}",
+      "endOthers": "Sair dos outros dispositivos",
+      "endAll": "Sair de todos os dispositivos",
+      "confirmEndAll": "Confirmar: sair de todos",
+      "endAllWarning": "Inclui este: você vai precisar entrar de novo."
+    },
+    "privacy": {
+      "title": "Privacidade e dados",
+      "exportTitle": "Exportar meus dados",
+      "exportHint": "Baixa um arquivo JSON com tudo o que é seu: perfil, semestres, matérias, tarefas, sessões de foco, notas, faltas, flashcards e preferências. Senhas e tokens nunca saem.",
+      "export": "Exportar em JSON",
+      "exporting": "Preparando…",
+      "exported": "Arquivo baixado",
+      "deleteTitle": "Excluir minha conta",
+      "deleteHint": "Apaga a conta e todos os dados, em todos os dispositivos. Não dá para desfazer; se quiser, exporte antes.",
+      "delete": "Excluir conta",
+      "deleteDialogTitle": "Excluir a conta para sempre?",
+      "deleteDialogBody": "Tudo da conta {{email}} será apagado agora e não poderá ser recuperado.",
+      "typeEmail": "Digite {{email}} para confirmar",
+      "emailMismatch": "Digite o e-mail desta conta.",
+      "deleteConfirm": "Excluir tudo"
     }
   }
 }
