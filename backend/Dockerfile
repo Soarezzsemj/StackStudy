@@ -1,14 +1,14 @@
 # syntax=docker/dockerfile:1
 
 # ---- dev: roda o código montado com spring-boot:run (usado pelo docker compose) ----
-FROM maven:3.9-eclipse-temurin-21 AS dev
+FROM maven:3.9-eclipse-temurin-26 AS dev
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 EXPOSE 8080
 CMD ["mvn", "-B", "spring-boot:run"]
 
 # ---- build: compila e extrai o jar (o jar extraído sobe mais rápido) ----
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /build
 # Baixa as dependências antes de copiar o código, para aproveitar o cache de camadas.
 COPY pom.xml .
