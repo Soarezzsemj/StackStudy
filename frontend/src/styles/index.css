@@ -30,6 +30,26 @@
     background: var(--action);
     color: var(--action-ink);
   }
+
+  /* O conteúdo principal recebe foco pelo "Pular para o conteúdo": sem contorno no bloco todo. */
+  main:focus {
+    outline: none;
+  }
+
+  /*
+   * Quem pede menos movimento no sistema não vê animações nem transições (pulsos dos esqueletos,
+   * spinner, barras). Vale para tudo, inclusive classes que esquecerem o motion-reduce.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {

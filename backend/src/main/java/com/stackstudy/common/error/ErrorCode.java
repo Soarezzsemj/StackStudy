@@ -15,6 +15,7 @@ public enum ErrorCode {
   EMAIL_ALREADY_REGISTERED(HttpStatus.CONFLICT),
   // 400, não 401: o frontend usa 401 para renovar a sessão.
   INVALID_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST),
+  RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS),
   CONFLICT(HttpStatus.CONFLICT),
   SEMESTER_ARCHIVED(HttpStatus.CONFLICT),
   SESSION_ALREADY_ACTIVE(HttpStatus.CONFLICT),

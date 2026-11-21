@@ -6,7 +6,10 @@ import com.stackstudy.auth.dto.RegisterRequest;
 import com.stackstudy.auth.dto.UserResponse;
 import com.stackstudy.common.error.ApiException;
 import com.stackstudy.common.error.ErrorCode;
+import com.stackstudy.common.error.RateLimitedException;
 import com.stackstudy.common.security.JwtService;
+import com.stackstudy.common.security.RateLimitProperties;
+import com.stackstudy.common.security.RateLimiter;
 import com.stackstudy.common.security.SecurityProperties;
 import java.time.Clock;
 import java.time.Duration;
@@ -45,7 +48,15 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
   private final SecurityProperties properties;
+  private final RateLimiter limiter;
+  private final RateLimitProperties rateLimits;
   private final Clock clock;
+
+  /**
+   * Hash de uma senha qualquer: o login de um e-mail que não existe também roda o BCrypt, para o
+   * tempo de resposta não dizer se a conta existe.
+   */
+  private final String dummyHash;
 
   public AuthService(
       UserRepository users,
@@ -56,6 +67,8 @@ public class AuthService {
       PasswordEncoder passwordEncoder,
       JwtService jwtService,
       SecurityProperties properties,
+      RateLimiter limiter,
+      RateLimitProperties rateLimits,
       Clock clock) {
     this.users = users;
     this.refreshTokens = refreshTokens;
@@ -65,7 +78,10 @@ public class AuthService {
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
     this.properties = properties;
+    this.limiter = limiter;
+    this.rateLimits = rateLimits;
     this.clock = clock;
+    this.dummyHash = passwordEncoder.encode("timing-equalizer-not-a-real-password");
   }
 
   @Transactional
@@ -90,14 +106,34 @@ public class AuthService {
     return issueTokens(user, newSession(user, userAgent));
   }
 
+  /**
+   * Login. A mesma resposta (e o mesmo custo de BCrypt) para e-mail inexistente e senha errada.
+   * Muitas senhas erradas no mesmo e-mail bloqueiam aquele e-mail por um tempo, mesmo vindo de IPs
+   * diferentes; durante o bloqueio, nem a senha certa entra.
+   */
   @Transactional
   public AuthResult login(LoginRequest request, String userAgent) {
-    User user =
-        users
-            .findByEmail(normalizeEmail(request.email()))
-            .filter(u -> passwordEncoder.matches(request.password(), u.getPasswordHash()))
-            .orElseThrow(
-                () -> new ApiException(ErrorCode.INVALID_CREDENTIALS, "Invalid email or password"));
+    String email = normalizeEmail(request.email());
+    String failKey = "login-failures:" + email;
+    RateLimitProperties.Rule rule = rateLimits.loginFailures();
+    if (rateLimits.enabled()) {
+      RateLimiter.Decision blocked = limiter.check(failKey, rule.limit());
+      if (!blocked.allowed()) {
+        throw new RateLimitedException(blocked.retryAfterSeconds());
+      }
+    }
+    User found = users.findByEmail(email).orElse(null);
+    boolean ok =
+        passwordEncoder.matches(
+            request.password(), found != null ? found.getPasswordHash() : dummyHash);
+    if (found == null || !ok) {
+      if (rateLimits.enabled()) {
+        limiter.acquire(failKey, rule.limit(), rule.window());
+      }
+      throw new ApiException(ErrorCode.INVALID_CREDENTIALS, "Invalid email or password");
+    }
+    limiter.reset(failKey);
+    User user = found;
     sessions.deleteStale(user.getId(), clock.instant().minus(STALE_SESSIONS));
     return issueTokens(user, newSession(user, userAgent));
   }

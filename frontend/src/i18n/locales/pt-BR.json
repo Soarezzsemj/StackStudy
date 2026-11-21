@@ -38,7 +38,8 @@
     "userMenu": "Conta",
     "pending": "{{count}} pendentes",
     "noSemester": "Nenhum semestre atual",
-    "openProfile": "Abrir perfil de {{name}}"
+    "openProfile": "Abrir perfil de {{name}}",
+    "skipToContent": "Pular para o conteúdo"
   },
   "statusbar": {
     "label": "Barra de status",
@@ -82,14 +83,16 @@
       "subtitle": "Bem-vindo de volta. Continue de onde parou.",
       "submit": "Entrar",
       "noAccount": "Ainda não tem conta?",
-      "toRegister": "Criar conta"
+      "toRegister": "Criar conta",
+      "expired": "Sua sessão expirou. Entre de novo para continuar."
     },
     "register": {
       "title": "Criar conta",
       "subtitle": "Matérias, foco, flashcards e notas em um só lugar.",
       "submit": "Criar conta",
       "haveAccount": "Já tem conta?",
-      "toLogin": "Entrar"
+      "toLogin": "Entrar",
+      "consent": "Ao criar a conta, você concorda com os <terms>Termos de uso</terms> e a <privacy>Política de Privacidade</privacy>."
     }
   },
   "errors": {
@@ -108,7 +111,8 @@
     "SESSION_STILL_ACTIVE": "Conclua a sessão antes de editá-la.",
     "ABSENCE_ALREADY_REGISTERED": "Já existe falta registrada nesta data. Exclua o registro e lance de novo.",
     "REVIEW_NOT_LATEST": "Esta não é a última resposta da carta; só ela pode ser desfeita.",
-    "INVALID_CURRENT_PASSWORD": "A senha atual está incorreta."
+    "INVALID_CURRENT_PASSWORD": "A senha atual está incorreta.",
+    "RATE_LIMITED": "Muitas tentativas seguidas. Espere alguns minutos e tente de novo."
   },
   "pages": {
     "cockpit": {
@@ -181,7 +185,8 @@
     "cell": "{{value}} em {{label}}"
   },
   "network": {
-    "waking": "Acordando o servidor… isso pode levar até 1 minuto."
+    "waking": "Acordando o servidor… isso pode levar até 1 minuto.",
+    "offline": "Você está sem internet. Nada será salvo até a conexão voltar."
   },
   "stack": {
     "semester": {
@@ -1060,6 +1065,132 @@
           "action": "Iniciar foco"
         }
       }
+    }
+  },
+  "errorPage": {
+    "reload": "Recarregar",
+    "home": "Voltar ao início",
+    "generic": {
+      "title": "Algo deu errado",
+      "body": "Esta tela teve um erro inesperado. Seus dados estão salvos no servidor; recarregar costuma resolver."
+    },
+    "newVersion": {
+      "title": "Nova versão no ar",
+      "body": "O StackStudy foi atualizado enquanto esta aba estava aberta. Recarregue para usar a versão nova."
+    },
+    "notFound": {
+      "title": "404",
+      "body": "Esta página não existe."
+    }
+  },
+  "legal": {
+    "nav": "Documentos legais",
+    "backHome": "stack.study, início",
+    "backToApp": "Voltar ao app",
+    "backToLogin": "Entrar",
+    "updated": "Atualizado em {{date}}",
+    "date": "21 de novembro de 2026",
+    "terms": {
+      "short": "Termos",
+      "title": "Termos de uso",
+      "intro": "Estes termos valem para quem usa o StackStudy, um organizador de estudos gratuito. Ao criar uma conta, você concorda com eles.",
+      "sections": [
+        {
+          "title": "1. O serviço",
+          "body": [
+            "O StackStudy ajuda a organizar matérias, tarefas, sessões de foco, notas e flashcards. É oferecido de graça, como está, sem garantia de disponibilidade: o servidor pode demorar para acordar ou ficar fora do ar."
+          ]
+        },
+        {
+          "title": "2. Sua conta",
+          "body": [
+            "Você é responsável pela sua senha e por tudo que for feito com a sua conta. Use um e-mail que seja seu. Uma pessoa, uma conta."
+          ]
+        },
+        {
+          "title": "3. Cálculos são estimativas",
+          "body": [
+            "Médias, nota necessária, CR e limite de faltas seguem as regras que você configura. Eles não substituem o regulamento da sua instituição: confira sempre com ela. Não nos responsabilizamos por decisões tomadas só com base nesses números."
+          ]
+        },
+        {
+          "title": "4. Uso aceitável",
+          "body": [
+            "Não use o serviço para atacar o sistema, automatizar acessos em massa, guardar conteúdo ilegal ou de terceiros sem direito. Contas que fizerem isso podem ser suspensas ou excluídas."
+          ]
+        },
+        {
+          "title": "5. Seus dados",
+          "body": [
+            "O que você cadastra é seu. Você pode exportar tudo em JSON e excluir a conta a qualquer momento, no Perfil. Como tratamos os dados está na Política de Privacidade."
+          ]
+        },
+        {
+          "title": "6. Mudanças",
+          "body": [
+            "Estes termos podem mudar. Mudanças relevantes serão avisadas no app antes de valer. Continuar usando depois disso significa concordar com a versão nova."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "short": "Privacidade",
+      "title": "Política de Privacidade",
+      "intro": "Esta política explica quais dados o StackStudy trata, para quê e quais são os seus direitos, conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018, LGPD).",
+      "sections": [
+        {
+          "title": "1. Quais dados",
+          "body": [
+            "Conta: nome, e-mail e senha (guardada só como hash BCrypt; ninguém consegue ver a senha).",
+            "Perfil (opcional): curso, instituição, período, bio, cor do avatar, idioma e fuso horário.",
+            "Estudos: semestres, matérias, tarefas, sessões de foco, avaliações, faltas, flashcards e preferências.",
+            "Técnicos: para cada login guardamos o navegador e sistema (User-Agent) para você reconhecer seus dispositivos. O IP é usado só em memória para limitar tentativas de login e não é gravado."
+          ]
+        },
+        {
+          "title": "2. Para quê",
+          "body": [
+            "Só para fazer o serviço funcionar: entrar na conta, mostrar e calcular seus dados, proteger contra abuso. A base legal é a execução do serviço que você pediu (art. 7º, V, da LGPD).",
+            "Não vendemos dados, não usamos para publicidade e não há rastreadores nem analytics de terceiros."
+          ]
+        },
+        {
+          "title": "3. Cookies e armazenamento local",
+          "body": [
+            "Usamos um único cookie, essencial: o de sessão (ss_refresh), HttpOnly e restrito à autenticação. No navegador guardamos o idioma e algumas preferências de tela (localStorage)."
+          ]
+        },
+        {
+          "title": "4. Onde os dados ficam",
+          "body": [
+            "O app roda em provedores de nuvem: Vercel (site), Render (servidor) e Neon (banco de dados PostgreSQL), com servidores nos Estados Unidos. Cópias de segurança semanais e criptografadas ficam guardadas de forma privada no GitHub. Esses provedores tratam os dados só para hospedar o serviço."
+          ]
+        },
+        {
+          "title": "5. Por quanto tempo",
+          "body": [
+            "Enquanto a conta existir. Ao excluir a conta, os dados saem do banco na hora; as cópias de segurança antigas expiram em até 90 dias."
+          ]
+        },
+        {
+          "title": "6. Seus direitos",
+          "body": [
+            "Você pode, a qualquer momento: ver e corrigir seus dados (Perfil), baixar tudo em JSON (Perfil > Privacidade e dados > Exportar) e excluir a conta com todos os dados (Perfil > Excluir conta). Também pode pedir informações sobre o tratamento pelo contato abaixo."
+          ]
+        },
+        {
+          "title": "7. Segurança",
+          "body": [
+            "Conexão sempre criptografada (HTTPS), senha com hash, sessões que você pode encerrar, limite de tentativas de login e acesso aos dados só pela sua conta."
+          ]
+        },
+        {
+          "title": "8. Contato",
+          "body": [
+            "Responsável pelo tratamento: o mantenedor do StackStudy. Dúvidas ou pedidos sobre seus dados: privacidade@seu-dominio.com (substitua pelo contato real antes de divulgar)."
+          ]
+        }
+      ]
     }
   }
 }

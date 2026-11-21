@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Button, TextField } from '@/components/ui';
 import { authApi } from '@/lib/api/auth';
 import { isLanguage, DEFAULT_LANGUAGE } from '@/i18n';
@@ -84,6 +84,19 @@ export function RegisterPage() {
         <Button type="submit" className="mt-2 w-full" disabled={register.isPending}>
           {register.isPending ? t('common.loading') : t('auth.register.submit')}
         </Button>
+        <p className="text-xs text-text-muted">
+          <Trans
+            i18nKey="auth.register.consent"
+            components={{
+              terms: (
+                <Link to="/terms" className="text-text-secondary underline underline-offset-4" />
+              ),
+              privacy: (
+                <Link to="/privacy" className="text-text-secondary underline underline-offset-4" />
+              ),
+            }}
+          />
+        </p>
       </form>
     </AuthLayout>
   );

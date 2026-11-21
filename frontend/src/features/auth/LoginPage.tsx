@@ -4,6 +4,8 @@ import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Button, TextField } from '@/components/ui';
 import { authApi } from '@/lib/api/auth';
+import { safeRedirect } from '@/lib/errors';
+import { useAuthStore } from '@/stores/authStore';
 import { AuthLayout } from './AuthLayout';
 import { errorMessage } from './errorMessage';
 
@@ -13,7 +15,8 @@ export function LoginPage() {
   const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const from = (location.state as { from?: string } | null)?.from ?? '/';
+  const from = safeRedirect((location.state as { from?: string } | null)?.from);
+  const expired = useAuthStore((s) => s.sessionExpired);
 
   const login = useMutation({
     mutationFn: authApi.login,
@@ -29,6 +32,16 @@ export function LoginPage() {
     <AuthLayout
       title={t('auth.login.title')}
       subtitle={t('auth.login.subtitle')}
+      notice={
+        expired && (
+          <p
+            role="status"
+            className="mb-6 rounded-inner border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-text"
+          >
+            {t('auth.login.expired')}
+          </p>
+        )
+      }
       footer={
         <>
           {t('auth.login.noAccount')}{' '}

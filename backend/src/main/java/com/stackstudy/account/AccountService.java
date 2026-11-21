@@ -11,7 +11,10 @@ import com.stackstudy.auth.dto.UserResponse;
 import com.stackstudy.common.error.ApiError;
 import com.stackstudy.common.error.ApiException;
 import com.stackstudy.common.error.ErrorCode;
+import com.stackstudy.common.error.RateLimitedException;
 import com.stackstudy.common.security.CurrentUser;
+import com.stackstudy.common.security.RateLimitProperties;
+import com.stackstudy.common.security.RateLimiter;
 import com.stackstudy.subject.SubjectColors;
 import java.time.Clock;
 import java.util.List;
@@ -40,6 +43,8 @@ public class AccountService {
   private final PasswordEncoder passwordEncoder;
   private final JdbcTemplate jdbc;
   private final CurrentUser currentUser;
+  private final RateLimiter limiter;
+  private final RateLimitProperties rateLimits;
   private final Clock clock;
 
   public AccountService(
@@ -50,6 +55,8 @@ public class AccountService {
       PasswordEncoder passwordEncoder,
       JdbcTemplate jdbc,
       CurrentUser currentUser,
+      RateLimiter limiter,
+      RateLimitProperties rateLimits,
       Clock clock) {
     this.users = users;
     this.sessions = sessions;
@@ -58,6 +65,8 @@ public class AccountService {
     this.passwordEncoder = passwordEncoder;
     this.jdbc = jdbc;
     this.currentUser = currentUser;
+    this.limiter = limiter;
+    this.rateLimits = rateLimits;
     this.clock = clock;
   }
 
@@ -165,8 +174,23 @@ public class AccountService {
         .orElseThrow(() -> ApiException.unauthorized("User no longer exists"));
   }
 
+  /**
+   * Confere a senha atual. Muitas erradas seguidas (por usuário) dão 429 até a janela passar: quem
+   * pegou um computador logado não consegue adivinhar a senha para excluir a conta.
+   */
   private void requirePassword(User user, String password) {
+    String key = "password-failures:" + user.getId();
+    RateLimitProperties.Rule rule = rateLimits.passwordFailures();
+    if (rateLimits.enabled()) {
+      RateLimiter.Decision blocked = limiter.check(key, rule.limit());
+      if (!blocked.allowed()) {
+        throw new RateLimitedException(blocked.retryAfterSeconds());
+      }
+    }
     if (password == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
+      if (rateLimits.enabled()) {
+        limiter.acquire(key, rule.limit(), rule.window());
+      }
       throw new ApiException(
           ErrorCode.INVALID_CURRENT_PASSWORD,
           "Current password is incorrect",

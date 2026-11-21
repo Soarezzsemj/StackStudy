@@ -90,6 +90,9 @@ describe('auth flow (UI)', () => {
     await userEvent.click(option);
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/flashcards'));
-    expect(screen.getByRole('heading', { level: 1, name: 'Flashcards' })).toBeInTheDocument();
+    // A tela é carregada sob demanda (code splitting): espera o arquivo chegar.
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Flashcards' }, { timeout: 5000 }),
+    ).toBeInTheDocument();
   });
 });

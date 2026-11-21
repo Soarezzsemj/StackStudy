@@ -23,6 +23,7 @@ Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 2
 | 4 | Flashcards: decks, cartas Markdown, SM-2 puro, fila diária com limites, revisão, CSV | ✅ |
 | 5 | Perfil e preferências: perfil, padrões das fases, e-mail/senha, sessões, exportar/excluir (LGPD) | ✅ |
 | 6 | Cockpit: home agregada (1 chamada), próximo passo, radar de risco, primeiros passos, Ctrl K | ✅ |
+| 7 | Polimento: rate limit, cabeçalhos, rotas públicas, a11y, code splitting, EXPLAIN, erros/offline, termos/LGPD, backup testado | ✅ |
 
 ## Estrutura
 
@@ -56,7 +57,10 @@ entidades JPA nunca saem do service.
 ### Frontend (`frontend/src`)
 
 ```
-app/            App, router, NAV_ITEMS (rotas e breadcrumbs)
+app/            App, router, lazyPages.ts (code splitting por tela; nos testes o setup troca por
+                imports diretos), NAV_ITEMS (rotas e breadcrumbs), hardening.test.tsx
+pages/          RouteErrorPage (erro/chunk sumido), PublicPage + LegalPage (/terms, /privacy),
+                NotFoundPage, DesignPage
 components/ui/  Button, Card, Chip, ProgressBar, PageTitle, StatBlock, Heatmap, Icon, TextField,
                 SelectField, TextAreaField, Dialog, Loading/Error/EmptyState, Wordmark
 components/shell/ AppShell, Sidebar, Topbar, StatusBar, CommandPalette
@@ -365,13 +369,45 @@ Frontend: idioma da conta aplicado ao entrar (`syncUserLanguage`) e trocado tamb
 lateral (grava na conta). Fuso por `useTimeZone()` nas consultas de heatmap, estatísticas e fila.
 - Frontend: `apiRequest` intercepta 401, faz **um** refresh compartilhado (dedupe) e repete a
   requisição; se o refresh falhar, limpa a sessão e `RequireAuth` manda para `/login`.
-  No carregamento, `useSessionBootstrap` tenta restaurar a sessão pelo cookie.
+  No carregamento, `useSessionBootstrap` tenta restaurar a sessão pelo cookie. Refresh recusado
+  com a pessoa logada = `clear('expired')` e o login mostra "Sua sessão expirou"; sem rede ou 429
+  no refresh, a sessão **não** cai. Destino pós-login passa por `safeRedirect` (só caminho interno).
+
+## Segurança e robustez (Fase 7)
+
+- **Rotas públicas**: só `POST /api/auth/{register,login,refresh,logout}` e
+  `GET /actuator/health/{liveness,readiness}`. Swagger só quando ligado (dev). O agregado
+  `/actuator/health` pede login. `PublicEndpointsIntegrationTest` varre **todas** as rotas do
+  `RequestMappingHandlerMapping` sem token e falha se alguma não der 401: rota pública nova
+  precisa entrar na lista de lá e no `SecurityConfig`.
+- **Rate limit** em memória (`RateLimiter`, janela fixa por chave, máx. 50 mil chaves): login 10/min,
+  cadastro 5/10 min e refresh 30/min por IP (`RateLimitFilter`); 10 senhas erradas por e-mail em
+  15 min bloqueiam o e-mail (até com a senha certa); 5 "senha atual" erradas por usuário em `/api/me`.
+  Responde 429 `RATE_LIMITED` + `Retry-After`. Ajuste em `stackstudy.security.rate-limit.*`; no
+  perfil `test` os limites são altos (o `RateLimitIntegrationTest` baixa só para ele).
+- Login de e-mail inexistente roda BCrypt com um hash falso: mesma resposta e mesmo tempo.
+- **Cabeçalhos**: API com CSP `default-src 'none'; frame-ancestors 'none'`, `Referrer-Policy:
+  no-referrer`, `Permissions-Policy`, COOP, mais os padrões do Spring (nosniff, DENY, no-store,
+  HSTS em HTTPS). Frontend: CSP, HSTS e afins no `vercel.json` (`connect-src` libera
+  `*.onrender.com` só por causa do `VITE_WAKE_URL`).
+- **Boot recusa** CORS com `*`, SameSite fora de Strict/Lax/None (None sem Secure) e, em `prod`,
+  cookie sem Secure ou rate limit desligado (`ProdSecurityGuard`).
+- **Dependências**: CI roda `npm audit --omit=dev --audit-level=high`; Dependabot semanal (npm,
+  maven, docker) e mensal (actions).
+- **A11y**: "Pular para o conteúdo" (primeiro Tab, foca o `<main>`), `prefers-reduced-motion`
+  global no CSS, contraste dos tokens testado (≥ 4,5:1; foco ≥ 3:1).
+- **Erros**: `errorElement` na raiz (`RouteErrorPage`, distingue arquivo de tela que sumiu depois de
+  um deploy), 404 dentro do app, aviso de offline (`OfflineNotice`) além do "Acordando o servidor…".
+- **Desempenho**: ver `docs/performance.md` (EXPLAIN em `QueryPlanIntegrationTest`, bundle).
+- **Backup**: `scripts/db-restore-drill.sh` ensaia backup + restauração local com os mesmos comandos
+  do workflow; rode depois de cada migration nova.
 
 ## Variáveis de ambiente
 
 Ver `.env.example`. Principais: `JWT_SECRET` (obrigatório, ≥ 32 chars), `DB_URL`, `DB_USERNAME`,
 `DB_PASSWORD`, `JWT_ACCESS_TTL` (PT15M), `JWT_REFRESH_TTL` (P14D), `CORS_ALLOWED_ORIGINS`,
-`REFRESH_COOKIE_SECURE`, `REFRESH_COOKIE_SAME_SITE`, `VITE_API_PROXY_TARGET`, `VITE_API_URL`
+`REFRESH_COOKIE_SECURE`, `REFRESH_COOKIE_SAME_SITE`, `RATE_LIMIT_ENABLED`, `VITE_API_PROXY_TARGET`,
+`VITE_API_URL`
 (padrão `/api`), `VITE_WAKE_URL`.
 Perfis Spring: `dev` (padrão, logs DEBUG), `prod` (ver abaixo), `test`.
 
@@ -393,8 +429,8 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
   Hikari máx. 5, Tomcat máx. 20 threads, health sem detalhes, Swagger desligado.
 - **Health**: `/actuator/health/liveness` (só `livenessState`, **não toca no banco**) é o que se
   pinga: `healthCheckPath` do Render, monitor externo (UptimeRobot/cron-job.org, 5–10 min) e
-  `VITE_WAKE_URL`. `/actuator/health` e `/actuator/health/readiness` (com `db`) são só para
-  diagnóstico. Componentes (`/actuator/health/db`) não são públicos.
+  `VITE_WAKE_URL`. `/actuator/health/readiness` (com `db`) é público, mas só para diagnóstico.
+  O agregado `/actuator/health` e os componentes (`/actuator/health/db`) pedem login (Fase 7).
 - **Vercel**: `frontend/vercel.json` faz rewrite de `/api/(.*)` para o Render (mesma origem, cookie
   sem CORS) e fallback de SPA. O build falha se o host ainda for o placeholder.
 - **Cold start no frontend**: aviso "Acordando o servidor…" após 3 s (`ServerWakeNotice`),
@@ -426,8 +462,8 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
 11. `/_design` é pública (não mostra dados), para conferência visual sem login.
 12. **Testcontainers 1.21.4** (override no pom): versões anteriores falham com Docker Engine 29+
     (versão mínima de API).
-13. Recharts entra como dependência para gráficos complexos das próximas fases; heatmap e barras
-    simples são SVG/CSS próprios (`<Heatmap>`).
+13. Gráficos são SVG/CSS próprios (`<Heatmap>`, barras). O Recharts previsto aqui nunca foi usado
+    e saiu das dependências na Fase 7.
 14. Idioma da interface: preferência salva em `localStorage` (`stackstudy.lang`), padrão pt-BR; o
     `locale` do usuário é enviado no cadastro.
 15. Corrida entre abas: duas abas fazendo refresh ao mesmo tempo podem disparar a detecção de reuso
@@ -545,3 +581,16 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
 63. **Sem índice novo na Fase 6**: as consultas do Cockpit caem nos índices da V2, V3 e V5.
 64. `PlaceholderPage` ficou sem uso (o Cockpit era a última página provisória); mantida para
     módulos futuros.
+65. **Rate limit em memória** (sem Redis): vale por instância. Com uma instância só (Render free)
+    é exato; com várias, cada uma conta à parte. O IP vem do `X-Forwarded-For` que a Vercel
+    preenche; quem chama o Render direto pode forjar esse cabeçalho, por isso existe também o
+    bloqueio por e-mail. Preço: um atacante pode travar o login de uma vítima por 15 min.
+66. **Cadastro ainda revela e-mail existente** (409 `EMAIL_ALREADY_REGISTERED`): esconder isso pede
+    confirmação por e-mail, que o plano grátis não tem. Mitigado pelo limite de 5 cadastros/10 min
+    por IP. O login não revela (mesma resposta e mesmo tempo).
+67. **React Router fica no 6.30** (2 avisos moderados só corrigidos no 7): o de SSR não se aplica
+    (SPA) e o de redirecionamento com `\` é coberto pelo `safeRedirect`. Migrar para o 7 depois.
+68. **Vitest fica no 2.1** (ferramenta de dev com avisos de segurança corrigidos só no 5): não vai
+    para o navegador; atualizar numa fase própria (mudanças grandes de API).
+69. **Índice `idx_cards_user_deck` (V8)**: achado pelo EXPLAIN; as contagens por deck varriam a
+    tabela `cards` inteira porque os índices existentes eram parciais.

@@ -30,12 +30,60 @@ globalThis.ResizeObserver ??= class {
 };
 Element.prototype.scrollIntoView ??= function scrollIntoView() {};
 
+// Code splitting não é assunto dos testes de tela: as páginas carregam direto (sem lazy), para
+// não depender do tempo de import. O build continua dividindo por rota.
+vi.mock('@/app/lazyPages', async () => {
+  const [
+    cockpit,
+    stack,
+    deepWork,
+    flashcards,
+    deck,
+    review,
+    grades,
+    profile,
+    notFound,
+    design,
+    legal,
+  ] = await Promise.all([
+    import('@/features/cockpit/CockpitPage'),
+    import('@/features/stack/StackPage'),
+    import('@/features/deepwork/DeepWorkPage'),
+    import('@/features/flashcards/FlashcardsPage'),
+    import('@/features/flashcards/DeckPage'),
+    import('@/features/flashcards/ReviewPage'),
+    import('@/features/grades/GradesPage'),
+    import('@/features/profile/ProfilePage'),
+    import('@/pages/NotFoundPage'),
+    import('@/pages/DesignPage'),
+    import('@/pages/LegalPage'),
+  ]);
+  return {
+    CockpitPage: cockpit.CockpitPage,
+    StackPage: stack.StackPage,
+    DeepWorkPage: deepWork.DeepWorkPage,
+    FlashcardsPage: flashcards.FlashcardsPage,
+    DeckPage: deck.DeckPage,
+    ReviewPage: review.ReviewPage,
+    GradesPage: grades.GradesPage,
+    ProfilePage: profile.ProfilePage,
+    NotFoundPage: notFound.NotFoundPage,
+    DesignPage: design.DesignPage,
+    LegalPage: legal.LegalPage,
+  };
+});
+
 // Os testes conferem os textos em pt-BR (idioma padrão).
 void i18n.changeLanguage('pt-BR');
 
 afterEach(() => {
   cleanup();
-  useAuthStore.setState({ status: 'unknown', accessToken: null, user: null });
+  useAuthStore.setState({
+    status: 'unknown',
+    accessToken: null,
+    user: null,
+    sessionExpired: false,
+  });
   useUiStore.setState({ paletteOpen: false, mobileNavOpen: false });
   useDeepWorkStore.setState({
     mode: 'POMODORO',

@@ -9,6 +9,20 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    build: {
+      rollupOptions: {
+        output: {
+          // Bibliotecas em arquivos próprios: mudam pouco, então ficam no cache do navegador entre
+          // deploys (as telas já são separadas pelo lazy() do router).
+          manualChunks: {
+            react: ['react', 'react-dom', 'react-router-dom'],
+            query: ['@tanstack/react-query', 'zustand'],
+            i18n: ['i18next', 'react-i18next'],
+            palette: ['cmdk'],
+          },
+        },
+      },
+    },
     resolve: {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
     },

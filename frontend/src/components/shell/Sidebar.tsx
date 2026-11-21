@@ -9,6 +9,7 @@ import { changeLanguage, SUPPORTED_LANGUAGES, type Language } from '@/i18n';
 import { cn } from '@/lib/cn';
 import { useCurrentSubjects } from '@/features/stack/queries';
 import { useStackStore } from '@/stores/stackStore';
+import { LegalLinks } from './LegalLinks';
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { t, i18n } = useTranslation();
@@ -154,6 +155,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             <Icon name="logout" size={18} />
           </Button>
         </div>
+        <LegalLinks className="px-3 text-xs" />
       </div>
     </div>
   );

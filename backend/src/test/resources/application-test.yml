@@ -7,6 +7,19 @@ stackstudy:
       secure: false
     cors:
       allowed-origins: http://localhost:5173
+    # Os testes fazem muitos logins do mesmo IP (127.0.0.1): limites altos aqui. O
+    # RateLimitIntegrationTest liga limites baixos só para ele.
+    rate-limit:
+      login:
+        limit: 100000
+      register:
+        limit: 100000
+      refresh:
+        limit: 100000
+      login-failures:
+        limit: 100000
+      password-failures:
+        limit: 100000
 
 logging:
   level:

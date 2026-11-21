@@ -23,6 +23,15 @@ public class GlobalExceptionHandler {
 
   private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+  @ExceptionHandler(RateLimitedException.class)
+  ResponseEntity<ApiError> handleRateLimited(RateLimitedException ex) {
+    return ResponseEntity.status(ex.getCode().status())
+        .header(
+            org.springframework.http.HttpHeaders.RETRY_AFTER,
+            Long.toString(ex.getRetryAfterSeconds()))
+        .body(ApiError.of(ex.getCode(), ex.getMessage()));
+  }
+
   @ExceptionHandler(ApiException.class)
   ResponseEntity<ApiError> handleApi(ApiException ex) {
     return build(ex.getCode(), ex.getMessage(), ex.getDetails());

@@ -50,5 +50,27 @@ public record SecurityProperties(
               ? List.of()
               : allowedOrigins.stream().map(String::trim).filter(s -> !s.isEmpty()).toList();
     }
+
+    /** Origem curinga com cookies seria abrir a API para qualquer site: não sobe. */
+    @AssertTrue(message = "CORS origins must be explicit (no '*')")
+    public boolean isExplicit() {
+      return allowedOrigins.stream().noneMatch(o -> o.contains("*"));
+    }
+  }
+
+  /**
+   * Cookie do refresh: SameSite=None exige Secure (o navegador recusa o contrário) e
+   * Strict/Lax/None são os únicos valores válidos.
+   */
+  @AssertTrue(message = "REFRESH_COOKIE_SAME_SITE must be Strict, Lax or None (None needs Secure)")
+  public boolean isCookieConsistent() {
+    if (refreshCookie == null) {
+      return true;
+    }
+    String sameSite = refreshCookie.sameSite();
+    if ("None".equalsIgnoreCase(sameSite)) {
+      return refreshCookie.secure();
+    }
+    return "Strict".equalsIgnoreCase(sameSite) || "Lax".equalsIgnoreCase(sameSite);
   }
 }

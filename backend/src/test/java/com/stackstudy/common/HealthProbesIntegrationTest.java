@@ -49,16 +49,12 @@ class HealthProbesIntegrationTest extends IntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("UP"));
     verify(dataSource, atLeastOnce()).getConnection();
-
-    clearInvocations(dataSource);
-    mvc.perform(get("/actuator/health"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.status").value("UP"));
-    verify(dataSource, atLeastOnce()).getConnection();
   }
 
   @Test
   void individualHealthComponentsAreNotPublic() throws Exception {
     mvc.perform(get("/actuator/health/db")).andExpect(status().isUnauthorized());
+    // O agregado (com o banco) também não é público: só liveness e readiness.
+    mvc.perform(get("/actuator/health")).andExpect(status().isUnauthorized());
   }
 }

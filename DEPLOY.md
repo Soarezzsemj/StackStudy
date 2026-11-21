@@ -28,7 +28,7 @@ GitHub Actions ── pg_dump semanal (criptografado) ──► artifact privado
 
 - [ ] 1. Neon: projeto criado, **URL direta** e **URL pooled** copiadas
 - [ ] 2. `JWT_SECRET` gerado e guardado num gerenciador de senhas
-- [ ] 3. Render: serviço criado pelo `render.yaml`, variáveis preenchidas, logs com migration aplicada, `/actuator/health/liveness` e `/actuator/health` = `UP`
+- [ ] 3. Render: serviço criado pelo `render.yaml`, variáveis preenchidas, logs com migration aplicada, `/actuator/health/liveness` e `/actuator/health/readiness` = `UP`
 - [ ] 4. `frontend/vercel.json` com o host real do Render; projeto na Vercel com root `frontend/`; primeiro deploy ok
 - [ ] 5. Teste ponta a ponta: cadastro, login, refresh, logout e cookie `HttpOnly` + `Secure`
 - [ ] 6. GitHub: repositório **privado**, secrets do backup criados, backup rodado uma vez à mão
@@ -101,7 +101,7 @@ Guarde o resultado num gerenciador de senhas.
    ```
 5. Confira os dois endpoints de health:
    - `https://<seu-servico>.onrender.com/actuator/health/liveness`: `{"status":"UP"}`. Só diz que o processo está vivo; **não consulta o banco**.
-   - `https://<seu-servico>.onrender.com/actuator/health`: `{"status":"UP",...}`. Este **consulta o Neon**; use para diagnóstico, não para pings frequentes.
+   - `https://<seu-servico>.onrender.com/actuator/health/readiness`: `{"status":"UP"}`. Este **consulta o Neon**; use para diagnóstico, não para pings frequentes. (O `/actuator/health` agregado pede login desde a Fase 7: só os dois probes são públicos.)
    - Anote o host (`<seu-servico>.onrender.com`): ele vai no `vercel.json`.
    - Em prod o Swagger fica desligado (404). Para ligar temporariamente: `SWAGGER_ENABLED=true`.
 
@@ -144,6 +144,10 @@ Abra o app numa janela anônima, com o DevTools aberto (F12).
    - Para testar mais rápido, ponha `JWT_ACCESS_TTL=PT1M` no Render, teste e **remova depois**.
 7. **Logout:** clique em Sair. O cookie some. Recarregue: você vai para o login.
 8. **Login** de novo com a mesma conta.
+9. **Segurança (Fase 7):**
+   - `curl -sI https://<projeto>.vercel.app | grep -i -E "content-security|strict-transport|x-frame"`: os três cabeçalhos aparecem.
+   - `curl -s -o /dev/null -w "%{http_code}\n" https://<seu-servico>.onrender.com/actuator/health`: **401** (só liveness e readiness são públicos).
+   - Errar a senha 11 vezes seguidas na mesma conta: a 11ª tentativa responde "Muitas tentativas" (429) e a conta fica bloqueada por 15 min, mesmo com a senha certa.
 
 ## 6. Backup do banco (GitHub Actions)
 
@@ -179,6 +183,23 @@ pg_restore --no-owner --no-privileges --clean --if-exists \
   --dbname "postgresql://...URL DIRETA DO DESTINO..." backup.dump
 ```
 
+### Ensaio de restauração (testado)
+
+Backup que nunca foi restaurado não é backup. O script `scripts/db-restore-drill.sh` repete, **só no seu computador** (Docker, sem nuvem e sem credencial real), os mesmos comandos do workflow e da restauração acima:
+
+1. Sobe dois Postgres vazios, aplica todas as migrations no primeiro e põe dados em todas as tabelas.
+2. `pg_dump --format=custom --no-owner --no-privileges` → `pg_restore --list` → GPG AES-256 → `sha256sum`.
+3. `sha256sum -c` → `gpg --decrypt` → `pg_restore --clean --if-exists` no segundo banco, duas vezes (a restauração é repetível).
+4. Compara a contagem de linhas de cada tabela e uma amostra com acentos e arrays.
+
+```bash
+bash scripts/db-restore-drill.sh      # na raiz do repositório; precisa de docker, gpg e sha256sum
+```
+
+Resultado do ensaio feito na Fase 7 (Postgres 16, migrations V1–V8): **OK**. As 15 tabelas (`users`, `auth_sessions`, `refresh_tokens`, `semesters`, `subjects`, `assessments`, `absences`, `tasks`, `study_sessions`, `decks`, `cards`, `card_reviews` e os três `*_settings`) voltaram com as mesmas contagens e os mesmos dados. Rode de novo depois de qualquer migration nova; para testar com a versão do seu Neon, use `PG_IMAGE=postgres:17-alpine bash scripts/db-restore-drill.sh`.
+
+Para ensaiar com o **backup real** (artifact do GitHub), siga "Como restaurar" apontando o `pg_restore` para um **branch novo do Neon**, nunca para o banco em uso.
+
 **Dica:** restaure primeiro num **branch novo do Neon** (Branches → New branch), confira os dados e só então troque as URLs do Render para esse branch. Assim o banco atual não é tocado.
 
 ## 7. Manter o backend acordado (monitor gratuito)
@@ -187,12 +208,13 @@ O Render free hiberna depois de ~15 min sem tráfego, e acordar leva 1,5–2 min
 
 **Use sempre o liveness:** `https://<seu-servico>.onrender.com/actuator/health/liveness`
 
-### Por que não usar `/actuator/health`
+### Por que não usar o readiness
 
 | Endpoint | O que confere | Toca no banco? | Uso |
 | --- | --- | --- | --- |
 | `/actuator/health/liveness` | O processo Java está vivo | **Não** | Monitor, health check do Render, `VITE_WAKE_URL` |
-| `/actuator/health` e `/actuator/health/readiness` | O app **e o banco** respondem | **Sim** (abre conexão com o Neon) | Diagnóstico manual |
+| `/actuator/health/readiness` | O app **e o banco** respondem | **Sim** (abre conexão com o Neon) | Diagnóstico manual |
+| `/actuator/health` (agregado) e componentes | Detalhes | Sim | **Não é público** (401) |
 
 - O Neon cobra o tempo de banco ligado em **CU-horas**. Quando ninguém usa, a compute "dorme" (*scale to zero*) depois de ~5 min e para de consumir.
 - Um ping que toca no banco a cada 5–10 min **nunca deixa o Neon dormir**: o banco fica ligado 24 h por dia mesmo sem nenhum usuário.
@@ -250,7 +272,7 @@ O Render free hiberna depois de ~15 min sem tráfego, e acordar leva 1,5–2 min
 
 **O banco está inacessível.**
 - Compare os dois health:
-  - `/actuator/health/liveness` **UP** e `/actuator/health` **DOWN** quer dizer que o app está vivo e o problema é o banco.
+  - `/actuator/health/liveness` **UP** e `/actuator/health/readiness` **DOWN** quer dizer que o app está vivo e o problema é o banco.
   - Os dois fora do ar quer dizer que é o backend.
 - Veja o status no painel do Neon (o banco dorme e acorda sozinho).
 - Confira as URLs e a senha. Se você trocou a senha no Neon, atualize as duas URLs no Render e o secret do GitHub.
@@ -299,14 +321,15 @@ Quando o cold start incomodar, troque o plano do Render: serviço → **Settings
 | `DATABASE_USERNAME` | não | Usuário do banco, se não estiver na URL. |
 | `DATABASE_PASSWORD` | não | Senha do banco, se não estiver na URL. |
 | `JWT_SECRET` | sim | Segredo do JWT, com 32 bytes ou mais (`openssl rand -base64 48`). |
-| `ALLOWED_ORIGINS` | não | Origens liberadas no CORS, separadas por vírgula; vazio com o rewrite da Vercel. |
+| `ALLOWED_ORIGINS` | não | Origens liberadas no CORS, separadas por vírgula; vazio com o rewrite da Vercel. `*` é recusado (não sobe). |
 | `JAVA_TOOL_OPTIONS` | não | Flags extras da JVM, lidas pela própria JVM. |
 | `JAVA_OPTS` | não | Flags extras da JVM, aplicadas por último (sobrescrevem as padrão). |
 | `JVM_MAX_HEAP` | não | Heap máximo da JVM (padrão `300m`). |
 | `DB_POOL_MAX` | não | Máximo de conexões no pool (padrão 5). |
 | `SWAGGER_ENABLED` | não | `true` liga o Swagger em prod (padrão `false`). |
-| `REFRESH_COOKIE_SECURE` | não | Cookie só em HTTPS (padrão `true`). |
-| `REFRESH_COOKIE_SAME_SITE` | não | SameSite do cookie (padrão `Lax`). |
+| `REFRESH_COOKIE_SECURE` | não | Cookie só em HTTPS (padrão `true`). Em prod, `false` **impede o boot**. |
+| `REFRESH_COOKIE_SAME_SITE` | não | SameSite do cookie (padrão `Lax`). Só `Strict`, `Lax` ou `None` (este exige Secure). |
+| `RATE_LIMIT_ENABLED` | não | Limite de tentativas em login/cadastro/refresh (padrão `true`). Em prod, `false` **impede o boot**. |
 | `JWT_ACCESS_TTL` / `JWT_REFRESH_TTL` | não | Validade dos tokens (padrão `PT15M` / `P14D`). |
 | `PORT` | automática | Porta HTTP, definida pelo próprio Render. |
 

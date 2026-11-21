@@ -1,44 +1,64 @@
-import { createBrowserRouter, type RouteObject } from 'react-router-dom';
+import { createBrowserRouter, Outlet, type RouteObject } from 'react-router-dom';
 import { AppShell } from '@/components/shell/AppShell';
 import { RedirectIfAuthenticated, RequireAuth } from '@/features/auth/RequireAuth';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterPage } from '@/features/auth/RegisterPage';
-import { DesignPage } from '@/pages/DesignPage';
-import { StackPage } from '@/features/stack/StackPage';
-import { DeepWorkPage } from '@/features/deepwork/DeepWorkPage';
-import { GradesPage } from '@/features/grades/GradesPage';
-import { FlashcardsPage } from '@/features/flashcards/FlashcardsPage';
-import { DeckPage } from '@/features/flashcards/DeckPage';
-import { ReviewPage } from '@/features/flashcards/ReviewPage';
-import { NotFoundPage } from '@/pages/NotFoundPage';
-import { ProfilePage } from '@/features/profile/ProfilePage';
-import { CockpitPage } from '@/features/cockpit/CockpitPage';
+import { RouteErrorPage } from '@/pages/RouteErrorPage';
+import { PublicPage } from '@/pages/PublicPage';
+import {
+  CockpitPage,
+  DeckPage,
+  DeepWorkPage,
+  DesignPage,
+  FlashcardsPage,
+  GradesPage,
+  LegalPage,
+  NotFoundPage,
+  ProfilePage,
+  ReviewPage,
+  StackPage,
+} from './lazyPages';
 
 export const routes: RouteObject[] = [
   {
-    element: <RedirectIfAuthenticated />,
-    children: [
-      { path: '/login', element: <LoginPage /> },
-      { path: '/register', element: <RegisterPage /> },
-    ],
-  },
-  // Rota interna para conferir o design system (sem login e sem dados).
-  { path: '/_design', element: <DesignPage /> },
-  {
-    element: <RequireAuth />,
+    // Raiz só para a página de erro valer em todas as rotas (erro de render ou de chunk).
+    element: <Outlet />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
-        element: <AppShell />,
+        element: <RedirectIfAuthenticated />,
         children: [
-          { path: '/', element: <CockpitPage /> },
-          { path: '/stack', element: <StackPage /> },
-          { path: '/deep-work', element: <DeepWorkPage /> },
-          { path: '/flashcards', element: <FlashcardsPage /> },
-          { path: '/flashcards/decks/:deckId', element: <DeckPage /> },
-          { path: '/flashcards/review', element: <ReviewPage /> },
-          { path: '/grades', element: <GradesPage /> },
-          { path: '/profile', element: <ProfilePage /> },
-          { path: '*', element: <NotFoundPage /> },
+          { path: '/login', element: <LoginPage /> },
+          { path: '/register', element: <RegisterPage /> },
+        ],
+      },
+      // Públicas, com ou sem login.
+      {
+        element: <PublicPage />,
+        children: [
+          { path: '/terms', element: <LegalPage kind="terms" /> },
+          { path: '/privacy', element: <LegalPage kind="privacy" /> },
+          // Rota interna para conferir o design system (sem login e sem dados).
+          { path: '/_design', element: <DesignPage /> },
+        ],
+      },
+      {
+        element: <RequireAuth />,
+        children: [
+          {
+            element: <AppShell />,
+            children: [
+              { path: '/', element: <CockpitPage /> },
+              { path: '/stack', element: <StackPage /> },
+              { path: '/deep-work', element: <DeepWorkPage /> },
+              { path: '/flashcards', element: <FlashcardsPage /> },
+              { path: '/flashcards/decks/:deckId', element: <DeckPage /> },
+              { path: '/flashcards/review', element: <ReviewPage /> },
+              { path: '/grades', element: <GradesPage /> },
+              { path: '/profile', element: <ProfilePage /> },
+              { path: '*', element: <NotFoundPage /> },
+            ],
+          },
         ],
       },
     ],

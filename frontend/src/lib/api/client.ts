@@ -93,15 +93,19 @@ export function refreshSession(): Promise<string | null> {
       (async () => {
         try {
           const res = await rawRequest('/auth/refresh', { method: 'POST' }, null);
+          // Muitas tentativas (429): não desloga; a sessão continua e o próximo pedido tenta de novo.
+          if (res.status === 429) return null;
           if (!res.ok) {
-            useAuthStore.getState().clear();
+            useAuthStore.getState().clear('expired');
             return null;
           }
           const data = (await res.json()) as AuthResponse;
           useAuthStore.getState().setSession(data.accessToken, data.user);
           return data.accessToken;
         } catch {
-          useAuthStore.getState().clear();
+          // Sem rede: quem já estava logado continua (o aviso de offline aparece); só no primeiro
+          // carregamento, sem sessão conhecida, vai para o login.
+          if (useAuthStore.getState().status !== 'authenticated') useAuthStore.getState().clear();
           return null;
         }
       })(),
@@ -121,7 +125,7 @@ async function request<T>(path: string, options: RequestOptions): Promise<T> {
     const fresh = await refreshSession();
     if (!fresh) return parse<T>(res);
     res = await sendWithRetry(path, options, fresh);
-    if (res.status === 401) useAuthStore.getState().clear();
+    if (res.status === 401) useAuthStore.getState().clear('expired');
   }
   return parse<T>(res);
 }

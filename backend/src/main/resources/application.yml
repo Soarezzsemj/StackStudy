@@ -67,3 +67,25 @@ stackstudy:
       same-site: ${REFRESH_COOKIE_SAME_SITE:Strict}
     cors:
       allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+    # Limites em memória (por instância). Valores pensados para uma pessoa real nunca bater
+    # neles: o refresh roda a cada 15 min por aba; login/cadastro são raros.
+    rate-limit:
+      enabled: ${RATE_LIMIT_ENABLED:true}
+      login:
+        limit: 10
+        window: PT1M
+      register:
+        limit: 5
+        window: PT10M
+      refresh:
+        limit: 30
+        window: PT1M
+      # Senha errada no mesmo e-mail: depois de 10 em 15 min, o e-mail fica bloqueado até a janela
+      # passar (mesmo vindo de IPs diferentes).
+      login-failures:
+        limit: 10
+        window: PT15M
+      # Senha atual errada em /api/me (trocar e-mail/senha, excluir conta), por usuário.
+      password-failures:
+        limit: 5
+        window: PT15M

@@ -11,14 +11,29 @@ interface AuthState {
   setSession: (accessToken: string, user: User) => void;
   /** Atualiza o perfil sem mexer no token (Perfil e preferências). */
   setUser: (user: User) => void;
-  clear: () => void;
+  /**
+   * Sai da sessão. 'expired' = caiu sozinha (refresh falhou com a pessoa usando o app): o login
+   * mostra "Sua sessão expirou".
+   */
+  clear: (reason?: 'expired') => void;
+  /** A última sessão terminou por expirar (não por logout). */
+  sessionExpired: boolean;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   status: 'unknown',
   accessToken: null,
   user: null,
-  setSession: (accessToken, user) => set({ status: 'authenticated', accessToken, user }),
+  sessionExpired: false,
+  setSession: (accessToken, user) =>
+    set({ status: 'authenticated', accessToken, user, sessionExpired: false }),
   setUser: (user) => set({ user }),
-  clear: () => set({ status: 'anonymous', accessToken: null, user: null }),
+  clear: (reason) =>
+    set((s) => ({
+      status: 'anonymous',
+      accessToken: null,
+      user: null,
+      // Só conta como "expirou" se havia alguém logado (não no primeiro carregamento).
+      sessionExpired: reason === 'expired' && s.status === 'authenticated',
+    })),
 }));

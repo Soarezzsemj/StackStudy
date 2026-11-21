@@ -196,9 +196,11 @@ class AuthFlowIntegrationTest extends IntegrationTest {
 
   @Test
   void healthAndApiDocsArePublic() throws Exception {
-    mvc.perform(get("/actuator/health"))
+    // Só os probes são públicos; o health agregado pede login (PublicEndpointsIntegrationTest).
+    mvc.perform(get("/actuator/health/liveness"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("UP"));
+    // Em dev/teste o Swagger está ligado e é público; em produção, desligado.
     mvc.perform(get("/v3/api-docs")).andExpect(status().isOk());
   }
 }

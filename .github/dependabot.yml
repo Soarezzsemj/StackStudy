@@ -1,0 +1,26 @@
+# Avisos de atualização de dependências (inclusive de segurança), uma vez por semana.
+# Os PRs do Dependabot passam pelo CI normal; nada é mesclado sozinho.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # Ferramentas de dev juntas, para não virar um PR por pacote.
+      dev-tooling:
+        dependency-type: development
+  - package-ecosystem: maven
+    directory: /backend
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: docker
+    directory: /backend
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

@@ -38,7 +38,8 @@
     "userMenu": "Account",
     "pending": "{{count}} pending",
     "noSemester": "No current semester",
-    "openProfile": "Open {{name}}’s profile"
+    "openProfile": "Open {{name}}’s profile",
+    "skipToContent": "Skip to content"
   },
   "statusbar": {
     "label": "Status bar",
@@ -82,14 +83,16 @@
       "subtitle": "Welcome back. Pick up where you left off.",
       "submit": "Log in",
       "noAccount": "No account yet?",
-      "toRegister": "Create account"
+      "toRegister": "Create account",
+      "expired": "Your session expired. Sign in again to continue."
     },
     "register": {
       "title": "Create account",
       "subtitle": "Subjects, focus, flashcards and grades in one place.",
       "submit": "Create account",
       "haveAccount": "Already have an account?",
-      "toLogin": "Log in"
+      "toLogin": "Log in",
+      "consent": "By creating an account you agree to the <terms>Terms of use</terms> and the <privacy>Privacy Policy</privacy>."
     }
   },
   "errors": {
@@ -108,7 +111,8 @@
     "SESSION_STILL_ACTIVE": "Finish the session before editing it.",
     "ABSENCE_ALREADY_REGISTERED": "An absence is already recorded on this date. Delete it and record again.",
     "REVIEW_NOT_LATEST": "This is not the card's latest answer; only that one can be undone.",
-    "INVALID_CURRENT_PASSWORD": "The current password is incorrect."
+    "INVALID_CURRENT_PASSWORD": "The current password is incorrect.",
+    "RATE_LIMITED": "Too many attempts in a row. Wait a few minutes and try again."
   },
   "pages": {
     "cockpit": {
@@ -181,7 +185,8 @@
     "cell": "{{value}} on {{label}}"
   },
   "network": {
-    "waking": "Waking up the server… this can take up to a minute."
+    "waking": "Waking up the server… this can take up to a minute.",
+    "offline": "You are offline. Nothing will be saved until the connection is back."
   },
   "stack": {
     "semester": {
@@ -1060,6 +1065,132 @@
           "action": "Start focus"
         }
       }
+    }
+  },
+  "errorPage": {
+    "reload": "Reload",
+    "home": "Back to start",
+    "generic": {
+      "title": "Something went wrong",
+      "body": "This screen hit an unexpected error. Your data is safe on the server; reloading usually fixes it."
+    },
+    "newVersion": {
+      "title": "New version available",
+      "body": "StackStudy was updated while this tab was open. Reload to use the new version."
+    },
+    "notFound": {
+      "title": "404",
+      "body": "This page does not exist."
+    }
+  },
+  "legal": {
+    "nav": "Legal documents",
+    "backHome": "stack.study, home",
+    "backToApp": "Back to the app",
+    "backToLogin": "Sign in",
+    "updated": "Updated on {{date}}",
+    "date": "November 21, 2026",
+    "terms": {
+      "short": "Terms",
+      "title": "Terms of use",
+      "intro": "These terms apply to everyone who uses StackStudy, a free study organizer. By creating an account, you agree to them.",
+      "sections": [
+        {
+          "title": "1. The service",
+          "body": [
+            "StackStudy helps you organize subjects, tasks, focus sessions, grades and flashcards. It is offered for free, as is, with no availability guarantee: the server may take a while to wake up or be offline."
+          ]
+        },
+        {
+          "title": "2. Your account",
+          "body": [
+            "You are responsible for your password and for everything done with your account. Use an email address that is yours. One person, one account."
+          ]
+        },
+        {
+          "title": "3. Calculations are estimates",
+          "body": [
+            "Averages, required grades, GPA and absence limits follow the rules you set. They do not replace your school’s regulations: always check with it. We are not liable for decisions made only on these numbers."
+          ]
+        },
+        {
+          "title": "4. Acceptable use",
+          "body": [
+            "Do not use the service to attack the system, automate mass access or store illegal content or content you have no rights to. Accounts doing so may be suspended or deleted."
+          ]
+        },
+        {
+          "title": "5. Your data",
+          "body": [
+            "What you add is yours. You can export everything as JSON and delete the account at any time, in your Profile. How we handle data is in the Privacy Policy."
+          ]
+        },
+        {
+          "title": "6. Changes",
+          "body": [
+            "These terms may change. Relevant changes will be announced in the app before they apply. Continuing to use the service afterwards means you agree to the new version."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "short": "Privacy",
+      "title": "Privacy Policy",
+      "intro": "This policy explains which data StackStudy processes, why, and your rights under Brazil’s General Data Protection Law (Law 13,709/2018, LGPD).",
+      "sections": [
+        {
+          "title": "1. Which data",
+          "body": [
+            "Account: name, email and password (stored only as a BCrypt hash; nobody can see the password).",
+            "Profile (optional): program, school, term, bio, avatar color, language and time zone.",
+            "Studies: terms, subjects, tasks, focus sessions, assessments, absences, flashcards and preferences.",
+            "Technical: for each sign-in we keep the browser and operating system (User-Agent) so you can recognize your devices. The IP address is used only in memory to limit sign-in attempts and is not stored."
+          ]
+        },
+        {
+          "title": "2. Why",
+          "body": [
+            "Only to run the service: sign you in, show and calculate your data, protect against abuse. The legal basis is performing the service you asked for (LGPD art. 7, V).",
+            "We do not sell data, do not use it for advertising and there are no third-party trackers or analytics."
+          ]
+        },
+        {
+          "title": "3. Cookies and local storage",
+          "body": [
+            "We use a single essential cookie: the session cookie (ss_refresh), HttpOnly and limited to authentication. In the browser we keep the language and a few screen preferences (localStorage)."
+          ]
+        },
+        {
+          "title": "4. Where data lives",
+          "body": [
+            "The app runs on cloud providers: Vercel (website), Render (server) and Neon (PostgreSQL database), with servers in the United States. Weekly encrypted backups are kept privately on GitHub. These providers process data only to host the service."
+          ]
+        },
+        {
+          "title": "5. For how long",
+          "body": [
+            "While the account exists. When you delete the account, the data leaves the database immediately; older backups expire within 90 days."
+          ]
+        },
+        {
+          "title": "6. Your rights",
+          "body": [
+            "At any time you can: see and fix your data (Profile), download everything as JSON (Profile > Privacy and data > Export) and delete the account with all its data (Profile > Delete account). You can also ask about the processing through the contact below."
+          ]
+        },
+        {
+          "title": "7. Security",
+          "body": [
+            "Always-encrypted connection (HTTPS), hashed passwords, sessions you can end, sign-in attempt limits and data access only through your account."
+          ]
+        },
+        {
+          "title": "8. Contact",
+          "body": [
+            "Controller: the StackStudy maintainer. Questions or requests about your data: privacy@your-domain.com (replace with the real contact before launch)."
+          ]
+        }
+      ]
     }
   }
 }
