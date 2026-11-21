@@ -25,6 +25,14 @@ public enum ErrorCode {
   REVIEW_NOT_LATEST(HttpStatus.CONFLICT),
   // Etapa Premium com ROADMAPS_PREMIUM_ENABLED=true e sem direito.
   ROADMAP_STAGE_LOCKED(HttpStatus.FORBIDDEN),
+  // Salas de estudo (Fase 10).
+  ROOM_SESSION_ACTIVE(HttpStatus.CONFLICT),
+  SESSION_IN_ROOM(HttpStatus.CONFLICT),
+  ROOM_FULL(HttpStatus.CONFLICT),
+  ROOM_LIMIT_REACHED(HttpStatus.CONFLICT),
+  ROOM_OWNER_CANNOT_LEAVE(HttpStatus.CONFLICT),
+  // Código inexistente, de sala apagada ou de quem foi removido: mesma resposta.
+  INVALID_INVITE_CODE(HttpStatus.NOT_FOUND),
   INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR);
 
   private final HttpStatus status;

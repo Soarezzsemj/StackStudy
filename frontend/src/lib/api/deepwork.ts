@@ -11,8 +11,10 @@ export interface StudySession {
   taskId?: string;
   /** Tópico de roadmap ligado (as horas somam no progresso dele). */
   roadmapNodeId?: string;
+  /** Sessão de sala de estudo (o tempo é contado pela sala, por heartbeats). */
+  roomId?: string;
   mode: SessionMode;
-  source: 'TIMER' | 'MANUAL';
+  source: 'TIMER' | 'MANUAL' | 'ROOM';
   plannedMinutes?: number;
   startedAt: string;
   endedAt?: string;

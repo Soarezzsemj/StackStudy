@@ -12,7 +12,7 @@ Todas as alterações ficam apenas no working tree; o dono do projeto revisa e c
 
 Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 27). Módulos:
 **Cockpit** (`/`), **The Stack** (`/stack`), **Deep Work** (`/deep-work`), **Flashcards**
-(`/flashcards`), **Grade Predictor** (`/grades`), **Roadmaps** (`/roadmaps`). Rota interna
+(`/flashcards`), **Grade Predictor** (`/grades`), **Roadmaps** (`/roadmaps`), **Salas de estudo** (`/rooms`). Rota interna
 `/_design` mostra o design system.
 
 | Fase | Escopo | Status |
@@ -27,6 +27,7 @@ Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 2
 | 7 | Polimento: rate limit, cabeçalhos, rotas públicas, a11y, code splitting, EXPLAIN, erros/offline, termos/LGPD, backup testado | ✅ |
 | 8 | Admin: Status: papel ADMIN (ADMIN_EMAILS), métricas agregadas, saúde, erros, painel com Recharts | ✅ |
 | 9 | Roadmaps: trilhas por curso (seed de exemplo), mapa/lista, progresso, meta, sugestões, Premium preparado (desligado) | ✅ |
+| 10 | Salas de estudo: sem chat, presença em memória, Pomodoro compartilhado/tempo corrido, ranking, reações, moderação | ✅ |
 
 ## Estrutura
 
@@ -44,7 +45,7 @@ DEPLOY.md            passo a passo do deploy (Neon + Render + Vercel) e backup
 ### Backend (`com.stackstudy`)
 
 Pacotes por feature: `auth` (inclui `AuthSession`), `account` (perfil, preferências, conta,
-exportação), `cockpit` (home agregada), `admin` (papel, métricas e painel de status), `roadmap` (catálogo, acesso Premium, progresso), `subject` (inclui semestres), `task`, `session`, `flashcard`, `grade`, `common`. Em cada feature: `*Controller` → `*Service` → `*Repository`, DTOs em `dto/` (records),
+exportação), `cockpit` (home agregada), `admin` (papel, métricas e painel de status), `roadmap` (catálogo, acesso Premium, progresso), `room` (salas, presença em memória, moderação), `subject` (inclui semestres), `task`, `session`, `flashcard`, `grade`, `common`. Em cada feature: `*Controller` → `*Service` → `*Repository`, DTOs em `dto/` (records),
 entidades JPA nunca saem do service.
 
 - `common.error`: `ApiException` + `ErrorCode` + `GlobalExceptionHandler`. Toda resposta de erro
@@ -83,6 +84,9 @@ features/deepwork/ DeepWorkPage, TimerCard, InsightsSections (stats, heatmap, hi
 features/stack/ StackPage, SubjectPanel, TaskToolbar (filtros + criação rápida), TaskList,
                 Task/Subject/Semester dialogs; lógica pura e testada em due.ts, grouping.ts,
                 filters.ts, shortcuts.ts; queries.ts (TanStack Query)
+features/rooms/ RoomsPage (/rooms, /rooms/:id), RoomCard (modo, cronômetro), MembersGrid, RoomSide
+                (ranking, reações, salas, segurança), RoomDialogs, RoomEngine (AppShell: heartbeat e
+                "Ainda está estudando?"); lógica pura e testada em roomLogic.ts
 features/roadmaps/ RoadmapsPage (/roadmaps → principal; /roadmaps/:slug), RoadmapMap (mapa CSS,
                 roving tabindex), RoadmapList (etapas expansíveis), NodeDialog, RoadmapCards
                 (resumo, tópico atual, meta, explorar, sugerir), TopicActions (tarefa, foco,
@@ -96,13 +100,14 @@ features/cockpit/ CockpitPage, NextStepCard (hero), CockpitSections (resumo, pra
 features/profile/ ProfilePage (Perfil, Preferências, Conta, Privacidade), *Section, queries.ts;
                 lógica pura e testada em helpers.ts (formulário ↔ PATCH, User-Agent, fusos, download)
 lib/api/        client.ts (fetch, refresh automático, retry de GET), auth.ts, stack.ts, deepwork.ts,
-                grades.ts, flashcards.ts, account.ts (/api/me/...), admin.ts, roadmaps.ts,
+                grades.ts, flashcards.ts, account.ts (/api/me/...), admin.ts, roadmaps.ts, rooms.ts,
                 types.ts,
                 config.ts (VITE_API_URL, tempos), slow.ts (aviso de lentidão), wake.ts (wake-up ping)
 stores/         Zustand: authStore, uiStore, networkStore, flashcardStore (diálogo aberto, também
                 pelo Ctrl K), stackStore (filtros, seleção e diálogo
                 do The Stack), deepWorkStore (modo, matéria, ciclo, pausa e tópico de roadmap da
-                próxima sessão; persistido no localStorage)
+                próxima sessão; persistido no localStorage), roomStore (minha sessão de sala + diferença de
+                relógio do servidor)
 lib/            keyboard.ts (guardas dos atalhos), useNow.ts (re-render do timer), useDebouncedValue.ts,
                 useTimeZone.ts (fuso do perfil ou do navegador), syncUserLanguage.ts (idioma da
                 conta ao entrar), initials.ts (avatar)
@@ -383,6 +388,61 @@ lateral (grava na conta). Fuso por `useTimeZone()` nas consultas de heatmap, est
   No carregamento, `useSessionBootstrap` tenta restaurar a sessão pelo cookie. Refresh recusado
   com a pessoa logada = `clear('expired')` e o login mostra "Sua sessão expirou"; sem rede ou 429
   no refresh, a sessão **não** cai. Destino pós-login passa por `safeRedirect` (só caminho interno).
+
+## Salas de estudo (Fase 10)
+
+Estudar junto, vendo quem está ativo, **sem chat livre** (nem imagem, vídeo ou nome: só o apelido da
+sala). Pacote `room`.
+
+**Dados (V12)**: `study_rooms` (código de convite de 12 caracteres Crockford, 60 bits de
+`SecureRandom`; PRIVATE por padrão; capacidade 2–50; meta semanal; modo padrão; ciclo Pomodoro
+compartilhado com `cycle_started_at`), `study_room_members` (papel, apelido, `show_subject`,
+`hide_from_ranking`, `muted`, `banned`), `room_reports` (motivo em lista fechada, foto do nome
+da sala/apelido), `user_blocks`. **A sessão da sala é uma linha de `study_sessions`** (`source =
+'ROOM'`, `room_id`, `counted_seconds`, `cycles_completed`, `last_heartbeat_at`, `ended_by`
+USER|AUTO_PAUSE|TIMEOUT; `subject_id` opcional só nela): soma nas horas do Deep Work sem contar
+duas vezes e o índice único parcial garante uma sessão ativa por pessoa. FREE (tempo corrido) é
+gravado como `FLOW`.
+
+**Tempo (servidor é a fonte da verdade, `LiveSession`, puro e testado)**: o cliente manda
+start/heartbeat/pause/resume/stop/confirm, nunca duração. Cada heartbeat credita o intervalo desde o
+anterior se ≤ 2 min (senão nada: ausente); relógio que volta não credita. Pausa e AUTO_PAUSE não
+contam. Tempo corrido: "Ainda está estudando?" a cada 60 min; o tempo depois do pedido fica
+pendente e só entra se confirmar em 5 min; sem resposta, AUTO_PAUSE e o pendente some. Pomodoro:
+só conta tempo nas fases de foco do ciclo da sala (`RoomPomodoro.phaseAt`, pelo relógio, igual
+para todos); foco que termina com a pessoa presente = ciclo concluído. Sem limite de duração (12 h
+ou mais).
+
+**Memória x banco**: `RoomPresence` (sessões e reações) e `RoomDirectory` (sala + membros +
+bloqueios, invalidado em toda escrita) ficam em memória; heartbeat e presença não tocam no banco
+(teste com spy no DataSource). Grava: começar, a cada 30 min, pausar/retomar/parar, TIMEOUT, e
+`@PreDestroy`. Reinício: a sessão se reconstrói no próximo heartbeat a partir do salvo. Sem job:
+TIMEOUT (15 min sem heartbeat) acontece ao ler a presença ou quando a pessoa volta
+(`RoomSessionBridge.closeIfStale`, chamado pelo Deep Work).
+
+**Deep Work**: `GET /sessions/active` mostra a sessão de sala (`roomId`, segundos da memória);
+pause/resume/complete/cancel/delete nela = 409 `SESSION_IN_ROOM`. Com Deep Work ativo a sala não
+começa (`SESSION_ALREADY_ACTIVE`); outra aba/sala = 409 `ROOM_SESSION_ACTIVE` ou `takeover`.
+
+API (`/api/rooms`; **todo endpoint de sala confere pertencimento**: fora = 404; só o dono edita):
+
+- `POST /`, `GET /mine`, `GET /public?q=` (só nome, contagens e meta), `GET /{id}?tz=`,
+  `POST /join` (código, rate limit 10/10 min por usuário; inválido = 404 `INVALID_INVITE_CODE`),
+  `POST /{id}/join` (pública), `POST /{id}/leave` (`deleteHistory`), `DELETE /{id}/history`,
+  `PATCH /{id}`, `DELETE /{id}`, `POST /{id}/invite-code`, `DELETE|PATCH /{id}/members/{userId}`
+  (remover = banned; silenciar), `PATCH /{id}/me`.
+- `POST /{id}/session/start|heartbeat|pause|resume|stop|confirm-presence`, `GET /{id}/presence`,
+  `GET /{id}/ranking?period=today|week&mode=&tz=` (FREE por tempo, POMODORO por ciclos; opt-out),
+  `POST /{id}/reactions` (BORA/FOCO/BOA/FORCA; 1 a cada 10 s por par, 30/h), `POST /{id}/report`
+  (5/dia). `GET /api/users/blocks`, `POST|DELETE /api/users/{id}/block` (esconde presença e
+  reações nos dois sentidos). Admin: `GET /api/admin/status/reports` (só leitura, sem e-mail).
+- Limites: 5 salas por dono, 10 por pessoa, 5 criações/h, capacidade da sala.
+
+**Frontend**: `RoomEngine` no AppShell (heartbeat a cada 30 s, inclusive com a aba oculta; imediato
+ao voltar; modal "Ainda está estudando?" com contagem regressiva e Enter). Cronômetro =
+`countedSeconds` + tempo desde `serverTime` (com a diferença de relógio, teto de 2 min), nunca
+ticks. Presença em polling de 30 s e ranking de 2 min **só com a aba visível**
+(`usePageVisible`), com atualização imediata ao voltar.
 
 ## Roadmaps (Fase 9)
 
@@ -723,3 +783,25 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
     rota pública nova (Fase 7) só para a vitrine. Dá para abrir `GET` depois, se for útil.
 83. **Sugestões sem tela no admin**: ficam em `roadmap_suggestions` (texto livre do usuário); ler
     pelo banco por ora. Uma lista no painel exigiria revisar o teste de vazamento de dados pessoais.
+84. **Sessão da sala dentro de `study_sessions`** (em vez de tabela própria): as horas entram no
+    Deep Work, no Cockpit e no heatmap sem somar duas vezes, e o índice único parcial já impede sala
+    e Deep Work ao mesmo tempo. `subject_id` ficou opcional só para `source = 'ROOM'` (CHECK).
+85. **Presença em memória, por instância** (sem Redis nem WebSocket): uma instância só no plano
+    grátis. Reiniciar zera a presença; a sessão se reconstrói do último salvamento (até 30 min de
+    perda num desligamento brusco; no normal, `@PreDestroy` grava).
+86. **Heartbeat continua com a aba oculta** (o pedido falava de polling só com a aba visível): sem
+    ele o tempo pararia de contar em 2 min para quem estuda com outra aba aberta. O polling de
+    presença e ranking é que para. A confirmação de 60 min cobre o "cronômetro esquecido".
+87. **Sem resposta à confirmação, o tempo depois do pedido não conta** (fica pendente e some no
+    AUTO_PAUSE); quem confirma em 5 min não perde nada.
+88. **Ciclo Pomodoro sempre compartilhado** pela sala (o dono configura e pode reiniciar); não há
+    Pomodoro individual dentro da sala (para isso existe o Deep Work).
+89. **Fora da sala = 404** em todo endpoint (Decisão 2); membro comum em ação de dono = 403.
+    Removido pelo dono fica `banned` e o mesmo código responde como inválido.
+90. **Reações só em memória** (caixa por pessoa, 10 min, entregue uma vez pela presença); nenhum
+    texto livre entre usuários existe na API.
+91. **Denúncias com foto do nome da sala e do apelido** (a sala pode ser apagada depois); o admin lê
+    em `/api/admin/status/reports`, sem e-mail de ninguém.
+92. **Sem decisão jurídica sobre idade mínima** nesta fase: o produto não pede idade; o desenho evita
+    dados de menores (apelido, sem chat, privada por padrão), mas termos de uso e idade mínima
+    precisam de revisão jurídica antes de abrir salas públicas em escala.

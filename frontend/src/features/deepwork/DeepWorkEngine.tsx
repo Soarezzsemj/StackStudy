@@ -14,7 +14,9 @@ import { useAlert, useCompleteFocus } from './useFocusFlow';
  */
 export function DeepWorkEngine() {
   const { t } = useTranslation();
-  const { data: active } = useActiveSession();
+  const { data: activeData } = useActiveSession();
+  // Sessão de sala: quem cuida é a própria sala (RoomEngine).
+  const active = activeData?.roomId ? null : activeData;
   const breakState = useDeepWorkStore((s) => s.breakState);
   const setBreak = useDeepWorkStore((s) => s.setBreak);
   const now = useNow(!!active || !!breakState);

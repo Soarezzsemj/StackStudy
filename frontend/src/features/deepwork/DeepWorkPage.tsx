@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, ErrorState, LoadingState, PageTitle } from '@/components/ui';
+import { Link } from 'react-router-dom';
+import { Button, buttonClass, Card, ErrorState, LoadingState, PageTitle } from '@/components/ui';
 import { useCurrentSubjects } from '@/features/stack/queries';
 import type { StudySession } from '@/lib/api/deepwork';
 import { hasModifier, isControlTarget, isTypingTarget } from '@/lib/keyboard';
@@ -57,6 +58,8 @@ export function DeepWorkPage() {
     if (dialog || paletteOpen) return;
     function onKeyDown(e: KeyboardEvent) {
       if (e.key !== ' ' || e.repeat || hasModifier(e)) return;
+      // Sessão de sala: controlada pela tela da sala.
+      if (session?.roomId) return;
       if (isTypingTarget(e.target) || isControlTarget(e.target)) return;
       e.preventDefault();
       if (session) {
@@ -87,6 +90,13 @@ export function DeepWorkPage() {
           <LoadingState />
         ) : active.isError ? (
           <ErrorState message={t('deepWork.loadError')} onRetry={() => void active.refetch()} />
+        ) : session?.roomId ? (
+          <Card variant="hero" title={t('deepWork.inRoom.title')}>
+            <p className="mb-4 text-sm text-text-on-space">{t('deepWork.inRoom.body')}</p>
+            <Link to={`/rooms/${session.roomId}`} className={buttonClass('primary')}>
+              {t('deepWork.inRoom.open')}
+            </Link>
+          </Card>
         ) : (
           <TimerCard
             active={session}

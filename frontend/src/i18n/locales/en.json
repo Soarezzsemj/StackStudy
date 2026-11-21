@@ -26,7 +26,8 @@
     "design": "Design system",
     "profile": "Profile",
     "admin": "Administration",
-    "roadmaps": "Roadmaps"
+    "roadmaps": "Roadmaps",
+    "rooms": "Study rooms"
   },
   "shell": {
     "root": "~/stackstudy",
@@ -51,7 +52,8 @@
     "gpa": "GPA {{value}}",
     "gpaEmpty": "GPA —",
     "session": "Focus session",
-    "paused": "paused"
+    "paused": "paused",
+    "room": "Studying in a room"
   },
   "palette": {
     "label": "Command palette",
@@ -115,7 +117,13 @@
     "REVIEW_NOT_LATEST": "This is not the card's latest answer; only that one can be undone.",
     "INVALID_CURRENT_PASSWORD": "The current password is incorrect.",
     "RATE_LIMITED": "Too many attempts in a row. Wait a few minutes and try again.",
-    "ROADMAP_STAGE_LOCKED": "This stage is not available on your plan yet."
+    "ROADMAP_STAGE_LOCKED": "This stage is not available on your plan yet.",
+    "ROOM_SESSION_ACTIVE": "You already have a session open in a room (another tab or device).",
+    "SESSION_IN_ROOM": "This session belongs to a study room: control it from the room.",
+    "ROOM_FULL": "The room is full.",
+    "ROOM_LIMIT_REACHED": "You reached the room limit.",
+    "ROOM_OWNER_CANNOT_LEAVE": "The room creator cannot leave it: delete the room in its settings.",
+    "INVALID_INVITE_CODE": "Invalid invite code."
   },
   "pages": {
     "cockpit": {
@@ -436,7 +444,12 @@
       "delete": "Delete session"
     },
     "topic": "Topic: {{title}}",
-    "removeTopic": "Remove topic"
+    "removeTopic": "Remove topic",
+    "inRoom": {
+      "title": "You are in a study room",
+      "body": "This session is counted by the room and adds to your Deep Work hours. Pause or stop it there.",
+      "open": "Open the room"
+    }
   },
   "grades": {
     "semester": "Semester",
@@ -1101,7 +1114,7 @@
     "backToApp": "Back to the app",
     "backToLogin": "Sign in",
     "updated": "Updated on {{date}}",
-    "date": "November 21, 2026 (roadmaps)",
+    "date": "November 21, 2026 (study rooms)",
     "terms": {
       "short": "Terms",
       "title": "Terms of use",
@@ -1205,13 +1218,20 @@
           ]
         },
         {
-          "title": "9. Security",
+          "title": "9. Study rooms",
+          "body": [
+            "In rooms, other members only see the nickname you choose for that room, whether you are studying, paused or away, your session time and, if you allow it, your subject. There is no chat, image or video; reactions are ready-made phrases. Public rooms show up in search with only their name, member count and goal.",
+            "Presence (\"who is studying now\") and reactions live only in the server memory and are gone after a restart. We store the rooms, memberships (nickname and preferences), room study sessions (which add to your Deep Work hours), blocks and the reports you send; reports are only read by the administrator. You can leave a room deleting your history in it; everything shows up in your data export and is deleted with the account."
+          ]
+        },
+        {
+          "title": "10. Security",
           "body": [
             "Always-encrypted connection (HTTPS), hashed passwords, sessions you can end, sign-in attempt limits and data access only through your account."
           ]
         },
         {
-          "title": "10. Contact",
+          "title": "11. Contact",
           "body": [
             "Controller: the StackStudy maintainer. Questions or requests about your data: privacy@your-domain.com (replace with the real contact before launch)."
           ]
@@ -1473,6 +1493,238 @@
       "send": "Send suggestion",
       "thanks": "Thank you! Your suggestion was saved.",
       "fieldError": "Use plain text only (no < or >) and keep within the length limit."
+    }
+  },
+  "rooms": {
+    "title": "Study rooms",
+    "description": "Study together with other people and see who is active. No chatting.",
+    "loading": "Loading the room…",
+    "loadError": "Could not load.",
+    "notFound": "Room not found (or you are not a member).",
+    "aside": "Ranking, reactions, rooms and safety",
+    "noChat": "There is no chat here: nobody exchanges messages, people just study together. Others only see your nickname, state and time (and your subject, if you allow it).",
+    "empty": {
+      "title": "You are not in any room yet",
+      "body": "Create a room and invite people you know with the code, or join a public room."
+    },
+    "confirm": {
+      "title": "Still studying?",
+      "body": "In free mode we ask every 60 minutes. Without an answer, the timer pauses and idle time does not count.",
+      "countdown": "Time to answer: {{time}}",
+      "hint": "Press Enter to confirm.",
+      "expired": "Time is up and the timer paused. Confirm to start counting again.",
+      "yes": "Yes, I am studying"
+    },
+    "card": {
+      "label": "Room {{name}}",
+      "studyingNow_one": "{{count}} studying now",
+      "studyingNow_other": "{{count}} studying now",
+      "subject": "Subject (optional)",
+      "noSubject": "No subject",
+      "start": "Start studying",
+      "resume": "Resume",
+      "pause": "Pause",
+      "stop": "Stop and save",
+      "deepWorkActive": "You have a Deep Work session running.",
+      "openDeepWork": "Open Deep Work",
+      "elsewhere": "You are studying in another room.",
+      "conflict": "Your session is open in another tab, device or room.",
+      "takeover": "End the other one and start here",
+      "note": "Time is counted by the server and saved every {{save}} minutes (and when you pause or stop). In free mode we ask every {{confirm}} minutes whether you are still studying."
+    },
+    "mode": {
+      "label": "Counting mode",
+      "FREE": "Free timer",
+      "POMODORO": "Pomodoro",
+      "explain": {
+        "FREE": "Continuous timer: adds up all the time you spend in the room, even in long sessions.",
+        "POMODORO": "Focus and break cycles shared by the whole room. Only focus time counts."
+      }
+    },
+    "phase": {
+      "FOCUS": "Focus",
+      "SHORT_BREAK": "Short break",
+      "LONG_BREAK": "Long break",
+      "cycle": "cycle {{cycle}} of {{of}}",
+      "remaining": "{{time}} left in this phase"
+    },
+    "pomodoro": {
+      "cycles_one": "{{count}} cycle completed this session",
+      "cycles_other": "{{count}} cycles completed this session",
+      "shared": "The cycle belongs to the room: everyone sees the same phase."
+    },
+    "free": {
+      "since": "In the room since {{time}}",
+      "ready": "Ready to start",
+      "elapsed": "Session time: {{time}}"
+    },
+    "state": {
+      "STUDYING": "Studying",
+      "PAUSED": "Paused",
+      "AUTO_PAUSED": "Paused (no confirmation)",
+      "AWAY": "Away",
+      "OFFLINE": "Offline",
+      "autoPausedLong": "Paused: you did not confirm that you were still studying."
+    },
+    "stats": {
+      "today": "Today",
+      "week": "Week",
+      "longest": "Longest session"
+    },
+    "goal": {
+      "progress": "Room weekly goal: {{done}} of {{goal}} h"
+    },
+    "members": {
+      "title": "In the room",
+      "showSubject": "Show my subject",
+      "alone": "Just you here",
+      "invite": "Share the invite code with people who will study with you.",
+      "you": "(you)",
+      "owner": "Room owner",
+      "member": "Member",
+      "muted": "muted",
+      "cycles_one": "{{count}} cycle",
+      "cycles_other": "{{count}} cycles",
+      "time": "Session: {{time}}",
+      "mute": "Mute",
+      "unmute": "Unmute",
+      "remove": "Remove"
+    },
+    "ranking": {
+      "title": "Ranking",
+      "by": {
+        "FREE": "By time in the room (free timer).",
+        "POMODORO": "By completed cycles (Pomodoro)."
+      },
+      "period": "Period",
+      "today": "Today",
+      "week": "Week",
+      "empty": "Nobody studied in this period yet.",
+      "cycles_one": "{{count}} cycle",
+      "cycles_other": "{{count}} cycles",
+      "hidden": "You are out of the ranking (change it in \"My preferences\").",
+      "optOut": "Prefer not to appear? Change it in \"My preferences\"."
+    },
+    "reactions": {
+      "title": "Quick reactions",
+      "hint": "Only ready-made reactions: there is no free text between users.",
+      "nobody": "Nobody else in the room for now.",
+      "muted": "The room owner muted your reactions.",
+      "to": "To",
+      "choose": "Choose a reaction",
+      "kind": {
+        "BORA": "Let's go!",
+        "FOCO": "Focus!",
+        "BOA": "Nice!",
+        "FORCA": "Keep going!"
+      },
+      "sent": "Reaction sent.",
+      "received": "Reactions received"
+    },
+    "mine": {
+      "title": "My rooms",
+      "studying_one": "{{count}} studying",
+      "studying_other": "{{count}} studying"
+    },
+    "create": {
+      "open": "Create room",
+      "title": "New study room",
+      "submit": "Create",
+      "name": "Room name",
+      "nameError": "Use 3 to 60 characters, no < or >.",
+      "visibility": "Visibility",
+      "mode": "Default mode",
+      "goal": "Room weekly goal (hours, optional)"
+    },
+    "join": {
+      "open": "Join with code",
+      "title": "Join a room",
+      "submit": "Join",
+      "code": "Invite code",
+      "codeHint": "12 letters and digits, like ABCD-1234-EFGH."
+    },
+    "public": {
+      "title": "Public rooms",
+      "search": "Search by name",
+      "empty": "No public room found.",
+      "member": "You are in it",
+      "meta": "{{members}}/{{max}} members · {{studying}} studying",
+      "goal": "goal of {{hours}} h/week",
+      "open": "Open",
+      "join": "Join",
+      "full": "Room full"
+    },
+    "safety": {
+      "title": "Rules and safety",
+      "rule1": "No chat, images or video: only nickname, state and time.",
+      "rule2": "Use a nickname, never your full name or contact details.",
+      "rule3": "Something wrong? Report the room or block whoever bothers you.",
+      "report": "Report room",
+      "blockWho": "Block user",
+      "block": "Block",
+      "blocked": "Blocked",
+      "someone": "User",
+      "unblock": "Unblock"
+    },
+    "nickname": {
+      "label": "Your nickname in the room",
+      "hint": "This is what others see. Do not use your full name.",
+      "error": "Use 2 to 24 letters, digits, spaces, dots, hyphens or underscores."
+    },
+    "visibility": {
+      "PRIVATE": "Private (code only)",
+      "PUBLIC": "Public (shows in search)",
+      "hint": {
+        "PRIVATE": "Only people with the invite code can join.",
+        "PUBLIC": "Listed with name, member count and goal; members are only shown to people who join."
+      }
+    },
+    "me": {
+      "open": "My preferences",
+      "title": "My preferences in this room",
+      "showSubject": "Show the subject I am studying",
+      "hideFromRanking": "Do not appear in the ranking",
+      "historyHint": "You can delete your session history in this room (the hours also leave Deep Work).",
+      "deleteHistory": "Delete my history in this room",
+      "historyDeleted": "History deleted.",
+      "leaveWithHistory": "When leaving, also delete my history",
+      "leave": "Leave room"
+    },
+    "owner": {
+      "open": "Room settings",
+      "title": "Room settings",
+      "capacity": "Capacity (2 to 50)",
+      "pomodoro": "Room Pomodoro cycle (minutes)",
+      "focus": "Focus",
+      "short": "Short break",
+      "long": "Long break",
+      "every": "Long break every (cycles)",
+      "restart": "Restart the cycle now",
+      "code": "Invite code",
+      "codeHint": "Only share it with people you know. A new code invalidates the old one.",
+      "regenerate": "Generate new code",
+      "delete": "Delete room",
+      "deleteConfirm": "Delete the room for everyone? Studied hours stay in each member’s Deep Work.",
+      "deleteYes": "Delete for good",
+      "codeInline": "code {{code}}"
+    },
+    "report": {
+      "title": "Report",
+      "submit": "Send report",
+      "thanks": "Report sent. The StackStudy team will review it.",
+      "reason": "Reason",
+      "reasons": {
+        "SPAM": "Spam or advertising",
+        "HARASSMENT": "Harassment or bullying",
+        "INAPPROPRIATE_NAME": "Inappropriate name or nickname",
+        "OFFENSIVE_CONTENT": "Offensive content",
+        "SAFETY_CONCERN": "Safety risk (for example, involving a minor)",
+        "OTHER": "Other reason"
+      },
+      "who": "Who",
+      "theRoom": "The room",
+      "detail": "Detail (optional)",
+      "detailHint": "Up to 300 characters, no HTML. Do not include personal data."
     }
   }
 }

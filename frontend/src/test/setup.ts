@@ -7,6 +7,7 @@ import { useUiStore } from '@/stores/uiStore';
 import { useNetworkStore } from '@/stores/networkStore';
 import { useStackStore } from '@/stores/stackStore';
 import { useDeepWorkStore } from '@/stores/deepWorkStore';
+import { useRoomStore } from '@/stores/roomStore';
 import { DEFAULT_FILTERS } from '@/features/stack/filters';
 import { __resetClientForTests } from '@/lib/api/client';
 import { __resetWakeForTests } from '@/lib/api/wake';
@@ -47,6 +48,7 @@ vi.mock('@/app/lazyPages', async () => {
     legal,
     adminStatus,
     roadmaps,
+    rooms,
   ] = await Promise.all([
     import('@/features/cockpit/CockpitPage'),
     import('@/features/stack/StackPage'),
@@ -61,6 +63,7 @@ vi.mock('@/app/lazyPages', async () => {
     import('@/pages/LegalPage'),
     import('@/features/admin/AdminStatusPage'),
     import('@/features/roadmaps/RoadmapsPage'),
+    import('@/features/rooms/RoomsPage'),
   ]);
   return {
     CockpitPage: cockpit.CockpitPage,
@@ -76,6 +79,7 @@ vi.mock('@/app/lazyPages', async () => {
     LegalPage: legal.LegalPage,
     AdminStatusPage: adminStatus.AdminStatusPage,
     RoadmapsPage: roadmaps.RoadmapsPage,
+    RoomsPage: rooms.RoomsPage,
   };
 });
 
@@ -101,6 +105,7 @@ afterEach(() => {
   });
   localStorage.clear();
   useNetworkStore.setState({ slowRequests: 0 });
+  useRoomStore.setState({ session: null, offsetMs: 0, receivedAt: 0 });
   useStackStore.setState({ filters: DEFAULT_FILTERS, selectedTaskId: null, dialog: null });
   __resetClientForTests();
   __resetWakeForTests();

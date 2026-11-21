@@ -8,6 +8,7 @@ import { PublicPage } from '@/pages/PublicPage';
 import {
   AdminStatusPage,
   RoadmapsPage,
+  RoomsPage,
   CockpitPage,
   DeckPage,
   DeepWorkPage,
@@ -59,6 +60,8 @@ export const routes: RouteObject[] = [
               { path: '/grades', element: <GradesPage /> },
               { path: '/profile', element: <ProfilePage /> },
               { path: '/roadmaps', element: <RoadmapsPage /> },
+              { path: '/rooms', element: <RoomsPage /> },
+              { path: '/rooms/:id', element: <RoomsPage /> },
               { path: '/roadmaps/:slug', element: <RoadmapsPage /> },
               // A página confere o papel (403 sem piscar); o servidor confere de novo.
               { path: '/admin/status', element: <AdminStatusPage /> },

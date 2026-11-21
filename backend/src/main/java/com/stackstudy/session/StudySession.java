@@ -32,6 +32,13 @@ public class StudySession extends BaseEntity {
   @Column(name = "roadmap_node_id")
   private UUID roadmapNodeId;
 
+  // Sala de estudo (source ROOM): só leitura aqui; quem grava é o room.RoomRepository.
+  @Column(name = "room_id", insertable = false, updatable = false)
+  private UUID roomId;
+
+  @Column(name = "counted_seconds", insertable = false, updatable = false)
+  private int countedSeconds;
+
   @Column(name = "started_at", nullable = false)
   private Instant startedAt;
 
@@ -89,6 +96,19 @@ public class StudySession extends BaseEntity {
     s.source = Source.MANUAL;
     s.edit(subjectId, taskId, startedAt, durationMinutes);
     return s;
+  }
+
+  public UUID getRoomId() {
+    return roomId;
+  }
+
+  /** Sessão de sala de estudo: o tempo é contado por heartbeats (ver RoomSessionBridge). */
+  public boolean isRoomSession() {
+    return source == Source.ROOM;
+  }
+
+  public int getCountedSeconds() {
+    return countedSeconds;
   }
 
   public UUID getRoadmapNodeId() {

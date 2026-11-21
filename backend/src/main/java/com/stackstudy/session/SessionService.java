@@ -33,6 +33,7 @@ public class SessionService {
   private final TaskRepository tasks;
   private final DeepWorkSettingsService settings;
   private final RoadmapService roadmaps;
+  private final RoomSessionBridge rooms;
   private final CurrentUser currentUser;
   private final Clock clock;
 
@@ -42,6 +43,7 @@ public class SessionService {
       TaskRepository tasks,
       DeepWorkSettingsService settings,
       RoadmapService roadmaps,
+      RoomSessionBridge rooms,
       CurrentUser currentUser,
       Clock clock) {
     this.sessions = sessions;
@@ -49,20 +51,41 @@ public class SessionService {
     this.tasks = tasks;
     this.settings = settings;
     this.roadmaps = roadmaps;
+    this.rooms = rooms;
     this.currentUser = currentUser;
     this.clock = clock;
   }
 
-  @Transactional(readOnly = true)
+  /**
+   * Sessão ativa (do Deep Work ou de uma sala). Sessão de sala parada há tempo demais é encerrada
+   * aqui (TIMEOUT), sem job em segundo plano.
+   */
+  @Transactional
   public Optional<Session> active() {
     Instant now = clock.instant();
-    return sessions.findByUserIdAndEndedAtIsNull(currentUser.id()).map(s -> Session.from(s, now));
+    UUID userId = currentUser.id();
+    return activeSession(userId)
+        .map(
+            s ->
+                s.isRoomSession()
+                    ? Session.from(
+                        s, now, rooms.liveSeconds(userId, s.getId(), s.getCountedSeconds()))
+                    : Session.from(s, now));
+  }
+
+  /** Ativa, encerrando antes a de sala que expirou. */
+  private Optional<StudySession> activeSession(UUID userId) {
+    Optional<StudySession> s = sessions.findByUserIdAndEndedAtIsNull(userId);
+    if (s.isPresent() && s.get().isRoomSession() && rooms.closeIfStale(userId, s.get().getId())) {
+      return Optional.empty();
+    }
+    return s;
   }
 
   @Transactional
   public Session start(SessionRequests.Start request) {
     UUID userId = currentUser.id();
-    if (sessions.findByUserIdAndEndedAtIsNull(userId).isPresent()) {
+    if (activeSession(userId).isPresent()) {
       throw alreadyActive();
     }
     checkReferences(userId, request.subjectId(), request.taskId());
@@ -169,6 +192,9 @@ public class SessionService {
   @Transactional
   public void delete(UUID id) {
     StudySession session = findOwned(id);
+    if (session.isActive() && session.isRoomSession()) {
+      throw new ApiException(ErrorCode.SESSION_IN_ROOM, "This session belongs to a study room");
+    }
     UUID node = session.getRoadmapNodeId();
     sessions.delete(session);
     sessions.flush();
@@ -221,6 +247,10 @@ public class SessionService {
     StudySession session = findOwned(id);
     if (!session.isActive()) {
       throw new ApiException(ErrorCode.SESSION_NOT_ACTIVE, "Session is not active");
+    }
+    if (session.isRoomSession()) {
+      // O tempo da sala é do servidor da sala: pausar/parar só por lá.
+      throw new ApiException(ErrorCode.SESSION_IN_ROOM, "This session belongs to a study room");
     }
     return session;
   }

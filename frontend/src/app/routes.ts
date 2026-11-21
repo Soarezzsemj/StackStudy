@@ -17,6 +17,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/flashcards', labelKey: 'nav.flashcards', slug: 'flashcards', icon: 'flashcards' },
   { to: '/grades', labelKey: 'nav.grades', slug: 'grades', icon: 'grades' },
   { to: '/roadmaps', labelKey: 'nav.roadmaps', slug: 'roadmaps', icon: 'roadmap' },
+  { to: '/rooms', labelKey: 'nav.rooms', slug: 'rooms', icon: 'users' },
 ];
 
 /** Perfil: fora do menu principal (fica no bloco do usuário, na barra lateral). */

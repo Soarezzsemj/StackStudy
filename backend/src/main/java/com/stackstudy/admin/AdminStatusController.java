@@ -4,6 +4,8 @@ import com.stackstudy.admin.dto.AdminResponses.ErrorRow;
 import com.stackstudy.admin.dto.AdminResponses.Health;
 import com.stackstudy.admin.dto.AdminResponses.Overview;
 import com.stackstudy.admin.dto.AdminResponses.Signup;
+import com.stackstudy.room.RoomService;
+import com.stackstudy.room.dto.RoomResponses.ReportView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -22,9 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminStatusController {
 
   private final AdminStatusService status;
+  private final RoomService rooms;
 
-  public AdminStatusController(AdminStatusService status) {
+  public AdminStatusController(AdminStatusService status, RoomService rooms) {
     this.status = status;
+    this.rooms = rooms;
   }
 
   @GetMapping("/overview")
@@ -49,5 +53,11 @@ public class AdminStatusController {
   @Operation(summary = "Error responses of the last 24 h, by route pattern and status")
   public List<ErrorRow> errors() {
     return status.errors();
+  }
+
+  @GetMapping("/reports")
+  @Operation(summary = "Latest 50 study room reports (read-only; no emails)")
+  public List<ReportView> reports() {
+    return rooms.reportsForAdmin();
   }
 }

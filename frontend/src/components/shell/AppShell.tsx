@@ -8,6 +8,7 @@ import { Topbar } from './Topbar';
 import { StatusBar } from './StatusBar';
 import { CommandPalette } from './CommandPalette';
 import { DeepWorkEngine } from '@/features/deepwork/DeepWorkEngine';
+import { RoomEngine } from '@/features/rooms/RoomEngine';
 import { RouteFallback } from './RouteFallback';
 
 export function AppShell() {
@@ -84,6 +85,7 @@ export function AppShell() {
       <StatusBar />
       <CommandPalette />
       <DeepWorkEngine />
+      <RoomEngine />
     </div>
   );
 }

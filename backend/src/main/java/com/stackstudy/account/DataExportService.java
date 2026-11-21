@@ -73,6 +73,21 @@ public class DataExportService {
     QUERIES.put(
         "roadmapSuggestions",
         "SELECT * FROM roadmap_suggestions WHERE user_id = ? ORDER BY created_at");
+    // Salas de estudo (Fase 10): salas criadas, onde é membro (apelido e privacidade), denúncias
+    // feitas e bloqueios. As sessões da sala já saem em studySessions (source ROOM).
+    QUERIES.put(
+        "studyRoomsOwned",
+        "SELECT id, name, visibility, max_members, weekly_goal_hours, default_mode, created_at"
+            + " FROM study_rooms WHERE owner_id = ? ORDER BY created_at");
+    QUERIES.put(
+        "studyRoomMemberships",
+        "SELECT * FROM study_room_members WHERE user_id = ? ORDER BY joined_at");
+    QUERIES.put(
+        "roomReportsSent",
+        "SELECT id, room_name, reported_nickname, reason, detail, created_at FROM room_reports"
+            + " WHERE reporter_id = ? ORDER BY created_at");
+    QUERIES.put(
+        "userBlocks", "SELECT blocked_id, created_at FROM user_blocks WHERE blocker_id = ?");
     // Métricas de operação (Fase 8): dias com atividade e, para admins, acessos ao painel.
     QUERIES.put(
         "activityDays", "SELECT day FROM user_activity_daily WHERE user_id = ? ORDER BY day");

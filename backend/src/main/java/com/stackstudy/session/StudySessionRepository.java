@@ -60,7 +60,7 @@ public interface StudySessionRepository extends JpaRepository<StudySession, UUID
           """
           SELECT s.subject_id, SUM(s.effective_seconds) AS seconds
           FROM study_sessions s
-          WHERE s.user_id = :userId AND s.ended_at IS NOT NULL
+          WHERE s.user_id = :userId AND s.ended_at IS NOT NULL AND s.subject_id IS NOT NULL
             AND s.started_at >= :from AND s.started_at < :to
           GROUP BY s.subject_id
           HAVING SUM(s.effective_seconds) > 0

@@ -22,7 +22,18 @@ export function StatusBar() {
       className="flex h-statusbar shrink-0 items-center justify-between gap-4 border-t border-border bg-bg px-4 text-xs text-text-muted lg:px-8"
     >
       <div className="flex min-w-0 items-center gap-2" aria-live="off">
-        {active ? (
+        {active?.roomId ? (
+          <Link
+            to={`/rooms/${active.roomId}`}
+            className="flex min-w-0 items-center gap-2 hover:text-text"
+          >
+            <span
+              aria-hidden="true"
+              className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-action motion-reduce:animate-none"
+            />
+            <span className="truncate text-text-secondary">{t('statusbar.room')}</span>
+          </Link>
+        ) : active ? (
           <Link to="/deep-work" className="flex min-w-0 items-center gap-2 hover:text-text">
             <span
               aria-hidden="true"

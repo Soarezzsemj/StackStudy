@@ -25,6 +25,7 @@ public final class SessionResponses {
       UUID subjectId,
       UUID taskId,
       UUID roadmapNodeId,
+      UUID roomId,
       Mode mode,
       Source source,
       Integer plannedMinutes,
@@ -39,11 +40,17 @@ public final class SessionResponses {
       Instant serverTime) {
 
     public static Session from(StudySession s, Instant now) {
+      return from(s, now, s.effectiveSecondsAt(now));
+    }
+
+    /** {@code effectiveSeconds}: na sessão de sala ativa, o valor contado pelo servidor. */
+    public static Session from(StudySession s, Instant now, long effectiveSeconds) {
       return new Session(
           s.getId(),
           s.getSubjectId(),
           s.getTaskId(),
           s.getRoadmapNodeId(),
+          s.getRoomId(),
           s.getMode(),
           s.getSource(),
           s.getPlannedMinutes(),
@@ -51,7 +58,7 @@ public final class SessionResponses {
           s.getEndedAt(),
           s.getPausedAt(),
           s.getPausedSeconds(),
-          s.effectiveSecondsAt(now),
+          effectiveSeconds,
           s.isActive(),
           s.getNote(),
           s.getFocusRating(),

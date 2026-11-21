@@ -305,6 +305,28 @@ Para testar localmente: `ROADMAPS_PREMIUM_ENABLED=true docker compose up`.
 
 ---
 
+## 10. Salas de estudo (presença em memória)
+
+Não há variável nova: os tempos e limites ficam em `stackstudy.rooms.*` no `application.yml` (heartbeat de 30 s, ausente após 2 min, TIMEOUT após 15 min, salvamento a cada 30 min, confirmação de presença a cada 60 min com 5 min para responder; 5 salas por dono, 10 por pessoa; limites de criação, entrada, denúncia e reação).
+
+**Como funciona no plano grátis**
+
+- A presença ("quem está estudando agora"), o cronômetro de cada sessão e as reações ficam **na memória do backend** (`RoomPresence`). O heartbeat não abre transação nem consulta o banco; só grava ao começar, a cada 30 min, ao pausar/retomar/parar e ao encerrar.
+- **Não há job em segundo plano**: sessão sem heartbeat é encerrada (TIMEOUT, com o tempo até o último heartbeat válido) quando alguém lê a presença da sala ou quando a própria pessoa volta ao app.
+- **Reinício/deploy**: a memória zera. No desligamento normal (SIGTERM do Render) o backend grava o que estava em memória; cada sessão se reconstrói no próximo heartbeat (até 30 s) a partir do último salvamento. Num desligamento brusco perde-se no máximo o tempo desde o último salvamento (≤ 30 min). As reações não entregues se perdem.
+- **Neon dormindo**: sala vazia não acorda nada. Com alguém estudando, o backend fica acordado (são requisições a cada 30 s) e o banco recebe poucas consultas por minuto que já existiam antes (checagem da sessão do login a cada 30 s e "última atividade" a cada minuto), não da presença. Ou seja: enquanto alguém estuda numa sala, o Neon tende a não suspender; quando todos saem, volta a dormir.
+- O polling da presença (30 s) e do ranking (2 min) para com a aba oculta; o heartbeat continua (senão o tempo pararia de contar), e o "Ainda está estudando?" evita cronômetro ligado sem estudo.
+
+**Limitações**: a memória vale por instância. Com **mais de uma instância** (ou várias réplicas), cada uma veria só parte da presença e a mesma sessão poderia ser contada em duas. Mantenha uma instância só (é o caso do Render free).
+
+**Para escalar depois** (fora desta fase):
+
+1. Trocar `RoomPresence` e `RoomDirectory` por um armazenamento compartilhado (Redis: hash por sessão com TTL de 2 min, conjunto por sala), mantendo `LiveSession` como regra pura.
+2. Trocar o polling por WebSocket/SSE (Spring WebSocket + STOMP, ou SSE) para empurrar presença e reações; o heartbeat pode virar ping do socket.
+3. Com Redis, o rate limit (`RateLimiter`) e o cache da sessão do login também passam a ser compartilhados.
+
+---
+
 ## O que fazer se…
 
 **O primeiro acesso demora muito (cold start).**

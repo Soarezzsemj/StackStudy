@@ -110,3 +110,36 @@ stackstudy:
     suggestions:
       limit: 5
       window: P1D
+  # Salas de estudo (Fase 10). Presença em memória; heartbeats não tocam no banco.
+  rooms:
+    max-owned-rooms: 5
+    max-memberships: 10
+    timing:
+      # Maior intervalo entre heartbeats que ainda conta (o app manda a cada 30 s).
+      max-credit: PT2M
+      # Sem heartbeat há mais que isso: "ausente" (o tempo para de contar).
+      absent-after: PT2M
+      # Sem heartbeat há mais que isso: encerrada por TIMEOUT (na próxima leitura, sem job).
+      timeout-after: PT15M
+      # Grava o progresso no banco a cada 30 min de sessão (e ao pausar/parar).
+      save-every: PT30M
+      # Tempo corrido: "Ainda está estudando?" a cada 60 min; 5 min para responder.
+      confirm-every: PT60M
+      confirm-grace: PT5M
+    limits:
+      create:
+        limit: 5
+        window: PT1H
+      join:
+        limit: 10
+        window: PT10M
+      report:
+        limit: 5
+        window: P1D
+      # Reações: por remetente e, à parte, por par remetente → destinatário.
+      reaction:
+        limit: 30
+        window: PT1H
+      reaction-pair:
+        limit: 1
+        window: PT10S

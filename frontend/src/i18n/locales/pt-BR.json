@@ -26,7 +26,8 @@
     "design": "Design system",
     "profile": "Perfil",
     "admin": "Administração",
-    "roadmaps": "Roadmaps"
+    "roadmaps": "Roadmaps",
+    "rooms": "Salas de estudo"
   },
   "shell": {
     "root": "~/stackstudy",
@@ -51,7 +52,8 @@
     "gpa": "GPA {{value}}",
     "gpaEmpty": "GPA —",
     "session": "Sessão de foco",
-    "paused": "pausada"
+    "paused": "pausada",
+    "room": "Estudando numa sala"
   },
   "palette": {
     "label": "Paleta de comandos",
@@ -115,7 +117,13 @@
     "REVIEW_NOT_LATEST": "Esta não é a última resposta da carta; só ela pode ser desfeita.",
     "INVALID_CURRENT_PASSWORD": "A senha atual está incorreta.",
     "RATE_LIMITED": "Muitas tentativas seguidas. Espere alguns minutos e tente de novo.",
-    "ROADMAP_STAGE_LOCKED": "Esta etapa ainda não está disponível no seu plano."
+    "ROADMAP_STAGE_LOCKED": "Esta etapa ainda não está disponível no seu plano.",
+    "ROOM_SESSION_ACTIVE": "Você já tem uma sessão aberta numa sala (outra aba ou aparelho).",
+    "SESSION_IN_ROOM": "Essa sessão é de uma sala de estudo: controle pela tela da sala.",
+    "ROOM_FULL": "A sala está cheia.",
+    "ROOM_LIMIT_REACHED": "Você chegou ao limite de salas.",
+    "ROOM_OWNER_CANNOT_LEAVE": "Quem criou a sala não sai dela: apague a sala nas configurações.",
+    "INVALID_INVITE_CODE": "Código de convite inválido."
   },
   "pages": {
     "cockpit": {
@@ -436,7 +444,12 @@
       "delete": "Excluir sessão"
     },
     "topic": "Tópico: {{title}}",
-    "removeTopic": "Tirar tópico"
+    "removeTopic": "Tirar tópico",
+    "inRoom": {
+      "title": "Você está numa sala de estudo",
+      "body": "O tempo dessa sessão é contado pela sala e entra nas suas horas de Deep Work. Pause ou pare por lá.",
+      "open": "Abrir a sala"
+    }
   },
   "grades": {
     "semester": "Semestre",
@@ -1101,7 +1114,7 @@
     "backToApp": "Voltar ao app",
     "backToLogin": "Entrar",
     "updated": "Atualizado em {{date}}",
-    "date": "21 de novembro de 2026 (roadmaps)",
+    "date": "21 de novembro de 2026 (salas de estudo)",
     "terms": {
       "short": "Termos",
       "title": "Termos de uso",
@@ -1205,13 +1218,20 @@
           ]
         },
         {
-          "title": "9. Segurança",
+          "title": "9. Salas de estudo",
+          "body": [
+            "Nas salas, os outros membros veem só o apelido que você escolher para aquela sala, se você está estudando, pausado ou ausente, o tempo da sessão e, se você permitir, a matéria. Não há chat, envio de imagens ou vídeo; as reações são frases prontas. Salas públicas aparecem na busca só com nome, número de membros e meta.",
+            "A presença (\"quem está estudando agora\") e as reações ficam só na memória do servidor e somem ao reiniciar. Guardamos no banco as salas, as participações (apelido e preferências), as sessões de estudo da sala (que somam nas suas horas de Deep Work), os bloqueios e as denúncias que você fizer; as denúncias são lidas só pelo administrador. Você pode sair de uma sala apagando o seu histórico nela; tudo aparece na exportação dos seus dados e é apagado com a exclusão da conta."
+          ]
+        },
+        {
+          "title": "10. Segurança",
           "body": [
             "Conexão sempre criptografada (HTTPS), senha com hash, sessões que você pode encerrar, limite de tentativas de login e acesso aos dados só pela sua conta."
           ]
         },
         {
-          "title": "10. Contato",
+          "title": "11. Contato",
           "body": [
             "Responsável pelo tratamento: o mantenedor do StackStudy. Dúvidas ou pedidos sobre seus dados: privacidade@seu-dominio.com (substitua pelo contato real antes de divulgar)."
           ]
@@ -1473,6 +1493,238 @@
       "send": "Enviar sugestão",
       "thanks": "Obrigado! Sua sugestão foi registrada.",
       "fieldError": "Use só texto (sem < ou >) e respeite o tamanho."
+    }
+  },
+  "rooms": {
+    "title": "Salas de estudo",
+    "description": "Estude junto com outras pessoas, vendo quem está ativo. Sem conversa.",
+    "loading": "Carregando a sala…",
+    "loadError": "Não foi possível carregar.",
+    "notFound": "Sala não encontrada (ou você não faz parte dela).",
+    "aside": "Ranking, reações, salas e segurança",
+    "noChat": "Aqui não existe chat: ninguém troca mensagens, só estuda junto. Os outros veem apenas o seu apelido, o estado e o tempo (e a matéria, se você permitir).",
+    "empty": {
+      "title": "Você ainda não está em nenhuma sala",
+      "body": "Crie uma sala e convide quem você conhece com o código, ou entre numa sala pública."
+    },
+    "confirm": {
+      "title": "Ainda está estudando?",
+      "body": "No tempo corrido, perguntamos a cada 60 minutos. Sem resposta, o cronômetro pausa e o tempo parado não conta.",
+      "countdown": "Tempo para responder: {{time}}",
+      "hint": "Pressione Enter para confirmar.",
+      "expired": "O prazo acabou e o cronômetro pausou. Confirme para voltar a contar.",
+      "yes": "Sim, estou estudando"
+    },
+    "card": {
+      "label": "Sala {{name}}",
+      "studyingNow_one": "{{count}} estudando agora",
+      "studyingNow_other": "{{count}} estudando agora",
+      "subject": "Matéria (opcional)",
+      "noSubject": "Sem matéria",
+      "start": "Começar a estudar",
+      "resume": "Retomar",
+      "pause": "Pausar",
+      "stop": "Parar e salvar",
+      "deepWorkActive": "Você tem uma sessão de Deep Work em andamento.",
+      "openDeepWork": "Abrir Deep Work",
+      "elsewhere": "Você está estudando em outra sala.",
+      "conflict": "Sua sessão está aberta em outra aba, aparelho ou sala.",
+      "takeover": "Encerrar a outra e começar aqui",
+      "note": "O tempo é contado pelo servidor e salvo a cada {{save}} minutos (e ao pausar ou parar). No tempo corrido, a cada {{confirm}} minutos perguntamos se você ainda está estudando."
+    },
+    "mode": {
+      "label": "Modo de contagem",
+      "FREE": "Tempo corrido",
+      "POMODORO": "Pomodoro",
+      "explain": {
+        "FREE": "Cronômetro contínuo: soma todo o tempo em que você está na sala, até em sessões longas.",
+        "POMODORO": "Ciclos de foco e pausa iguais para todos da sala. Só o tempo de foco conta."
+      }
+    },
+    "phase": {
+      "FOCUS": "Foco",
+      "SHORT_BREAK": "Pausa curta",
+      "LONG_BREAK": "Pausa longa",
+      "cycle": "ciclo {{cycle}} de {{of}}",
+      "remaining": "Faltam {{time}} nesta fase"
+    },
+    "pomodoro": {
+      "cycles_one": "{{count}} ciclo concluído nesta sessão",
+      "cycles_other": "{{count}} ciclos concluídos nesta sessão",
+      "shared": "O ciclo é da sala: todos veem a mesma fase."
+    },
+    "free": {
+      "since": "Na sala desde {{time}}",
+      "ready": "Pronto para começar",
+      "elapsed": "Tempo da sessão: {{time}}"
+    },
+    "state": {
+      "STUDYING": "Estudando",
+      "PAUSED": "Pausado",
+      "AUTO_PAUSED": "Pausado (sem confirmação)",
+      "AWAY": "Ausente",
+      "OFFLINE": "Offline",
+      "autoPausedLong": "Pausado: faltou confirmar que você ainda está estudando."
+    },
+    "stats": {
+      "today": "Hoje",
+      "week": "Semana",
+      "longest": "Maior sessão"
+    },
+    "goal": {
+      "progress": "Meta semanal da sala: {{done}} de {{goal}} h"
+    },
+    "members": {
+      "title": "Na sala",
+      "showSubject": "Mostrar minha matéria",
+      "alone": "Só você por aqui",
+      "invite": "Compartilhe o código de convite com quem vai estudar junto.",
+      "you": "(você)",
+      "owner": "Dono da sala",
+      "member": "Membro",
+      "muted": "silenciado",
+      "cycles_one": "{{count}} ciclo",
+      "cycles_other": "{{count}} ciclos",
+      "time": "Sessão: {{time}}",
+      "mute": "Silenciar",
+      "unmute": "Tirar silêncio",
+      "remove": "Remover"
+    },
+    "ranking": {
+      "title": "Ranking",
+      "by": {
+        "FREE": "Por tempo na sala (tempo corrido).",
+        "POMODORO": "Por ciclos concluídos (Pomodoro)."
+      },
+      "period": "Período",
+      "today": "Hoje",
+      "week": "Semana",
+      "empty": "Ninguém estudou neste período ainda.",
+      "cycles_one": "{{count}} ciclo",
+      "cycles_other": "{{count}} ciclos",
+      "hidden": "Você está fora do ranking (dá para mudar em \"Minhas preferências\").",
+      "optOut": "Prefere não aparecer? Mude em \"Minhas preferências\"."
+    },
+    "reactions": {
+      "title": "Reações rápidas",
+      "hint": "Só reações prontas: não existe texto livre entre usuários.",
+      "nobody": "Ninguém mais na sala por enquanto.",
+      "muted": "O dono da sala silenciou suas reações.",
+      "to": "Para",
+      "choose": "Escolha a reação",
+      "kind": {
+        "BORA": "Bora!",
+        "FOCO": "Foco!",
+        "BOA": "Boa!",
+        "FORCA": "Força!"
+      },
+      "sent": "Reação enviada.",
+      "received": "Reações recebidas"
+    },
+    "mine": {
+      "title": "Minhas salas",
+      "studying_one": "{{count}} estudando",
+      "studying_other": "{{count}} estudando"
+    },
+    "create": {
+      "open": "Criar sala",
+      "title": "Nova sala de estudo",
+      "submit": "Criar",
+      "name": "Nome da sala",
+      "nameError": "Use de 3 a 60 caracteres, sem < ou >.",
+      "visibility": "Visibilidade",
+      "mode": "Modo padrão",
+      "goal": "Meta semanal da sala (horas, opcional)"
+    },
+    "join": {
+      "open": "Entrar com código",
+      "title": "Entrar numa sala",
+      "submit": "Entrar",
+      "code": "Código de convite",
+      "codeHint": "12 letras e números, como ABCD-1234-EFGH."
+    },
+    "public": {
+      "title": "Salas públicas",
+      "search": "Buscar por nome",
+      "empty": "Nenhuma sala pública encontrada.",
+      "member": "Você está nela",
+      "meta": "{{members}}/{{max}} membros · {{studying}} estudando",
+      "goal": "meta de {{hours}} h/semana",
+      "open": "Abrir",
+      "join": "Entrar",
+      "full": "Sala cheia"
+    },
+    "safety": {
+      "title": "Regras e segurança",
+      "rule1": "Sem chat, imagens ou vídeo: só apelido, estado e tempo.",
+      "rule2": "Use um apelido, nunca seu nome completo ou dados de contato.",
+      "rule3": "Algo errado? Denuncie a sala ou bloqueie quem incomoda.",
+      "report": "Denunciar sala",
+      "blockWho": "Bloquear usuário",
+      "block": "Bloquear",
+      "blocked": "Bloqueados",
+      "someone": "Usuário",
+      "unblock": "Desbloquear"
+    },
+    "nickname": {
+      "label": "Seu apelido na sala",
+      "hint": "É o que os outros veem. Não use seu nome completo.",
+      "error": "Use de 2 a 24 letras, números, espaço, ponto, hífen ou sublinhado."
+    },
+    "visibility": {
+      "PRIVATE": "Privada (só com código)",
+      "PUBLIC": "Pública (aparece na busca)",
+      "hint": {
+        "PRIVATE": "Só entra quem tiver o código de convite.",
+        "PUBLIC": "Aparece na lista com nome, número de membros e meta; os membros só aparecem para quem entra."
+      }
+    },
+    "me": {
+      "open": "Minhas preferências",
+      "title": "Minhas preferências na sala",
+      "showSubject": "Mostrar a matéria que estou estudando",
+      "hideFromRanking": "Não aparecer no ranking",
+      "historyHint": "Você pode apagar o seu histórico de sessões nesta sala (as horas saem também do Deep Work).",
+      "deleteHistory": "Apagar meu histórico nesta sala",
+      "historyDeleted": "Histórico apagado.",
+      "leaveWithHistory": "Ao sair, apagar também o meu histórico",
+      "leave": "Sair da sala"
+    },
+    "owner": {
+      "open": "Configurar sala",
+      "title": "Configurações da sala",
+      "capacity": "Capacidade (2 a 50)",
+      "pomodoro": "Ciclo Pomodoro da sala (minutos)",
+      "focus": "Foco",
+      "short": "Pausa curta",
+      "long": "Pausa longa",
+      "every": "Pausa longa a cada (ciclos)",
+      "restart": "Recomeçar o ciclo agora",
+      "code": "Código de convite",
+      "codeHint": "Compartilhe só com quem você conhece. Gerar um novo invalida o antigo.",
+      "regenerate": "Gerar novo código",
+      "delete": "Apagar sala",
+      "deleteConfirm": "Apagar a sala para todos? As horas estudadas continuam no Deep Work de cada um.",
+      "deleteYes": "Apagar de vez",
+      "codeInline": "código {{code}}"
+    },
+    "report": {
+      "title": "Denunciar",
+      "submit": "Enviar denúncia",
+      "thanks": "Denúncia enviada. A equipe do StackStudy vai analisar.",
+      "reason": "Motivo",
+      "reasons": {
+        "SPAM": "Spam ou propaganda",
+        "HARASSMENT": "Assédio ou intimidação",
+        "INAPPROPRIATE_NAME": "Nome ou apelido impróprio",
+        "OFFENSIVE_CONTENT": "Conteúdo ofensivo",
+        "SAFETY_CONCERN": "Risco à segurança (por exemplo, de um menor de idade)",
+        "OTHER": "Outro motivo"
+      },
+      "who": "Quem",
+      "theRoom": "A sala",
+      "detail": "Detalhe (opcional)",
+      "detailHint": "Até 300 caracteres, sem HTML. Não inclua dados pessoais."
     }
   }
 }
