@@ -7,6 +7,8 @@ import { LoginPage } from '@/features/auth/LoginPage';
 import { VerifyEmailPage } from '@/features/auth/VerifyEmailPage';
 import { RouteErrorPage } from '@/pages/RouteErrorPage';
 import { PublicPage } from '@/pages/PublicPage';
+import { LEGAL_DOCUMENTS } from '@/content/legal/documents';
+import { LegacyRedirect } from '@/pages/LegacyRedirect';
 import {
   AdminStatusPage,
   RoadmapsPage,
@@ -48,12 +50,15 @@ export const routes: RouteObject[] = [
           { path: '/verify-email', element: <VerifyEmailPage /> },
         ],
       },
+      // Endereços antigos dos documentos legais (Fase 7) continuam valendo.
+      { path: LEGAL_DOCUMENTS.terms.legacyPath, element: <LegacyRedirect to="terms" /> },
+      { path: LEGAL_DOCUMENTS.privacy.legacyPath, element: <LegacyRedirect to="privacy" /> },
       // Públicas, com ou sem login.
       {
         element: <PublicPage />,
         children: [
-          { path: '/terms', element: <LegalPage kind="terms" /> },
-          { path: '/privacy', element: <LegalPage kind="privacy" /> },
+          { path: LEGAL_DOCUMENTS.terms.path, element: <LegalPage kind="terms" /> },
+          { path: LEGAL_DOCUMENTS.privacy.path, element: <LegalPage kind="privacy" /> },
           // Rota interna para conferir o design system (sem login e sem dados).
           { path: '/_design', element: <DesignPage /> },
         ],

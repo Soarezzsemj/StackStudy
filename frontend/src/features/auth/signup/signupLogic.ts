@@ -15,7 +15,6 @@ export const STUDY_AREAS: StudyArea[] = [
   'HUMANITIES',
   'BUSINESS',
   'ARTS_DESIGN',
-  'HIGH_SCHOOL',
   'OTHER',
 ];
 
@@ -176,10 +175,9 @@ export function canGoTo(target: Step, d: SignupDraft): boolean {
 
 /**
  * Faixa de meta semanal sugerida pelo período (só uma referência; a pessoa escolhe). Começo do
- * curso ou ensino médio: menos horas; fim do curso: mais.
+ * curso: menos horas; fim do curso: mais.
  */
-export function suggestedGoal(area: StudyArea | '', period: string): { min: number; max: number } {
-  if (area === 'HIGH_SCHOOL') return { min: 8, max: 15 };
+export function suggestedGoal(period: string): { min: number; max: number } {
   const n = Number(/\d+/.exec(period)?.[0] ?? NaN);
   if (!Number.isFinite(n)) return { min: 8, max: 20 };
   if (n <= 2) return { min: 6, max: 12 };

@@ -204,4 +204,49 @@
   .input[type='time'] {
     color-scheme: dark;
   }
+
+  /* Documentos legais: título menor que o das telas (são longos) */
+  .legal-title {
+    font-size: clamp(2rem, 5vw, 44px);
+  }
+}
+
+/* Impressão: só o texto, preto no branco, sem cabeçalho, rodapé, índice nem botões */
+@media print {
+  body {
+    background: none;
+    color: black;
+  }
+
+  .print-hidden,
+  .legal-toc,
+  #root header,
+  #root footer,
+  #root a[href='#main'] {
+    display: none !important;
+  }
+
+  .legal-doc,
+  .legal-doc * {
+    color: black !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+
+  .legal-doc h2 {
+    break-after: avoid;
+  }
+
+  .legal-doc tr {
+    break-inside: avoid;
+  }
+
+  .legal-table th,
+  .legal-table td {
+    border: 1px solid gray !important;
+  }
+
+  .legal-table {
+    overflow: visible !important;
+  }
 }

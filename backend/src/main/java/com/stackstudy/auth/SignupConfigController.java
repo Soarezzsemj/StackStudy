@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SignupConfigController {
 
   /**
-   * @param minAge idade mínima configurada (ausente = sem número definido; decisão jurídica)
+   * @param minAge idade mínima configurada (padrão 18)
    */
   public record SignupConfig(
       boolean googleEnabled,

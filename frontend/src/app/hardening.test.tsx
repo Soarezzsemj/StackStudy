@@ -75,24 +75,31 @@ describe('acessibilidade: contraste dos tokens', () => {
 // ---------------------------------------------------------------------------
 
 describe('Termos e Privacidade', () => {
-  it('abrem sem login, em pt-BR e en, com as seções da LGPD', async () => {
+  it('abrem sem login; o endereço antigo leva ao novo; em inglês avisa que é só pt-BR', async () => {
     useAuthStore.getState().clear();
     mockApi({});
-    renderWithProviders(routes, { initialEntries: ['/privacy'] });
+    const { router } = renderWithProviders(routes, { initialEntries: ['/privacy'] });
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Política de Privacidade' }),
+      await screen.findByRole('heading', {
+        level: 1,
+        name: 'Política de Privacidade do StackStudy',
+      }),
     ).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/privacidade');
     expect(screen.getByRole('heading', { name: '7. Seus direitos' })).toBeInTheDocument();
-    expect(screen.getByText(/art\. 7º, V, da LGPD/)).toBeInTheDocument();
     const footer = screen.getByRole('navigation', { name: 'Documentos legais' });
-    await userEvent.click(within(footer).getByRole('link', { name: 'Termos' }));
+    await userEvent.click(within(footer).getByRole('link', { name: 'Termos de Uso' }));
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Termos de uso' }),
+      await screen.findByRole('heading', { level: 1, name: 'Termos de Uso do StackStudy' }),
     ).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/termos');
 
     await act(() => i18n.changeLanguage('en'));
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Terms of use' }),
+      await screen.findByText('This document is available in Brazilian Portuguese only.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Termos de Uso do StackStudy' }),
     ).toBeInTheDocument();
     await act(() => i18n.changeLanguage('pt-BR'));
   });

@@ -92,6 +92,10 @@ public class RegistrationService {
     if (!Boolean.TRUE.equals(request.acceptTerms()) || !Boolean.TRUE.equals(request.confirmAge())) {
       throw ApiException.invalidField("acceptTerms", "must be accepted");
     }
+    // Só maiores de 18: a área voltada ao ensino médio fica só para contas antigas.
+    if (request.area() == SignupEnums.StudyArea.HIGH_SCHOOL) {
+      throw ApiException.invalidField("area", "is not available");
+    }
     PasswordPolicy.check("password", request.password(), email);
     // Sempre: o custo do BCrypt não diz se o e-mail existe.
     String hash = passwordEncoder.encode(request.password());

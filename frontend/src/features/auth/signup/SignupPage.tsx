@@ -247,7 +247,6 @@ export function SignupPage() {
             error={error}
             touch={touch}
             suggestion={suggestion.data}
-            config={config.data}
           />
         )}
 

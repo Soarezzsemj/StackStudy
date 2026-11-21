@@ -935,7 +935,9 @@
       "deleteDialogBody": "Everything in {{email}} will be deleted now and cannot be recovered.",
       "typeEmail": "Type {{email}} to confirm",
       "emailMismatch": "Type this account’s email.",
-      "deleteConfirm": "Delete everything"
+      "deleteConfirm": "Delete everything",
+      "legalTitle": "Documents",
+      "legalHint": "Current Terms of Use and Privacy Policy (version {{version}}, in Portuguese)."
     }
   },
   "cockpit": {
@@ -1118,137 +1120,15 @@
     "backHome": "stack.study, home",
     "backToApp": "Back to the app",
     "backToLogin": "Sign in",
-    "updated": "Updated on {{date}}",
-    "date": "November 21, 2026 (sign-up)",
+    "toc": "On this page",
+    "print": "Print",
+    "contact": "Contact",
+    "ptOnly": "This document is available in Brazilian Portuguese only.",
     "terms": {
-      "short": "Terms",
-      "title": "Terms of use",
-      "intro": "These terms apply to everyone who uses StackStudy, a free study organizer. By creating an account, you agree to them.",
-      "sections": [
-        {
-          "title": "1. The service",
-          "body": [
-            "StackStudy helps you organize subjects, tasks, focus sessions, grades and flashcards. It is offered for free, as is, with no availability guarantee: the server may take a while to wake up or be offline."
-          ]
-        },
-        {
-          "title": "2. Your account",
-          "body": [
-            "You are responsible for your password and for everything done with your account. Use an email address that is yours. One person, one account."
-          ]
-        },
-        {
-          "title": "3. Calculations are estimates",
-          "body": [
-            "Averages, required grades, GPA and absence limits follow the rules you set. They do not replace your school’s regulations: always check with it. We are not liable for decisions made only on these numbers."
-          ]
-        },
-        {
-          "title": "4. Acceptable use",
-          "body": [
-            "Do not use the service to attack the system, automate mass access or store illegal content or content you have no rights to. Accounts doing so may be suspended or deleted."
-          ]
-        },
-        {
-          "title": "5. Your data",
-          "body": [
-            "What you add is yours. You can export everything as JSON and delete the account at any time, in your Profile. How we handle data is in the Privacy Policy."
-          ]
-        },
-        {
-          "title": "6. Changes",
-          "body": [
-            "These terms may change. Relevant changes will be announced in the app before they apply. Continuing to use the service afterwards means you agree to the new version."
-          ]
-        }
-      ]
+      "short": "Terms of Use"
     },
     "privacy": {
-      "short": "Privacy",
-      "title": "Privacy Policy",
-      "intro": "This policy explains which data StackStudy processes, why, and your rights under Brazil’s General Data Protection Law (Law 13,709/2018, LGPD).",
-      "sections": [
-        {
-          "title": "1. Which data",
-          "body": [
-            "Account: name, email and password (stored only as a BCrypt hash; nobody can see the password).",
-            "Profile (optional): program, school, term, bio, avatar color, language and time zone.",
-            "Studies: terms, subjects, tasks, focus sessions, assessments, absences, flashcards and preferences.",
-            "Technical: for each sign-in we keep the browser and operating system (User-Agent) so you can recognize your devices. The IP address is used only in memory to limit sign-in attempts and is not stored."
-          ]
-        },
-        {
-          "title": "2. Sign-up",
-          "body": [
-            "To create the account we ask for: email and password (stored only as a hash), name, nickname, area, program, term and institution (program, term and institution are optional), and your routine preferences (weekly goal, focus rhythm, reminders, suggested roadmap and whether you want to appear in room rankings, off by default). They are used to build your Cockpit, suggest a roadmap and set up Deep Work.",
-            "We also keep your consent: the Terms of use and Privacy Policy versions you accepted, the date and the minimum age confirmation, so we can ask again if the texts change. A profile photo is optional and, for now, turned off (your avatar is your initials). In study rooms, your nickname is the only data of yours other people see."
-          ]
-        },
-        {
-          "title": "3. Why",
-          "body": [
-            "Only to run the service: sign you in, show and calculate your data, protect against abuse. The legal basis is performing the service you asked for (LGPD art. 7, V).",
-            "We do not sell data, do not use it for advertising and there are no third-party trackers or analytics."
-          ]
-        },
-        {
-          "title": "4. Cookies and local storage",
-          "body": [
-            "We use a single essential cookie: the session cookie (ss_refresh), HttpOnly and limited to authentication. In the browser we keep the language and a few screen preferences (localStorage)."
-          ]
-        },
-        {
-          "title": "5. Where data lives",
-          "body": [
-            "The app runs on cloud providers: Vercel (website), Render (server) and Neon (PostgreSQL database), with servers in the United States. Weekly encrypted backups are kept privately on GitHub. These providers process data only to host the service."
-          ]
-        },
-        {
-          "title": "6. For how long",
-          "body": [
-            "While the account exists. When you delete the account, the data leaves the database immediately; older backups expire within 90 days."
-          ]
-        },
-        {
-          "title": "7. Your rights",
-          "body": [
-            "At any time you can: see and fix your data (Profile), download everything as JSON (Profile > Privacy and data > Export) and delete the account with all its data (Profile > Delete account). You can also ask about the processing through the contact below."
-          ]
-        },
-        {
-          "title": "8. Operational metrics",
-          "body": [
-            "To run the service we keep aggregated records: the last time each account used the app (updated at most once a minute), the days with activity (one record per day, in UTC) and error counts per route and hour (only the route pattern, such as \"POST /api/auth/refresh\", and the error code; never content, parameters, emails or passwords).",
-            "Only the StackStudy administrator sees these numbers, in a restricted dashboard, always aggregated; the only per-person information is the list of latest sign-ups with a masked email (e.g. an***@domain.com) and the program. Every access to the dashboard is logged. Error counts are deleted after 7 days, dashboard access logs after 90 days and activity days after about 13 months; everything goes away when the account is deleted and shows up in your data export."
-          ]
-        },
-        {
-          "title": "9. Study progress and suggestions",
-          "body": [
-            "If you follow a roadmap, we keep which trails you follow, the weekly goal, the status of each topic (to do, in progress, done), the hours you log and the hours of Deep Work sessions linked to a topic.",
-            "Roadmap suggestions you send are stored with your account for the administrator to read; no email is sent. All of it shows up in your data export and is deleted with the account. Unfollowing a roadmap keeps the progress, so you can come back."
-          ]
-        },
-        {
-          "title": "10. Study rooms",
-          "body": [
-            "In rooms, other members only see the nickname you choose for that room, whether you are studying, paused or away, your session time and, if you allow it, your subject. There is no chat, image or video; reactions are ready-made phrases. Public rooms show up in search with only their name, member count and goal.",
-            "Presence (\"who is studying now\") and reactions live only in the server memory and are gone after a restart. We store the rooms, memberships (nickname and preferences), room study sessions (which add to your Deep Work hours), blocks and the reports you send; reports are only read by the administrator. You can leave a room deleting your history in it; everything shows up in your data export and is deleted with the account."
-          ]
-        },
-        {
-          "title": "11. Security",
-          "body": [
-            "Always-encrypted connection (HTTPS), hashed passwords, sessions you can end, sign-in attempt limits and data access only through your account."
-          ]
-        },
-        {
-          "title": "12. Contact",
-          "body": [
-            "Controller: the StackStudy maintainer. Questions or requests about your data: privacy@your-domain.com (replace with the real contact before launch)."
-          ]
-        }
-      ]
+      "short": "Privacy Policy"
     }
   },
   "admin": {
@@ -1809,7 +1689,7 @@
       "nicknameHint": "This is what shows in study rooms. Do not use your full name.",
       "area": "Area",
       "course": "Program (optional)",
-      "courseHint": "Write it your way, for example: Nursing, Law, high school senior year.",
+      "courseHint": "Write it your way, for example: Nursing, Law, Civil Engineering.",
       "suggestion": "Based on your program, we will suggest the {{title}} roadmap.",
       "period": "Term (optional)",
       "periodHint": "E.g. 3rd semester, 2nd year.",
@@ -1822,7 +1702,6 @@
       "HUMANITIES": "Humanities",
       "BUSINESS": "Business",
       "ARTS_DESIGN": "Arts and design",
-      "HIGH_SCHOOL": "High school/entrance exams",
       "OTHER": "Other"
     },
     "routine": {
@@ -1837,9 +1716,8 @@
       "followRoadmapHint": "It shows on the Cockpit with the next topic.",
       "rooms": "Appear in study rooms",
       "roomsHint": "Show up in the ranking of rooms you join. It stays off if you prefer.",
-      "terms": "I have read and accept the <terms>Terms of use</terms> and the <privacy>Privacy Policy</privacy>.",
-      "age": "I confirm I am at least the minimum age to use StackStudy.",
-      "ageWithNumber": "I confirm I am at least {{age}}, the minimum age to use StackStudy."
+      "terms": "I have read and accept the <terms>Terms of Use</terms> and the <privacy>Privacy Policy</privacy>.",
+      "age": "I am 18 or older"
     },
     "rhythms": {
       "POMODORO_25_5": {
@@ -1871,8 +1749,8 @@
       "periodInvalid": "Use up to 40 characters, no < or >.",
       "institutionInvalid": "Use up to 120 characters, no < or >.",
       "goal": "Pick between 1 and 60 hours.",
-      "terms": "To create the account, accept the Terms of use and the Privacy Policy.",
-      "age": "Confirm you are at least the minimum age."
+      "terms": "To create the account, accept the Terms of Use and the Privacy Policy.",
+      "age": "Confirm you are 18 or older."
     },
     "server": {
       "emailTaken": "Could not create an account with this email. If it is yours, sign in or recover access.",

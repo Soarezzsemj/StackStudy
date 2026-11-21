@@ -154,12 +154,11 @@ stackstudy:
         window: PT10S
   # Cadastro em 3 passos (Fase 11). Versões aceitas ficam no usuário (novo aceite no futuro).
   signup:
-    # Placeholders: datas da última revisão das páginas /terms e /privacy. Troque quando os textos
-    # jurídicos definitivos existirem.
-    terms-version: ${TERMS_VERSION:2026-11-21}
-    privacy-version: ${PRIVACY_VERSION:2026-11-21}
-    # Idade mínima: sem valor = a caixa diz só "a idade mínima" (decisão jurídica pendente).
-    min-age: ${MIN_AGE:}
+    # Versões dos textos em frontend/src/content/legal (mude junto com o arquivo .md).
+    terms-version: ${TERMS_VERSION:1.0}
+    privacy-version: ${PRIVACY_VERSION:1.0}
+    # Idade mínima gravada com a confirmação (o serviço é só para maiores de 18).
+    min-age: ${MIN_AGE:18}
     email-verification-enabled: ${EMAIL_VERIFICATION_ENABLED:false}
     profile-photo-enabled: ${PROFILE_PHOTO_ENABLED:false}
     verification-ttl: PT24H

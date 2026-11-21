@@ -14,8 +14,8 @@ import org.springframework.validation.annotation.Validated;
  *
  * @param termsVersion versão dos Termos de uso aceita no cadastro ({@code TERMS_VERSION})
  * @param privacyVersion versão da Política de Privacidade ({@code PRIVACY_VERSION})
- * @param minAge idade mínima ({@code MIN_AGE}); sem valor = a caixa pede só "a idade mínima", sem
- *     número. A idade e a regra para menores de 18 dependem de decisão jurídica.
+ * @param minAge idade mínima ({@code MIN_AGE}, padrão 18), gravada com a confirmação de idade. O
+ *     serviço é só para maiores de 18 (Termos e Política 1.0).
  * @param emailVerificationEnabled {@code EMAIL_VERIFICATION_ENABLED} (padrão false)
  * @param profilePhotoEnabled {@code PROFILE_PHOTO_ENABLED} (padrão false: não há armazenamento de
  *     imagem no plano grátis; o avatar são as iniciais)

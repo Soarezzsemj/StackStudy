@@ -333,8 +333,8 @@ O cadastro em 3 passos funciona sem configurar nada. As variáveis abaixo são o
 
 | Variável | Padrão | O que faz |
 | --- | --- | --- |
-| `TERMS_VERSION` / `PRIVACY_VERSION` | `2026-11-21` | Versão gravada no aceite de cada conta. **Placeholder** (data da última revisão das páginas `/terms` e `/privacy`): troque quando houver texto jurídico definitivo; contas com versão antiga poderão ser convidadas a aceitar de novo. |
-| `MIN_AGE` | vazio | Idade mínima mostrada na caixa de confirmação ("tenho pelo menos N anos"). Vazio: a caixa diz só "a idade mínima". **Decisão jurídica pendente**, inclusive a regra para menores de 18. O app só registra a confirmação; não pede data de nascimento. |
+| `TERMS_VERSION` / `PRIVACY_VERSION` | `1.0` | Versão gravada no aceite de cada conta. Igual à dos arquivos `frontend/src/content/legal/*.md` (páginas `/termos` e `/privacidade`); mude junto com o texto (ver CLAUDE.md, "Documentos legais"). |
+| `MIN_AGE` | `18` | Idade mínima gravada com a confirmação ("Tenho 18 anos ou mais"). O serviço é só para maiores de 18. O app não pede data de nascimento. |
 | `APP_URL` | `http://localhost:5173` | Endereço do frontend (ex.: `https://<app>.vercel.app`), usado nos links do e-mail e no retorno do Google. |
 | `EMAIL_VERIFICATION_ENABLED` | `false` | Liga a confirmação de e-mail: o cadastro responde "confira seu e-mail" (igual para e-mail novo e já cadastrado, sem enumeração) e o login só entra depois do link. **Em `prod` o boot falha** se estiver ligada sem um `EmailSender` real: hoje só existe o `LogEmailSender` (escreve no log, para desenvolvimento). Escolher e configurar o provedor fica para você. |
 | `PROFILE_PHOTO_ENABLED` | `false` | Upload de foto (JPEG/PNG até 2 MB, conferida pelo conteúdo e regravada sem metadados). **O boot falha** se estiver ligada sem um `ProfilePhotoStorage`: o plano grátis não tem onde guardar arquivos (o disco do Render some a cada deploy). Avatar = iniciais. |
@@ -431,7 +431,7 @@ Quando o cold start incomodar, troque o plano do Render: serviço → **Settings
 | `ADMIN_EMAILS` | não | E-mails (vírgula) de contas **já criadas** que viram ADMIN ao iniciar. Ver "Painel do admin". |
 | `ADMIN_LINK_RENDER` / `_NEON` / `_VERCEL` / `_BACKUP` | não | Links `https://` para os painéis dos provedores no Admin: Status. |
 | `ROADMAPS_PREMIUM_ENABLED` | não | `false` (padrão): roadmaps todos grátis. `true` bloqueia as etapas PREMIUM; não ligue antes de existir assinatura. Ver "Roadmaps". |
-| `TERMS_VERSION`, `PRIVACY_VERSION`, `MIN_AGE`, `APP_URL` | não | Cadastro: versões do aceite (placeholders), idade mínima (pendente) e endereço do frontend. Ver "Cadastro". |
+| `TERMS_VERSION`, `PRIVACY_VERSION`, `MIN_AGE`, `APP_URL` | não | Cadastro: versões do aceite (padrão `1.0`), idade mínima (padrão 18) e endereço do frontend. Ver "Cadastro". |
 | `EMAIL_VERIFICATION_ENABLED`, `PROFILE_PHOTO_ENABLED`, `AUTH_GOOGLE_*` | não | Desligados por padrão; ligar exige provedor/armazenamento/credenciais (o boot falha sem eles). Ver "Cadastro". |
 | `RATE_LIMIT_ENABLED` | não | Limite de tentativas em login/cadastro/refresh (padrão `true`). Em prod, `false` **impede o boot**. |
 | `JWT_ACCESS_TTL` / `JWT_REFRESH_TTL` | não | Validade dos tokens (padrão `PT15M` / `P14D`). |

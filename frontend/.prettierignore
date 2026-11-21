@@ -2,3 +2,5 @@ dist
 coverage
 node_modules
 package-lock.json
+# Textos legais: ficam exatamente como foram aprovados (sem reformatar).
+src/content/legal/*.md

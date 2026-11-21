@@ -64,8 +64,10 @@ entidades JPA nunca saem do service.
 ```
 app/            App, router, lazyPages.ts (code splitting por tela; nos testes o setup troca por
                 imports diretos), NAV_ITEMS (rotas e breadcrumbs), hardening.test.tsx
-pages/          RouteErrorPage (erro/chunk sumido), PublicPage + LegalPage (/terms, /privacy),
-                NotFoundPage, DesignPage
+pages/          RouteErrorPage (erro/chunk sumido), PublicPage + LegalPage (/termos, /privacidade;
+                /terms e /privacy redirecionam via LegacyRedirect), NotFoundPage, DesignPage
+content/legal/  termos.pt-BR.md e privacidade.pt-BR.md (texto jurídico, fora do Prettier),
+                documents.ts (caminho e versão), legalMarkdown.ts (parser sem HTML)
 components/ui/  Button, Card, Chip, ProgressBar, PageTitle, StatBlock, Heatmap, Icon, TextField,
                 SelectField, TextAreaField, Dialog, Loading/Error/EmptyState, Wordmark
 components/shell/ AppShell, Sidebar, Topbar, StatusBar, CommandPalette
@@ -109,7 +111,7 @@ stores/         Zustand: authStore, uiStore, networkStore, flashcardStore (diál
                 do The Stack), deepWorkStore (modo, matéria, ciclo, pausa e tópico de roadmap da
                 próxima sessão; persistido no localStorage), roomStore (minha sessão de sala + diferença de
                 relógio do servidor)
-lib/            keyboard.ts (guardas dos atalhos), useNow.ts (re-render do timer), useDebouncedValue.ts,
+lib/            site.ts (CONTACT_EMAIL, único lugar do e-mail de contato), keyboard.ts (guardas dos atalhos), useNow.ts (re-render do timer), useDebouncedValue.ts,
                 useTimeZone.ts (fuso do perfil ou do navegador), syncUserLanguage.ts (idioma da
                 conta ao entrar), initials.ts (avatar)
 i18n/           react-i18next; locales/pt-BR.json (padrão) e en.json
@@ -403,9 +405,11 @@ Work (ritmo 25/5, 50/10 ou tempo corrido → foco/pausa; meta 1–60 h) e o road
 - **Senha**: `PasswordPolicy` (10–72, lista curta de senhas óbvias, poucos caracteres distintos,
   igual ao e-mail) vale no cadastro e na troca de senha. Frontend tem o espelho em
   `signupLogic.ts` e o indicador de força (4 níveis).
-- **Aceite**: `acceptTerms` e `confirmAge` obrigatórios (`@AssertTrue`). Versões em
-  `stackstudy.signup.*` (`TERMS_VERSION`, `PRIVACY_VERSION`, placeholders); `MIN_AGE` sem valor
-  padrão (decisão jurídica). Contas anteriores à V13 ficam sem aceite gravado.
+- **Aceite**: `acceptTerms` e `confirmAge` ("Tenho 18 anos ou mais") obrigatórios
+  (`@AssertTrue`). Versões em `stackstudy.signup.*` (`TERMS_VERSION`, `PRIVACY_VERSION`, padrão
+  `1.0`, iguais às dos `.md`); `MIN_AGE` padrão 18, gravado em `age_confirmed_min`. Área
+  `HIGH_SCHOOL` não é oferecida nem aceita no cadastro (fica no enum/CHECK só para contas antigas).
+  Contas anteriores à V13 ficam sem aceite gravado.
 - **Enumeração**: verificação desligada = 409 `EMAIL_ALREADY_REGISTERED` com mensagem neutra, BCrypt
   sempre, limite por IP (`RateLimitFilter`) e por e-mail (mesma regra `register`). Verificação
   ligada = 202 idêntico para e-mail novo e existente (o dono recebe um aviso).
@@ -429,6 +433,25 @@ e no primeiro erro; erros só depois de tocar, ligados por `aria-describedby`), 
 `SignupFields` (chips como radiogroup, switches, caixas de aceite), `SignupBrand` (painel e prévia
 do perfil ao vivo; vira cabeçalho curto no celular). Links legais abrem em nova aba (sair apagaria
 o rascunho). `/register` redireciona para `/signup`; `/verify-email` confirma o link.
+
+## Documentos legais (Termos de Uso e Política de Privacidade)
+
+- Texto em `frontend/src/content/legal/termos.pt-BR.md` e `privacidade.pt-BR.md`, **exatamente**
+  como aprovado (o `.prettierignore` deixa os dois de fora). Só pt-BR; em inglês a página avisa.
+- `LegalPage` desenha com `legalMarkdown.ts` (título `#`, seções `##` com âncora, parágrafo, lista
+  `-`, tabela, `**negrito**`): elementos React, nunca `innerHTML` (tag no texto vira texto).
+  Índice "Nesta página" com âncoras, botão Imprimir e CSS de impressão (`@media print`).
+- Rotas públicas `/termos` e `/privacidade`; `/terms` e `/privacy` redirecionam (com a âncora).
+  `LegalLinks` (Termos, Privacidade, Contato `mailto:` com `CONTACT_EMAIL`) fica no login,
+  cadastro, páginas públicas, barra lateral e Perfil › Privacidade e dados.
+- Campos entre colchetes (`[NOME COMPLETO]`, `[CPF/CNPJ]`, `[CIDADE/UF]`) são do dono do projeto.
+  `LegalPage.test.tsx` falha com `APP_ENV=production` enquanto houver colchetes.
+
+**Publicar uma nova versão**: (1) edite o `.md` e a linha `**Versão X · Última atualização: …**`;
+(2) troque `version` em `documents.ts`; (3) troque o padrão de `TERMS_VERSION`/`PRIVACY_VERSION`
+no `application.yml`, no `.env.example` e a variável no Render (um teste confere o yml com o
+`documents.ts`); (4) rode `APP_ENV=production npm test`. Contas novas gravam a versão nova; pedir
+novo aceite a quem aceitou a antiga ainda não existe (fase própria).
 
 ## Salas de estudo (Fase 10)
 
@@ -863,3 +886,6 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
 98. **Idade mínima só confirmada** (`MIN_AGE` sem valor padrão): nenhuma data de nascimento é
     pedida; a regra para menores e o número dependem de decisão jurídica.
 99. Tela de cadastro em chunk próprio (lazy), como as do app.
+100. **Textos legais 1.0 em Markdown versionado** (antes ficavam no i18n, em pt-BR e en, como
+    rascunho): o texto jurídico é um só, em pt-BR, revisado como arquivo. Serviço só para maiores
+    de 18 (`MIN_AGE=18`), o que substitui as Decisões 92 e 98 quanto à idade.

@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card, Dialog, ErrorState, Icon, TextField } from '@/components/ui';
+import { LegalLinks } from '@/components/shell/LegalLinks';
+import { LEGAL_DOCUMENTS } from '@/content/legal/documents';
 import { errorMessage, fieldErrors } from '@/features/auth/errorMessage';
 import type { User } from '@/lib/api/types';
 import { downloadJson, exportFileName } from './helpers';
@@ -21,6 +23,14 @@ export function PrivacySection({ user }: { user: User }) {
       id="privacidade"
     >
       <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-3">
+          <h3 className="label text-text-secondary">{t('profile.privacy.legalTitle')}</h3>
+          <p className="text-sm text-text-secondary">
+            {t('profile.privacy.legalHint', { version: LEGAL_DOCUMENTS.privacy.version })}
+          </p>
+          <LegalLinks className="text-sm" label={t('profile.privacy.legalTitle')} />
+        </div>
+
         <div className="flex flex-col gap-3">
           <h3 className="label text-text-secondary">{t('profile.privacy.exportTitle')}</h3>
           <p className="text-sm text-text-secondary">{t('profile.privacy.exportHint')}</p>

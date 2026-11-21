@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Icon, TextField } from '@/components/ui';
 import type { RoadmapSuggestion, SignupConfig } from '@/lib/api/auth';
+import { LEGAL_DOCUMENTS } from '@/content/legal/documents';
 import { API_URL } from '@/lib/api/config';
 import { cn } from '@/lib/cn';
 import { ChoiceGroup, Consent, Switch } from './SignupFields';
@@ -265,11 +266,9 @@ export function RoutineStep({
   set,
   error,
   suggestion,
-  config,
-}: StepProps & { suggestion?: RoadmapSuggestion | null; config?: SignupConfig }) {
+}: StepProps & { suggestion?: RoadmapSuggestion | null }) {
   const { t } = useTranslation();
-  const range = suggestedGoal(draft.area, draft.period);
-  const minAge = config?.minAge;
+  const range = suggestedGoal(draft.period);
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
@@ -343,7 +342,7 @@ export function RoutineStep({
               // Nova aba: sair da página apagaria o rascunho (que só existe na memória).
               terms: (
                 <Link
-                  to="/terms"
+                  to={LEGAL_DOCUMENTS.terms.path}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-semibold text-action underline underline-offset-4"
@@ -351,7 +350,7 @@ export function RoutineStep({
               ),
               privacy: (
                 <Link
-                  to="/privacy"
+                  to={LEGAL_DOCUMENTS.privacy.path}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-semibold text-action underline underline-offset-4"
@@ -366,7 +365,7 @@ export function RoutineStep({
           onChange={(v) => set('confirmAge', v)}
           error={error('confirmAge')}
         >
-          {minAge ? t('signup.routine.ageWithNumber', { age: minAge }) : t('signup.routine.age')}
+          {t('signup.routine.age')}
         </Consent>
       </div>
     </div>

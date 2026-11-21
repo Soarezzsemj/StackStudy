@@ -282,6 +282,16 @@ describe('Perfil', () => {
       'GET /api/me/export': () => jsonResponse(200, { format: 'stackstudy-export', tasks: [] }),
     });
     const privacy = await screen.findByRole('region', { name: 'Privacidade e dados' });
+    // Documentos legais em vigor, ao lado da exportação e da exclusão.
+    const docs = within(privacy).getByRole('navigation', { name: 'Documentos' });
+    expect(within(docs).getByRole('link', { name: 'Termos de Uso' })).toHaveAttribute(
+      'href',
+      '/termos',
+    );
+    expect(within(docs).getByRole('link', { name: 'Política de Privacidade' })).toHaveAttribute(
+      'href',
+      '/privacidade',
+    );
     await ui.click(within(privacy).getByRole('button', { name: 'Exportar em JSON' }));
     expect(await within(privacy).findByText('Arquivo baixado')).toBeInTheDocument();
     expect(calls(fetchMock, 'GET', '/api/me/export')).toHaveLength(1);

@@ -161,17 +161,21 @@ describe('Cadastro em 3 passos', () => {
 
     // Sem os aceites, não envia; o erro fica ligado à caixa.
     await user.click(screen.getByRole('button', { name: 'Criar minha conta' }));
-    const terms = screen.getByRole('checkbox', { name: /Termos de uso/ });
+    const terms = screen.getByRole('checkbox', { name: /Termos de Uso/ });
     expect(terms).toHaveAttribute('aria-invalid', 'true');
     expect(document.getElementById(terms.getAttribute('aria-describedby')!)).toHaveTextContent(
-      'aceite os Termos de uso',
+      'aceite os Termos de Uso',
     );
     expect(fetchMock.mock.calls.some(([, i]) => i?.method === 'POST')).toBe(false);
     // Links legais abrem em nova aba (o rascunho só existe nesta página).
-    expect(screen.getByRole('link', { name: 'Termos de uso' })).toHaveAttribute('target', '_blank');
+    const consentLinks = screen
+      .getAllByRole('link', { name: 'Termos de Uso' })
+      .filter((a) => a.getAttribute('target') === '_blank');
+    expect(consentLinks).toHaveLength(1);
+    expect(consentLinks[0]).toHaveAttribute('href', '/termos');
 
     await user.click(terms);
-    await user.click(screen.getByRole('checkbox', { name: /idade mínima/ }));
+    await user.click(screen.getByRole('checkbox', { name: 'Tenho 18 anos ou mais' }));
     await user.click(screen.getByRole('button', { name: 'Criar minha conta' }));
     const busy = await screen.findByRole('button', { name: 'Criando sua conta…' });
     expect(busy).toBeDisabled();
@@ -212,8 +216,8 @@ describe('Cadastro em 3 passos', () => {
     await fillProfile(user);
     await user.click(screen.getByRole('button', { name: 'Continuar' }));
     await screen.findByRole('heading', { name: 'Sua rotina de estudos' });
-    await user.click(screen.getByRole('checkbox', { name: /Termos de uso/ }));
-    await user.click(screen.getByRole('checkbox', { name: /idade mínima/ }));
+    await user.click(screen.getByRole('checkbox', { name: /Termos de Uso/ }));
+    await user.click(screen.getByRole('checkbox', { name: 'Tenho 18 anos ou mais' }));
     await user.click(screen.getByRole('button', { name: 'Criar minha conta' }));
     const email = await screen.findByLabelText('E-mail');
     await waitFor(() => expect(email).toHaveAttribute('aria-invalid', 'true'));
@@ -261,9 +265,9 @@ describe('lógica do cadastro', () => {
     expect(passwordStrength('abcdefghijk').level).toBe(2);
     expect(passwordStrength('Abcdefgh12k').level).toBe(3);
     expect(passwordStrength(PASSWORD).level).toBe(4);
-    expect(suggestedGoal('HIGH_SCHOOL', '')).toEqual({ min: 8, max: 15 });
-    expect(suggestedGoal('LAW', '1º período')).toEqual({ min: 6, max: 12 });
-    expect(suggestedGoal('LAW', '9º semestre')).toEqual({ min: 12, max: 25 });
+    expect(suggestedGoal('')).toEqual({ min: 8, max: 20 });
+    expect(suggestedGoal('1º período')).toEqual({ min: 6, max: 12 });
+    expect(suggestedGoal('9º semestre')).toEqual({ min: 12, max: 25 });
     const p = buildPayload(
       {
         ...EMPTY_DRAFT,

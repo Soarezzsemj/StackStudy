@@ -97,10 +97,11 @@ class SignupIntegrationTest extends IntegrationTest {
     assertThat(u.get("deadline_reminders")).isEqualTo(false);
     assertThat(u.get("rooms_visible")).isEqualTo(false);
     // Aceite com as versões configuradas e a confirmação de idade.
-    assertThat(u.get("terms_version")).isEqualTo("2026-11-21");
-    assertThat(u.get("privacy_version")).isEqualTo("2026-11-21");
+    assertThat(u.get("terms_version")).isEqualTo("1.0");
+    assertThat(u.get("privacy_version")).isEqualTo("1.0");
     assertThat(u.get("consent_at")).isNotNull();
     assertThat(u.get("age_confirmed")).isEqualTo(true);
+    assertThat(((Number) u.get("age_confirmed_min")).intValue()).isEqualTo(18);
     assertThat(u.get("role")).isEqualTo("USER");
     assertThat(String.valueOf(u.get("password_hash"))).startsWith("$2").doesNotContain(PASSWORD);
 
@@ -177,6 +178,10 @@ class SignupIntegrationTest extends IntegrationTest {
     Map<String, Object> area = full(AuthTestClient.uniqueEmail());
     area.put("area", "ENGINEERING_ONLY");
     register(area).andExpect(status().isBadRequest());
+    // Ensino médio saiu do cadastro (serviço só para maiores de 18).
+    Map<String, Object> school = full(AuthTestClient.uniqueEmail());
+    school.put("area", "HIGH_SCHOOL");
+    register(school).andExpect(status().isBadRequest());
     Map<String, Object> goal = full(AuthTestClient.uniqueEmail());
     goal.put("weeklyGoalHours", 61);
     register(goal).andExpect(status().isBadRequest());
@@ -243,8 +248,8 @@ class SignupIntegrationTest extends IntegrationTest {
         .andExpect(jsonPath("$.googleEnabled").value(false))
         .andExpect(jsonPath("$.emailVerificationEnabled").value(false))
         .andExpect(jsonPath("$.profilePhotoEnabled").value(false))
-        .andExpect(jsonPath("$.termsVersion").value("2026-11-21"))
-        .andExpect(jsonPath("$.minAge").doesNotExist());
+        .andExpect(jsonPath("$.termsVersion").value("1.0"))
+        .andExpect(jsonPath("$.minAge").value(18));
     mvc.perform(get("/api/auth/google/start")).andExpect(status().isNotFound());
     mvc.perform(get("/api/auth/google/callback").param("code", "x").param("state", "y"))
         .andExpect(status().isNotFound());

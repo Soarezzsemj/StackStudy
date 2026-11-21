@@ -15,7 +15,6 @@ export type StudyArea =
   | 'HUMANITIES'
   | 'BUSINESS'
   | 'ARTS_DESIGN'
-  | 'HIGH_SCHOOL'
   | 'OTHER';
 
 export type FocusRhythm = 'POMODORO_25_5' | 'POMODORO_50_10' | 'FREE';

@@ -136,6 +136,7 @@ docker compose --profile prod up --build backend-prod   # http://localhost:8081/
 
 ## Termos e privacidade
 
-Os Termos de uso e a Política de Privacidade (LGPD) ficam em
-`/terms` e `/privacy` no app, em pt-BR e en, com link no cadastro e no rodapé. **Antes de divulgar,
-troque o contato de privacidade** (`legal.privacy` nos arquivos de idioma).
+Os Termos de Uso e a Política de Privacidade (LGPD), versão 1.0, ficam em `/termos` e
+`/privacidade` no app (só pt-BR), com link no cadastro, no rodapé e no Perfil. O texto está em
+`frontend/src/content/legal/`. **Antes de divulgar, preencha os campos entre colchetes**
+(responsável, CPF/CNPJ e cidade); o teste com `APP_ENV=production` falha enquanto faltarem.
