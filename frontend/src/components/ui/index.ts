@@ -11,6 +11,7 @@ export { Icon, type IconName } from './Icon';
 export { TextField, type TextFieldProps } from './TextField';
 export { Wordmark } from './Wordmark';
 export { Avatar } from './Avatar';
+export { Skeleton } from './Skeleton';
 export { Dialog, type DialogProps } from './Dialog';
 export {
   SelectField,

@@ -64,8 +64,32 @@ public class FlashcardService {
    */
   @Transactional(readOnly = true)
   public List<DeckView> listDecks(String tz) {
-    UUID userId = currentUser.id();
-    ZoneId zone = DeepWorkStatsService.parseZone(tz);
+    return decksToday(currentUser.id(), DeepWorkStatsService.parseZone(tz)).decks();
+  }
+
+  /**
+   * Quanto entra na fila hoje, somando os decks mas sem passar do limite global (a fila corta
+   * assim). Mesmas 4 consultas da lista de decks. Usado pelo Cockpit.
+   */
+  public record TodayCounts(long newToday, long reviewsToday, long totalCards, int decks) {
+    public long dueToday() {
+      return newToday + reviewsToday;
+    }
+  }
+
+  @Transactional(readOnly = true)
+  public TodayCounts todayCounts(ZoneId zone) {
+    DecksToday d = decksToday(currentUser.id(), zone);
+    long newToday = Math.min(d.decks().stream().mapToLong(DeckView::newToday).sum(), d.globalNew());
+    long reviews =
+        Math.min(d.decks().stream().mapToLong(DeckView::dueToday).sum(), d.globalReviews());
+    long total = d.decks().stream().mapToLong(DeckView::totalCards).sum();
+    return new TodayCounts(newToday, reviews, total, d.decks().size());
+  }
+
+  private record DecksToday(List<DeckView> decks, int globalNew, int globalReviews) {}
+
+  private DecksToday decksToday(UUID userId, ZoneId zone) {
     LocalDate today = LocalDate.now(clock.withZone(zone));
     Instant startOfToday = today.atStartOfDay(zone).toInstant();
     FlashcardSettings s = settings.forUser(userId);
@@ -105,7 +129,7 @@ public class FlashcardService {
               Math.min(c[1], newLeft),
               Math.min(c[2], reviewLeft)));
     }
-    return out;
+    return new DecksToday(out, globalNew, globalReviews);
   }
 
   @Transactional

@@ -28,7 +28,9 @@ describe('auth flow (UI)', () => {
     await userEvent.type(screen.getByLabelText('Senha'), 'correct-horse');
     await userEvent.click(screen.getByRole('button', { name: 'Entrar' }));
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Cockpit' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: /^(Bom dia|Boa tarde|Boa noite)/ }),
+    ).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/');
     expect(screen.getByRole('navigation', { name: 'Navegação principal' })).toBeInTheDocument();
     expect(screen.getByText('Nenhuma sessão ativa')).toBeInTheDocument();
@@ -81,7 +83,7 @@ describe('auth flow (UI)', () => {
     useAuthStore.getState().setSession('t1', testUser);
     mockApi();
     const { router } = renderWithProviders(routes, { initialEntries: ['/'] });
-    await screen.findByRole('heading', { level: 1, name: 'Cockpit' });
+    await screen.findByRole('heading', { level: 1, name: /^(Bom dia|Boa tarde|Boa noite)/ });
 
     await userEvent.keyboard('{Control>}k{/Control}');
     const option = await screen.findByRole('option', { name: /Ir para Flashcards/ });

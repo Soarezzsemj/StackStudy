@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { Command } from 'cmdk';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { NAV_ITEMS } from '@/app/routes';
+import { NAV_ITEMS, PROFILE_ITEM } from '@/app/routes';
+import { authApi } from '@/lib/api/auth';
 import { Icon } from '@/components/ui';
 import { useUiStore } from '@/stores/uiStore';
 import { useStackStore, type StackDialog } from '@/stores/stackStore';
@@ -29,7 +30,14 @@ const ACTIONS: { key: string; icon: IconName; dialog: StackDialog }[] = [
   { key: 'palette.newSemester', icon: 'calendar', dialog: { kind: 'semesterForm' } },
 ];
 
-/** Paleta global (Ctrl/Cmd+K): ações rápidas e navegação. */
+/** Atalhos para as seções do Perfil. */
+const ACCOUNT_LINKS: { key: string; icon: IconName; to: string }[] = [
+  { key: 'palette.preferences', icon: 'user', to: '/profile#preferencias' },
+  { key: 'palette.sessions', icon: 'globe', to: '/profile#conta' },
+  { key: 'palette.exportData', icon: 'archive', to: '/profile#privacidade' },
+];
+
+/** Paleta global (Ctrl/Cmd+K): ações rápidas, foco, conta e navegação entre todas as telas. */
 export function CommandPalette() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -166,8 +174,36 @@ export function CommandPalette() {
             })
           )}
         </Command.Group>
+        <Command.Group heading={t('palette.account')} className={GROUP_CLASS}>
+          {ACCOUNT_LINKS.map((link) => (
+            <Command.Item
+              key={link.key}
+              value={t(link.key)}
+              onSelect={() => run(() => navigate(link.to))}
+              className={ITEM_CLASS}
+            >
+              <Icon name={link.icon} size={18} />
+              <span className="flex-1">{t(link.key)}</span>
+            </Command.Item>
+          ))}
+          <Command.Item
+            value={t('palette.logout')}
+            onSelect={() =>
+              run(() => {
+                void authApi
+                  .logout()
+                  .catch(() => undefined)
+                  .then(() => navigate('/login', { replace: true }));
+              })
+            }
+            className={ITEM_CLASS}
+          >
+            <Icon name="logout" size={18} />
+            <span className="flex-1">{t('palette.logout')}</span>
+          </Command.Item>
+        </Command.Group>
         <Command.Group heading={t('palette.navigate')} className={GROUP_CLASS}>
-          {NAV_ITEMS.map((item) => {
+          {[...NAV_ITEMS, PROFILE_ITEM].map((item) => {
             const label = t('palette.goTo', { page: t(item.labelKey) });
             return (
               <Command.Item

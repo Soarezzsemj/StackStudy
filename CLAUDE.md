@@ -22,7 +22,7 @@ Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 2
 | 3 | Grade Predictor: avaliações, nota necessária, exame final, what-if, faltas, CR/GPA | ✅ |
 | 4 | Flashcards: decks, cartas Markdown, SM-2 puro, fila diária com limites, revisão, CSV | ✅ |
 | 5 | Perfil e preferências: perfil, padrões das fases, e-mail/senha, sessões, exportar/excluir (LGPD) | ✅ |
-| 6 | Cockpit e polimento: dashboard, radar de risco, estados vazios, atalhos | ⏳ |
+| 6 | Cockpit: home agregada (1 chamada), próximo passo, radar de risco, primeiros passos, Ctrl K | ✅ |
 
 ## Estrutura
 
@@ -40,7 +40,7 @@ DEPLOY.md            passo a passo do deploy (Neon + Render + Vercel) e backup
 ### Backend (`com.stackstudy`)
 
 Pacotes por feature: `auth` (inclui `AuthSession`), `account` (perfil, preferências, conta,
-exportação), `subject` (inclui semestres), `task`, `session`, `flashcard`, `grade`, `common`. Em cada feature: `*Controller` → `*Service` → `*Repository`, DTOs em `dto/` (records),
+exportação), `cockpit` (home agregada), `subject` (inclui semestres), `task`, `session`, `flashcard`, `grade`, `common`. Em cada feature: `*Controller` → `*Service` → `*Repository`, DTOs em `dto/` (records),
 entidades JPA nunca saem do service.
 
 - `common.error`: `ApiException` + `ErrorCode` + `GlobalExceptionHandler`. Toda resposta de erro
@@ -76,6 +76,9 @@ features/deepwork/ DeepWorkPage, TimerCard, InsightsSections (stats, heatmap, hi
 features/stack/ StackPage, SubjectPanel, TaskToolbar (filtros + criação rápida), TaskList,
                 Task/Subject/Semester dialogs; lógica pura e testada em due.ts, grouping.ts,
                 filters.ts, shortcuts.ts; queries.ts (TanStack Query)
+features/cockpit/ CockpitPage, NextStepCard (hero), CockpitSections (resumo, prazos, radar,
+                prova, mini heatmap, primeiros passos, ações rápidas), CockpitSkeleton; lógica
+                pura e testada em nextStep.ts (próximo passo, saudação, checklist)
 features/profile/ ProfilePage (Perfil, Preferências, Conta, Privacidade), *Section, queries.ts;
                 lógica pura e testada em helpers.ts (formulário ↔ PATCH, User-Agent, fusos, download)
 lib/api/        client.ts (fetch, refresh automático, retry de GET), auth.ts, stack.ts, deepwork.ts,
@@ -298,6 +301,30 @@ Regras (`flashcard.Sm2`, puro e testado):
 - CSV (`CardCsv`, RFC 4180): `frente,verso[,tags]`, cabeçalho opcional, até 1 MB e 2.000 linhas;
   linha inválida vira erro com código (o frontend traduz) e não derruba as outras.
 
+## Cockpit (Fase 6)
+
+`GET /api/cockpit?tz=` (fuso IANA; o frontend manda `useTimeZone()`), numa transação só leitura:
+
+- Foco de hoje e da semana, meta do dia (semanal ÷ 7, para cima no minuto) e da semana,
+  sequência atual e recorde, mini heatmap de 12 semanas (seg–dom). Só sessões encerradas.
+- Prazos em aberto: atrasadas + próximos 7 dias (até 10 de cada; totais à parte) e próxima prova
+  (`EXAM` em aberto, em qualquer data).
+- Cartas de hoje: soma dos decks, cortada pelo limite global (`FlashcardService.todayCounts`).
+- Em risco: passar direto já não dá (`IMPOSSIBLE`, `FAILED`, `EXAM`) ou faltas `WARNING`/`OVER`;
+  trancadas ficam de fora. A matéria vem inteira e a mensagem sai de `gradeHeadline`.
+- Primeiros passos: semestre, matéria, tarefa, sessão de foco (e deck), numa consulta `EXISTS`.
+
+**16 consultas fixas**, qualquer volume de dados (lista no javadoc de `CockpitService`);
+`CockpitIntegrationTest` mede com as estatísticas do Hibernate e falha se o número mudar ou
+crescer com os dados. Índices já existentes: tasks (user_id, status, due_date), study_sessions
+(user_id, started_at), cards (user_id, due_on).
+
+Frontend: próximo passo (sessão ativa > criar semestre/matéria > atrasada > prova em até 3 dias >
+cartas > prazo em 24 h > meta de foco > tudo em dia). Sem semestre ou matéria, só o checklist
+(nada de cartões zerados). Carregando: esqueleto com o desenho da tela, mais o aviso global
+"Acordando o servidor…". Ctrl K: ações, foco, conta (preferências, dispositivos, exportar, sair)
+e navegação para todas as telas, inclusive Perfil (com `#seção`).
+
 ## Auth (como funciona)
 
 - `POST /api/auth/register|login` → `{ accessToken, tokenType, expiresIn, user }` + cookie
@@ -513,3 +540,8 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
     hashes de senha/token são filtrados também por nome de coluna.
 61. Sem limite de tentativas na senha atual (como no login). Se virar problema, rate limit por
     usuário nos endpoints de `/api/me` que pedem senha.
+62. **Cockpit compõe os serviços das fases** (visão geral das notas, contagens dos decks) em vez de
+    SQL próprio para tudo: risco e "cartas de hoje" são os mesmos das telas. Custo: 16 consultas.
+63. **Sem índice novo na Fase 6**: as consultas do Cockpit caem nos índices da V2, V3 e V5.
+64. `PlaceholderPage` ficou sem uso (o Cockpit era a última página provisória); mantida para
+    módulos futuros.

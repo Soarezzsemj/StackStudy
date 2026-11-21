@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { LoadingState, PageTitle } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { AccountSection } from './AccountSection';
@@ -17,6 +19,12 @@ const SECTIONS = [
 export function ProfilePage() {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
+  const { hash } = useLocation();
+  // Ctrl K abre direto numa seção (/profile#preferencias): rola até ela.
+  useEffect(() => {
+    if (!hash || !user) return;
+    document.getElementById(hash.slice(1))?.scrollIntoView?.({ block: 'start' });
+  }, [hash, user]);
 
   return (
     <>

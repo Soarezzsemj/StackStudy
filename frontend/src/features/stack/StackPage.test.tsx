@@ -279,7 +279,7 @@ describe('The Stack page', () => {
       'GET /api/subjects': () => jsonResponse(200, [anatomy]),
     });
     const { router } = renderWithProviders(routes, { initialEntries: ['/'] });
-    await screen.findByRole('heading', { level: 1, name: 'Cockpit' });
+    await screen.findByRole('heading', { level: 1, name: /^(Bom dia|Boa tarde|Boa noite)/ });
 
     await userEvent.keyboard('{Control>}k{/Control}');
     await userEvent.click(await screen.findByRole('option', { name: /Nova matéria/ }));

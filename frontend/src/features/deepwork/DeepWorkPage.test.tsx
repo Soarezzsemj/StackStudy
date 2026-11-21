@@ -232,7 +232,7 @@ describe('Deep Work page', () => {
       { 'POST /api/deepwork/sessions': () => jsonResponse(201, activeSession(0)) },
       '/',
     );
-    await screen.findByRole('heading', { level: 1, name: 'Cockpit' });
+    await screen.findByRole('heading', { level: 1, name: /^(Bom dia|Boa tarde|Boa noite)/ });
     await userEvent.keyboard('{Control>}k{/Control}');
     await userEvent.click(await screen.findByRole('option', { name: /Iniciar foco em Anatomia/ }));
     await waitFor(() => expect(router.state.location.pathname).toBe('/deep-work'));

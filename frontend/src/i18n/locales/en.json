@@ -64,7 +64,12 @@
     "startFocus": "Start focus on {{subject}}",
     "goToSession": "Go to the active session",
     "newCard": "New card",
-    "reviewCards": "Review flashcards"
+    "reviewCards": "Review flashcards",
+    "account": "Account",
+    "preferences": "Preferences",
+    "sessions": "Signed-in devices",
+    "exportData": "Export my data",
+    "logout": "Sign out"
   },
   "auth": {
     "tagline": "The student's cockpit.",
@@ -903,6 +908,158 @@
       "typeEmail": "Type {{email}} to confirm",
       "emailMismatch": "Type this account’s email.",
       "deleteConfirm": "Delete everything"
+    }
+  },
+  "cockpit": {
+    "loading": "Loading the Cockpit…",
+    "loadError": "Could not load the Cockpit.",
+    "greeting": {
+      "morning": "Good morning, {{name}}",
+      "afternoon": "Good afternoon, {{name}}",
+      "evening": "Good evening, {{name}}",
+      "morningNoName": "Good morning",
+      "afternoonNoName": "Good afternoon",
+      "eveningNoName": "Good evening"
+    },
+    "next": {
+      "eyebrow": "Next step",
+      "activeSession": {
+        "title": "Your focus session is running",
+        "body": "Go back to the timer to pause or finish it.",
+        "action": "Go to the session"
+      },
+      "setup": {
+        "semester": {
+          "title": "Start by creating your term",
+          "body": "Subjects, tasks and grades live inside it.",
+          "action": "Create term"
+        },
+        "subject": {
+          "title": "Add your first subject",
+          "body": "Subjects organize deadlines, focus and grades.",
+          "action": "Add subject"
+        }
+      },
+      "overdue": {
+        "title": "Take care of: {{title}}",
+        "body_one": "This task is overdue (due {{due}}).",
+        "body_other": "{{count}} overdue tasks; this is the oldest (due {{due}}).",
+        "action": "Open The Stack"
+      },
+      "exam": {
+        "title": "Exam coming up: {{title}}",
+        "body_one": "{{count}} day left. How about a study session now?",
+        "body_other": "{{count}} days left. How about a study session now?",
+        "action": "Study now"
+      },
+      "review": {
+        "title_one": "{{count}} card to review today",
+        "title_other": "{{count}} cards to review today",
+        "body": "A few minutes of review today keeps tomorrow’s pile small.",
+        "action": "Review cards"
+      },
+      "dueSoon": {
+        "title": "Hand in: {{title}}",
+        "body": "Due {{due}}.",
+        "action": "Open The Stack"
+      },
+      "focus": {
+        "title_one": "{{count}} minute left for today’s goal",
+        "title_other": "{{count}} minutes left for today’s goal",
+        "body": "Pick a subject and start a focus session.",
+        "action": "Start focus"
+      },
+      "allDone": {
+        "title": "All caught up",
+        "body": "No overdue tasks, no cards waiting and today’s focus goal reached. Nice work."
+      }
+    },
+    "actions": {
+      "label": "Quick actions",
+      "startFocus": "Start focus",
+      "goToSession": "Go to the session",
+      "review": "Review cards",
+      "newTask": "New task",
+      "paletteHint": "or Ctrl K for everything"
+    },
+    "summary": {
+      "label": "Today at a glance",
+      "focusToday": "Focus today",
+      "minutes": "min",
+      "ofGoal": "of today’s {{goal}} min goal",
+      "noGoal": "No goal set",
+      "focusTodayProgress": "Today’s focus goal",
+      "week": "Week",
+      "weekGoal": "Weekly goal: {{goal}}",
+      "weekProgress": "Weekly focus goal",
+      "streak": "Streak",
+      "days_one": "day",
+      "days_other": "days",
+      "longest_one": "Best: {{count}} day",
+      "longest_other": "Best: {{count}} days",
+      "cards": "Cards today",
+      "cardsSplit": "{{reviews}} reviews · {{news}} new",
+      "noCards": "No cards yet"
+    },
+    "deadlines": {
+      "title": "Deadlines",
+      "all": "See all",
+      "overdue_one": "{{count}} overdue",
+      "overdue_other": "{{count}} overdue",
+      "upcoming_one": "{{count}} in the next 7 days",
+      "upcoming_other": "{{count}} in the next 7 days",
+      "more_one": "and {{count}} more in The Stack",
+      "more_other": "and {{count}} more in The Stack",
+      "noSubject": "No subject",
+      "emptyTitle": "Nothing for the next 7 days",
+      "emptyBody": "Add exams and assignments with a due date to see them here."
+    },
+    "risk": {
+      "title": "Risk radar",
+      "open": "Open grades",
+      "none": "No subject at risk right now.",
+      "absencesNear": "Absences near the limit: {{used}} of {{allowed}}",
+      "absencesOver": "Absences over the limit: {{used}} of {{allowed}}"
+    },
+    "exam": {
+      "title": "Next exam",
+      "none": "No exam yet. Create a task of type Exam.",
+      "inDays_zero": "Today",
+      "inDays_one": "In {{count}} day",
+      "inDays_other": "In {{count}} days"
+    },
+    "heatmap": {
+      "title": "Last weeks",
+      "open": "Open Deep Work",
+      "label": "Focus in the last 12 weeks: {{hours}}"
+    },
+    "onboarding": {
+      "title": "First steps",
+      "hint": "Four steps and the Cockpit starts showing your deadlines, focus and risks.",
+      "progress": "{{done}} of {{total}} done",
+      "done": "Done",
+      "steps": {
+        "semester": {
+          "title": "Create the term",
+          "body": "A term with start and end dates.",
+          "action": "Create term"
+        },
+        "subject": {
+          "title": "Add a subject",
+          "body": "Subjects organize tasks, focus and grades.",
+          "action": "Add subject"
+        },
+        "task": {
+          "title": "Create a task",
+          "body": "An exam, assignment or reading with a due date.",
+          "action": "Create task"
+        },
+        "focus": {
+          "title": "Do your first focus session",
+          "body": "Pomodoro or Flow tied to a subject.",
+          "action": "Start focus"
+        }
+      }
     }
   }
 }

@@ -64,7 +64,12 @@
     "startFocus": "Iniciar foco em {{subject}}",
     "goToSession": "Ir para a sessão ativa",
     "newCard": "Nova carta",
-    "reviewCards": "Revisar flashcards"
+    "reviewCards": "Revisar flashcards",
+    "account": "Conta",
+    "preferences": "Preferências",
+    "sessions": "Dispositivos conectados",
+    "exportData": "Exportar meus dados",
+    "logout": "Sair da conta"
   },
   "auth": {
     "tagline": "O cockpit do estudante.",
@@ -903,6 +908,158 @@
       "typeEmail": "Digite {{email}} para confirmar",
       "emailMismatch": "Digite o e-mail desta conta.",
       "deleteConfirm": "Excluir tudo"
+    }
+  },
+  "cockpit": {
+    "loading": "Carregando o Cockpit…",
+    "loadError": "Não foi possível carregar o Cockpit.",
+    "greeting": {
+      "morning": "Bom dia, {{name}}",
+      "afternoon": "Boa tarde, {{name}}",
+      "evening": "Boa noite, {{name}}",
+      "morningNoName": "Bom dia",
+      "afternoonNoName": "Boa tarde",
+      "eveningNoName": "Boa noite"
+    },
+    "next": {
+      "eyebrow": "Próximo passo",
+      "activeSession": {
+        "title": "Sua sessão de foco está rolando",
+        "body": "Volte para o timer quando quiser pausar ou concluir.",
+        "action": "Ir para a sessão"
+      },
+      "setup": {
+        "semester": {
+          "title": "Comece criando o seu semestre",
+          "body": "Matérias, tarefas e notas ficam dentro dele.",
+          "action": "Criar semestre"
+        },
+        "subject": {
+          "title": "Adicione a primeira matéria",
+          "body": "Com as matérias, dá para organizar prazos, foco e notas.",
+          "action": "Adicionar matéria"
+        }
+      },
+      "overdue": {
+        "title": "Resolver: {{title}}",
+        "body_one": "Esta tarefa está atrasada (prazo {{due}}).",
+        "body_other": "{{count}} tarefas atrasadas; esta é a mais antiga (prazo {{due}}).",
+        "action": "Ver na The Stack"
+      },
+      "exam": {
+        "title": "Prova chegando: {{title}}",
+        "body_one": "Falta {{count}} dia. Que tal uma sessão de estudo agora?",
+        "body_other": "Faltam {{count}} dias. Que tal uma sessão de estudo agora?",
+        "action": "Estudar agora"
+      },
+      "review": {
+        "title_one": "{{count}} carta para revisar hoje",
+        "title_other": "{{count}} cartas para revisar hoje",
+        "body": "Poucos minutos de revisão hoje evitam a pilha de amanhã.",
+        "action": "Revisar cartas"
+      },
+      "dueSoon": {
+        "title": "Entregar: {{title}}",
+        "body": "O prazo é {{due}}.",
+        "action": "Ver na The Stack"
+      },
+      "focus": {
+        "title_one": "Falta {{count}} minuto para a meta de hoje",
+        "title_other": "Faltam {{count}} minutos para a meta de hoje",
+        "body": "Escolha uma matéria e comece uma sessão de foco.",
+        "action": "Iniciar foco"
+      },
+      "allDone": {
+        "title": "Tudo em dia",
+        "body": "Sem atrasos, sem cartas pendentes e meta de foco batida. Bom trabalho."
+      }
+    },
+    "actions": {
+      "label": "Ações rápidas",
+      "startFocus": "Iniciar foco",
+      "goToSession": "Ir para a sessão",
+      "review": "Revisar cartas",
+      "newTask": "Nova tarefa",
+      "paletteHint": "ou Ctrl K para tudo"
+    },
+    "summary": {
+      "label": "Resumo do dia",
+      "focusToday": "Foco hoje",
+      "minutes": "min",
+      "ofGoal": "de {{goal}} min da meta do dia",
+      "noGoal": "Sem meta definida",
+      "focusTodayProgress": "Meta de foco de hoje",
+      "week": "Semana",
+      "weekGoal": "Meta semanal: {{goal}}",
+      "weekProgress": "Meta semanal de foco",
+      "streak": "Sequência",
+      "days_one": "dia",
+      "days_other": "dias",
+      "longest_one": "Recorde: {{count}} dia",
+      "longest_other": "Recorde: {{count}} dias",
+      "cards": "Cartas hoje",
+      "cardsSplit": "{{reviews}} revisões · {{news}} novas",
+      "noCards": "Nenhuma carta ainda"
+    },
+    "deadlines": {
+      "title": "Prazos",
+      "all": "Ver todos",
+      "overdue_one": "{{count}} atrasada",
+      "overdue_other": "{{count}} atrasadas",
+      "upcoming_one": "{{count}} nos próximos 7 dias",
+      "upcoming_other": "{{count}} nos próximos 7 dias",
+      "more_one": "e mais {{count}} na The Stack",
+      "more_other": "e mais {{count}} na The Stack",
+      "noSubject": "Sem matéria",
+      "emptyTitle": "Nada para os próximos 7 dias",
+      "emptyBody": "Cadastre provas e trabalhos com prazo para eles aparecerem aqui."
+    },
+    "risk": {
+      "title": "Radar de risco",
+      "open": "Abrir notas",
+      "none": "Nenhuma matéria em risco agora.",
+      "absencesNear": "Faltas perto do limite: {{used}} de {{allowed}}",
+      "absencesOver": "Faltas acima do limite: {{used}} de {{allowed}}"
+    },
+    "exam": {
+      "title": "Próxima prova",
+      "none": "Nenhuma prova cadastrada. Crie uma tarefa do tipo Prova.",
+      "inDays_zero": "É hoje",
+      "inDays_one": "Em {{count}} dia",
+      "inDays_other": "Em {{count}} dias"
+    },
+    "heatmap": {
+      "title": "Últimas semanas",
+      "open": "Abrir Deep Work",
+      "label": "Foco nas últimas 12 semanas: {{hours}}"
+    },
+    "onboarding": {
+      "title": "Primeiros passos",
+      "hint": "Quatro passos e o Cockpit passa a mostrar seus prazos, foco e riscos.",
+      "progress": "{{done}} de {{total}} feitos",
+      "done": "Feito",
+      "steps": {
+        "semester": {
+          "title": "Criar o semestre",
+          "body": "Período letivo com início e fim.",
+          "action": "Criar semestre"
+        },
+        "subject": {
+          "title": "Adicionar uma matéria",
+          "body": "As matérias organizam tarefas, foco e notas.",
+          "action": "Adicionar matéria"
+        },
+        "task": {
+          "title": "Criar uma tarefa",
+          "body": "Uma prova, trabalho ou leitura com prazo.",
+          "action": "Criar tarefa"
+        },
+        "focus": {
+          "title": "Fazer a primeira sessão de foco",
+          "body": "Pomodoro ou Flow ligado a uma matéria.",
+          "action": "Iniciar foco"
+        }
+      }
     }
   }
 }
