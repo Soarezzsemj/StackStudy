@@ -101,6 +101,8 @@ public class SubjectService {
         request.workloadHours(),
         color,
         request.status() == null ? SubjectStatus.IN_PROGRESS : request.status());
+    // PUT substitui tudo: sem regra = herda a preferência (o resto da regra própria fica).
+    subject.setGradeMethod(request.gradingRule() == null ? null : request.gradingRule().name());
   }
 
   private Map<UUID, Long> pendingCounts(List<Subject> list) {

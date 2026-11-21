@@ -15,15 +15,17 @@ import { todayInput } from '@/features/stack/due';
 import {
   GPA_SCALES,
   GPA_WEIGHTS,
-  GRADE_METHODS,
   type GpaScale,
   type GpaWeight,
   type GradeMethod,
   type GradeSettings,
   type SubjectGrades,
 } from '@/lib/api/grades';
-import { formatNumber } from './format';
+import { cn } from '@/lib/cn';
+import { formatGrade, formatNumber } from './format';
 import { numberOrNull, toInput } from './formValues';
+import { GradingRulePicker } from './GradingRulePicker';
+import { plannedPointsOf } from './simulation';
 import {
   useAbsences,
   useCreateAbsence,
@@ -52,6 +54,8 @@ export function GradeSettingsDialog({
   const [gpaScale, setGpaScale] = useState<GpaScale>(settings.gpaScale);
   const [gpaWeight, setGpaWeight] = useState<GpaWeight>(settings.gpaWeight);
   const [examEnabled, setExamEnabled] = useState(settings.finalExamEnabled);
+  const [roundBefore, setRoundBefore] = useState(settings.roundBeforeCompare);
+  const [roundingScale, setRoundingScale] = useState(settings.roundingScale);
   const [form, setForm] = useState({
     scaleMax: toInput(settings.scaleMax),
     passingGrade: toInput(settings.passingGrade),
@@ -83,9 +87,19 @@ export function GradeSettingsDialog({
         finalExamPassingGrade: numberOrNull(form.finalExamPassingGrade) as number,
         gpaScale,
         gpaWeight,
+        roundBeforeCompare: roundBefore,
+        roundingScale,
       },
       { onSuccess: onClose },
     );
+  }
+
+  function pickMethod(next: GradeMethod) {
+    setMethod(next);
+    // Na soma o comum é aprovar com 7: sugere se a mínima ainda é o padrão das médias (6).
+    if (next === 'SUM' && numberOrNull(form.passingGrade) === 6) {
+      setForm((f) => ({ ...f, passingGrade: '7' }));
+    }
   }
 
   return (
@@ -105,19 +119,14 @@ export function GradeSettingsDialog({
     >
       <form id="grade-settings-form" noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
         <p className="text-sm text-text-secondary">{t('grades.settings.hint')}</p>
+        <GradingRulePicker
+          value={method}
+          focusFirst
+          onChange={(m) => {
+            if (m) pickMethod(m);
+          }}
+        />
         <div className="grid gap-4 sm:grid-cols-2">
-          <SelectField
-            label={t('grades.settings.method')}
-            value={method}
-            data-autofocus
-            onChange={(e) => setMethod(e.target.value as GradeMethod)}
-          >
-            {GRADE_METHODS.map((m) => (
-              <option key={m} value={m}>
-                {t(`grades.method.${m}`)}
-              </option>
-            ))}
-          </SelectField>
           <TextField
             {...decimalProps}
             min={1}
@@ -138,6 +147,35 @@ export function GradeSettingsDialog({
             {...field('maxAbsencePct')}
           />
         </div>
+
+        {method === 'SUM' && (
+          <fieldset className="flex flex-col gap-4">
+            <legend className="label mb-2 text-text-secondary">{t('grades.sum.rounding')}</legend>
+            <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm">
+              <input
+                type="checkbox"
+                className="h-5 w-5 accent-[var(--action)]"
+                checked={roundBefore}
+                onChange={(e) => setRoundBefore(e.target.checked)}
+              />
+              {t('grades.sum.roundBeforeCompare')}
+            </label>
+            {roundBefore && (
+              <SelectField
+                label={t('grades.sum.roundingScale')}
+                value={String(roundingScale)}
+                onChange={(e) => setRoundingScale(Number(e.target.value))}
+              >
+                {[0, 1, 2].map((d) => (
+                  <option key={d} value={d}>
+                    {t(`grades.sum.digits.${d}`)}
+                  </option>
+                ))}
+              </SelectField>
+            )}
+            <p className="text-xs text-text-muted">{t('grades.sum.roundingHint')}</p>
+          </fieldset>
+        )}
 
         <fieldset className="flex flex-col gap-4">
           <legend className="label mb-2 text-text-secondary">
@@ -226,7 +264,12 @@ export function RuleDialog({
   const [examEnabled, setExamEnabled] = useState<'' | 'yes' | 'no'>(
     o.finalExamEnabled === undefined ? '' : o.finalExamEnabled ? 'yes' : 'no',
   );
+  const [roundBefore, setRoundBefore] = useState<'' | 'yes' | 'no'>(
+    o.roundBeforeCompare === undefined ? '' : o.roundBeforeCompare ? 'yes' : 'no',
+  );
+  const [roundingScale, setRoundingScale] = useState<string>(toInput(o.roundingScale));
   const [form, setForm] = useState({
+    pointsCap: toInput(o.pointsCap),
     scaleMax: toInput(o.scaleMax),
     passingGrade: toInput(o.passingGrade),
     maxAbsencePct: toInput(o.maxAbsencePct),
@@ -249,6 +292,10 @@ export function RuleDialog({
       setForm((f) => ({ ...f, [key]: e.target.value })),
   });
   const examOn = examEnabled === '' ? settings.finalExamEnabled : examEnabled === 'yes';
+  const effectiveMethod = method || settings.method;
+  const roundOn = roundBefore === '' ? settings.roundBeforeCompare : roundBefore === 'yes';
+  const inheritYesNo = (on: boolean) =>
+    t('grades.rule.inherit', { value: on ? t('grades.rule.yes') : t('grades.rule.no') });
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -266,6 +313,9 @@ export function RuleDialog({
           finalExamAverageWeight: numberOrNull(form.finalExamAverageWeight),
           finalExamPassingGrade: numberOrNull(form.finalExamPassingGrade),
           finalExamScore: examOn ? numberOrNull(form.finalExamScore) : null,
+          roundBeforeCompare: roundBefore === '' ? null : roundBefore === 'yes',
+          roundingScale: numberOrNull(roundingScale),
+          pointsCap: numberOrNull(form.pointsCap),
         },
       },
       { onSuccess: onClose },
@@ -289,22 +339,20 @@ export function RuleDialog({
     >
       <form id="grade-rule-form" noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
         <p className="text-sm text-text-secondary">{t('grades.rule.hint')}</p>
+        <GradingRulePicker
+          value={method}
+          focusFirst
+          inheritLabel={t('grades.rule.inherit', {
+            value: t(`grades.method.${settings.method}`),
+          })}
+          onChange={setMethod}
+        />
+        {effectiveMethod !== subject.rule.method && subject.assessments.length > 0 && (
+          <p className="text-sm text-warning" role="note">
+            {t('grades.rule.switchHint')}
+          </p>
+        )}
         <div className="grid gap-4 sm:grid-cols-2">
-          <SelectField
-            label={t('grades.settings.method')}
-            value={method}
-            data-autofocus
-            onChange={(e) => setMethod(e.target.value as GradeMethod | '')}
-          >
-            <option value="">
-              {t('grades.rule.inherit', { value: t(`grades.method.${settings.method}`) })}
-            </option>
-            {GRADE_METHODS.map((m) => (
-              <option key={m} value={m}>
-                {t(`grades.method.${m}`)}
-              </option>
-            ))}
-          </SelectField>
           <TextField
             {...decimalProps}
             min={1}
@@ -334,6 +382,52 @@ export function RuleDialog({
             {...field('totalClasses', subject.workloadHours)}
           />
         </div>
+
+        {effectiveMethod === 'SUM' && (
+          <fieldset className="flex flex-col gap-4">
+            <legend className="label mb-2 text-text-secondary">{t('grades.sum.rounding')}</legend>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <SelectField
+                label={t('grades.sum.roundBeforeCompare')}
+                value={roundBefore}
+                error={errors.roundBeforeCompare}
+                onChange={(e) => setRoundBefore(e.target.value as '' | 'yes' | 'no')}
+              >
+                <option value="">{inheritYesNo(settings.roundBeforeCompare)}</option>
+                <option value="yes">{t('grades.rule.yes')}</option>
+                <option value="no">{t('grades.rule.no')}</option>
+              </SelectField>
+              {roundOn && (
+                <SelectField
+                  label={t('grades.sum.roundingScale')}
+                  value={roundingScale}
+                  error={errors.roundingScale}
+                  onChange={(e) => setRoundingScale(e.target.value)}
+                >
+                  <option value="">
+                    {t('grades.rule.inherit', {
+                      value: t(`grades.sum.digits.${settings.roundingScale}`),
+                    })}
+                  </option>
+                  {[0, 1, 2].map((d) => (
+                    <option key={d} value={d}>
+                      {t(`grades.sum.digits.${d}`)}
+                    </option>
+                  ))}
+                </SelectField>
+              )}
+              <TextField
+                {...decimalProps}
+                min={0.01}
+                max={100}
+                label={t('grades.sum.pointsCap')}
+                hint={t('grades.sum.pointsCapHint')}
+                {...field('pointsCap')}
+              />
+            </div>
+            <p className="text-xs text-text-muted">{t('grades.sum.roundingHint')}</p>
+          </fieldset>
+        )}
 
         <fieldset className="flex flex-col gap-4">
           <legend className="label mb-2 text-text-secondary">
@@ -395,6 +489,9 @@ interface Row {
   name: string;
   weight: string;
   score: string;
+  /** Quanto vale (soma de pontos). */
+  maxPoints: string;
+  bonus: boolean;
 }
 
 let rowSeq = 0;
@@ -416,12 +513,23 @@ export function AssessmentsDialog({
       name: a.name,
       weight: toInput(a.weight),
       score: toInput(a.score),
+      maxPoints: toInput(a.maxPoints),
+      bonus: a.bonus ?? false,
     })),
   );
   const save = useSaveAssessments();
   const errors = fieldErrors(save.error);
-  const arithmetic = subject.rule.method === 'ARITHMETIC';
-  const totalWeight = rows.reduce((sum, r) => sum + (Number(r.weight) || 0), 0);
+  const method = subject.rule.method;
+  const arithmetic = method === 'ARITHMETIC';
+  const sum = method === 'SUM';
+  const totalWeight = rows.reduce((total, r) => total + (Number(r.weight) || 0), 0);
+  // Aviso "não fecha a escala": vem da própria calculadora, sobre o que está no formulário.
+  const planned = sum
+    ? plannedPointsOf(
+        subject.rule,
+        rows.map((r) => ({ maxPoints: numberOrNull(r.maxPoints), bonus: r.bonus })),
+      )
+    : null;
 
   function update(key: string, patch: Partial<Row>) {
     setRows((list) => list.map((r) => (r.key === key ? { ...r, ...patch } : r)));
@@ -432,16 +540,35 @@ export function AssessmentsDialog({
     save.mutate(
       {
         subjectId: subject.subjectId,
-        items: rows.map((r) => ({
-          id: r.id,
-          name: r.name,
-          weight: arithmetic ? (numberOrNull(r.weight) ?? 1) : (numberOrNull(r.weight) as number),
-          score: numberOrNull(r.score),
-        })),
+        items: rows.map((r) => {
+          if (sum) {
+            // Sem peso na soma: o backend mantém o que já estava.
+            return {
+              id: r.id,
+              name: r.name,
+              weight: null,
+              score: numberOrNull(r.score),
+              maxPoints: numberOrNull(r.maxPoints),
+              bonus: r.bonus,
+            };
+          }
+          return {
+            id: r.id,
+            name: r.name,
+            weight: arithmetic ? (numberOrNull(r.weight) ?? 1) : numberOrNull(r.weight),
+            score: numberOrNull(r.score),
+          };
+        }),
       },
       { onSuccess: onClose },
     );
   }
+
+  const hint = sum
+    ? t('grades.assessments.sumHint')
+    : arithmetic
+      ? t('grades.assessments.arithmeticHint')
+      : t('grades.assessments.weightHint');
 
   return (
     <Dialog
@@ -460,77 +587,140 @@ export function AssessmentsDialog({
       }
     >
       <form id="assessments-form" noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
-        <p className="text-sm text-text-secondary">
-          {arithmetic ? t('grades.assessments.arithmeticHint') : t('grades.assessments.weightHint')}
-        </p>
+        <p className="text-sm text-text-secondary">{hint}</p>
         {rows.length === 0 && <EmptyState title={t('grades.assessments.empty')} />}
         <ol className="m-0 flex list-none flex-col gap-3 p-0">
-          {rows.map((r, i) => (
-            <li key={r.key}>
-              <fieldset className="card-inner grid items-start gap-3 p-3 sm:grid-cols-[1fr_96px_112px_auto]">
-                <legend className="sr-only">{t('grades.assessments.row', { n: i + 1 })}</legend>
-                <TextField
-                  label={t('grades.assessments.name')}
-                  value={r.name}
-                  maxLength={80}
-                  placeholder={t('grades.assessments.namePlaceholder')}
-                  error={errors[`items[${i}].name`]}
-                  data-autofocus={i === 0 ? true : undefined}
-                  onChange={(e) => update(r.key, { name: e.target.value })}
-                />
-                <TextField
-                  {...decimalProps}
-                  min={0.01}
-                  label={t('grades.assessments.weight')}
-                  value={r.weight}
-                  disabled={arithmetic}
-                  error={errors[`items[${i}].weight`]}
-                  onChange={(e) => update(r.key, { weight: e.target.value })}
-                />
-                <TextField
-                  {...decimalProps}
-                  max={subject.rule.scaleMax}
-                  label={t('grades.assessments.score')}
-                  value={r.score}
-                  placeholder={t('grades.assessments.scorePlaceholder')}
-                  error={errors[`items[${i}].score`]}
-                  onChange={(e) => update(r.key, { score: e.target.value })}
-                />
-                <Button
-                  variant="ghost"
-                  iconOnly
-                  className="sm:mt-7"
-                  aria-label={t('grades.assessments.remove', {
-                    name: r.name || t('grades.assessments.untitled', { n: i + 1 }),
-                  })}
-                  onClick={() => setRows((list) => list.filter((x) => x.key !== r.key))}
+          {rows.map((r, i) => {
+            const maxPoints = numberOrNull(r.maxPoints);
+            return (
+              <li key={r.key}>
+                <fieldset
+                  className={cn(
+                    'card-inner grid items-start gap-3 p-3',
+                    sum
+                      ? 'sm:grid-cols-[1fr_112px_112px_auto_auto]'
+                      : 'sm:grid-cols-[1fr_96px_112px_auto]',
+                  )}
                 >
-                  <Icon name="trash" size={18} />
-                </Button>
-              </fieldset>
-            </li>
-          ))}
+                  <legend className="sr-only">{t('grades.assessments.row', { n: i + 1 })}</legend>
+                  <TextField
+                    label={t('grades.assessments.name')}
+                    value={r.name}
+                    maxLength={80}
+                    placeholder={t('grades.assessments.namePlaceholder')}
+                    error={errors[`items[${i}].name`]}
+                    data-autofocus={i === 0 ? true : undefined}
+                    onChange={(e) => update(r.key, { name: e.target.value })}
+                  />
+                  {sum ? (
+                    <TextField
+                      {...decimalProps}
+                      min={0.01}
+                      max={subject.rule.scaleMax}
+                      label={t('grades.assessments.maxPoints')}
+                      value={r.maxPoints}
+                      error={errors[`items[${i}].maxPoints`]}
+                      onChange={(e) => update(r.key, { maxPoints: e.target.value })}
+                    />
+                  ) : (
+                    <TextField
+                      {...decimalProps}
+                      min={0.01}
+                      label={t('grades.assessments.weight')}
+                      value={r.weight}
+                      disabled={arithmetic}
+                      error={errors[`items[${i}].weight`]}
+                      onChange={(e) => update(r.key, { weight: e.target.value })}
+                    />
+                  )}
+                  <TextField
+                    {...decimalProps}
+                    max={sum ? (maxPoints ?? subject.rule.scaleMax) : subject.rule.scaleMax}
+                    label={
+                      sum ? t('grades.assessments.scoreObtained') : t('grades.assessments.score')
+                    }
+                    value={r.score}
+                    placeholder={t('grades.assessments.scorePlaceholder')}
+                    error={errors[`items[${i}].score`]}
+                    onChange={(e) => update(r.key, { score: e.target.value })}
+                  />
+                  {sum && (
+                    <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm sm:mt-7">
+                      <input
+                        type="checkbox"
+                        className="h-5 w-5 accent-[var(--action)]"
+                        checked={r.bonus}
+                        onChange={(e) => update(r.key, { bonus: e.target.checked })}
+                      />
+                      {t('grades.assessments.bonus')}
+                    </label>
+                  )}
+                  <Button
+                    variant="ghost"
+                    iconOnly
+                    className="sm:mt-7"
+                    aria-label={t('grades.assessments.remove', {
+                      name: r.name || t('grades.assessments.untitled', { n: i + 1 }),
+                    })}
+                    onClick={() => setRows((list) => list.filter((x) => x.key !== r.key))}
+                  >
+                    <Icon name="trash" size={18} />
+                  </Button>
+                </fieldset>
+              </li>
+            );
+          })}
         </ol>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Button
             variant="secondary"
             disabled={rows.length >= 30}
             onClick={() =>
-              setRows((list) => [...list, { key: newKey(), name: '', weight: '1', score: '' }])
+              setRows((list) => [
+                ...list,
+                { key: newKey(), name: '', weight: '1', score: '', maxPoints: '', bonus: false },
+              ])
             }
           >
             <Icon name="plus" size={18} />
             {t('grades.assessments.add')}
           </Button>
-          {!arithmetic && rows.length > 0 && (
+          {!arithmetic && !sum && rows.length > 0 && (
             <p className="tabular text-sm text-text-muted">
               {t('grades.assessments.totalWeight', { total: formatNumber(totalWeight, lang) })}
             </p>
           )}
+          {sum && planned !== null && rows.length > 0 && (
+            <p className="tabular text-sm text-text-muted">
+              {t('grades.sum.plannedTotal', {
+                total: formatGrade(planned, lang),
+                max: formatGrade(subject.rule.scaleMax, lang),
+              })}
+            </p>
+          )}
         </div>
+        {sum && planned !== null && rows.length > 0 && planned !== subject.rule.scaleMax && (
+          <ScaleMismatchNote planned={planned} scaleMax={subject.rule.scaleMax} />
+        )}
         {save.error && <ErrorState message={errorMessage(t, save.error)} />}
       </form>
     </Dialog>
+  );
+}
+
+/** Aviso (não bloqueia) de que as avaliações não fecham o máximo da escala. */
+export function ScaleMismatchNote({ planned, scaleMax }: { planned: number; scaleMax: number }) {
+  const { t, i18n } = useTranslation();
+  return (
+    <p role="note" className="flex items-start gap-2 text-sm text-warning">
+      <Icon name="alert" size={18} className="mt-0.5 shrink-0" />
+      <span>
+        {t('grades.sum.mismatch', {
+          total: formatGrade(planned, i18n.language),
+          max: formatGrade(scaleMax, i18n.language),
+        })}
+      </span>
+    </p>
   );
 }
 

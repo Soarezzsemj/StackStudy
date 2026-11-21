@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Dialog, ErrorState, SelectField, TextField } from '@/components/ui';
 import { errorMessage, fieldErrors } from '@/features/auth/errorMessage';
+import { GradingRulePicker } from '@/features/grades/GradingRulePicker';
+import type { GradeMethod } from '@/lib/api/grades';
 import {
   SUBJECT_COLORS,
   SUBJECT_STATUSES,
@@ -47,6 +49,8 @@ export function SubjectDialog({
   );
   const [color, setColor] = useState(subject?.color ?? defaultColor);
   const [status, setStatus] = useState<SubjectStatus>(subject?.status ?? 'IN_PROGRESS');
+  // Regra de nota: '' = usa a preferência do usuário (Grade Predictor).
+  const [gradingRule, setGradingRule] = useState<GradeMethod | ''>(subject?.gradingRule ?? '');
   const [semesterId, setSemesterId] = useState(
     subject?.semesterId ?? defaultSemesterId ?? semesters[0]?.id ?? '',
   );
@@ -75,6 +79,7 @@ export function SubjectDialog({
           workloadHours: toNumber(workload) ?? null,
           color,
           status,
+          gradingRule: gradingRule || null,
         },
       },
       { onSuccess: onClose },
@@ -188,6 +193,12 @@ export function SubjectDialog({
             ))}
           </SelectField>
         </div>
+
+        <GradingRulePicker
+          value={gradingRule}
+          inheritLabel={t('stack.subjects.fields.gradingRuleInherit')}
+          onChange={setGradingRule}
+        />
 
         <fieldset className="flex flex-col gap-2">
           <legend className="label mb-2 text-text-secondary">

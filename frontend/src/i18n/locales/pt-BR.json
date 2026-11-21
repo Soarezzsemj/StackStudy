@@ -217,7 +217,8 @@
         "workloadHours": "Carga horária (h)",
         "color": "Cor",
         "status": "Situação",
-        "semester": "Semestre"
+        "semester": "Semestre",
+        "gradingRuleInherit": "Usar a minha preferência"
       },
       "status": {
         "IN_PROGRESS": "Cursando",
@@ -421,7 +422,8 @@
     "simulationHint": "As simulações não são salvas: servem só para testar cenários.",
     "method": {
       "WEIGHTED": "Média ponderada",
-      "ARITHMETIC": "Média aritmética"
+      "ARITHMETIC": "Média aritmética",
+      "SUM": "Soma de pontos"
     },
     "gpaScale": {
       "TEN": "0 a 10",
@@ -542,7 +544,7 @@
       "hint": "Valem para todas as matérias sem regra própria.",
       "method": "Tipo de média",
       "scaleMax": "Nota máxima (escala)",
-      "passingGrade": "Média mínima para aprovação",
+      "passingGrade": "Nota mínima para aprovação",
       "maxAbsencePct": "Limite de faltas (%)",
       "finalExam": "Exame final",
       "finalExamEnabled": "Há exame final",
@@ -563,7 +565,8 @@
       "totalClassesHint": "Vazio = usa a carga horária da matéria.",
       "finalExamScore": "Nota do exame final (se já fez)",
       "yes": "Sim",
-      "no": "Não"
+      "no": "Não",
+      "switchHint": "Trocar a regra reinterpreta as notas lançadas. Pesos e \"vale quantos pontos\" ficam guardados."
     },
     "assessments": {
       "title": "Avaliações de {{name}}",
@@ -579,12 +582,77 @@
       "arithmeticHint": "Média aritmética: os pesos são ignorados. Nota vazia = ainda não saiu.",
       "totalWeight": "Peso total: {{total}}",
       "empty": "Nenhuma avaliação ainda.",
-      "row": "Avaliação {{n}}"
+      "row": "Avaliação {{n}}",
+      "maxPoints": "Vale quantos pontos",
+      "scoreObtained": "Nota obtida",
+      "bonus": "Bônus",
+      "sumHint": "Soma de pontos: informe quanto cada avaliação vale. A nota obtida vai de 0 até esse valor. Bônus soma ao total, fora do previsto. Nota vazia = ainda não saiu."
     },
     "stackLine": {
       "average": "Média {{value}}",
       "absences_one": "{{count}} falta",
-      "absences_other": "{{count}} faltas"
+      "absences_other": "{{count}} faltas",
+      "points": "{{total}} de {{passing}} pts"
+    },
+    "methodQuestion": "Como a sua faculdade calcula a nota?",
+    "methodHint": {
+      "SUM": "Soma dos pontos das avaliações, aprova com 7 ou mais",
+      "WEIGHTED": "Média com pesos",
+      "ARITHMETIC": "Média simples"
+    },
+    "standingSum": {
+      "NO_ASSESSMENTS": "Sem avaliações",
+      "NOT_STARTED": "Sem notas",
+      "SECURED": "Já passou",
+      "ON_TRACK": "Possível",
+      "AT_RISK": "Em risco",
+      "EXAM": "Exame final",
+      "IMPOSSIBLE": "Impossível passar",
+      "PASSED": "Aprovado",
+      "FAILED": "Reprovado"
+    },
+    "headline": {
+      "exam": "Precisa de {{value}} no exame final",
+      "sumSecured": "Passou com {{total}} pontos; o restante é bônus",
+      "sumPassed": "Aprovado com {{total}} pontos",
+      "sumFailed": "Reprovado com {{total}} de {{passing}} pontos",
+      "sumImpossible": "Faltam {{points}} pontos e só dá para ganhar mais {{available}}",
+      "sumNeeds": "Precisa de {{points}} pontos para passar",
+      "averageSecured": "Aprovação garantida",
+      "averagePassed": "Aprovado com média {{value}}",
+      "averageFailed": "Reprovado com média {{value}}",
+      "averageImpossible": "Nem com nota máxima no que falta dá para passar direto",
+      "averageNeedsOne": "Precisa de {{value}} na {{name}} para passar direto",
+      "averageNeedsEach": "Precisa de {{value}} em cada avaliação que falta para passar direto"
+    },
+    "sum": {
+      "points": "Pontos",
+      "ofPassing": "{{total}} de {{passing}} pontos",
+      "progressLabel": "{{total}} de {{passing}} pontos até a nota mínima",
+      "missing": "faltam {{points}} pontos",
+      "canStillEarn": "pode ganhar mais até {{points}}",
+      "stillMissing": "Ainda faltam (pontos)",
+      "available": "Ainda dá para ganhar",
+      "plannedTotal": "Total previsto: {{total}} de {{max}} pontos",
+      "mismatch": "As avaliações somam {{total}} de {{max}} pontos. Dá para salvar assim (pontos extras ou avaliações ainda não definidas).",
+      "missingMaxPoints_one": "{{count}} avaliação sem \"vale quantos pontos\": edite as avaliações.",
+      "missingMaxPoints_other": "{{count}} avaliações sem \"vale quantos pontos\": edite as avaliações.",
+      "worth": "vale {{points}}",
+      "worthUnknown": "sem valor definido",
+      "itemGraded": "lançada",
+      "itemPending": "pendente",
+      "itemNeeds": "precisa {{points}}",
+      "rounding": "Arredondamento (soma de pontos)",
+      "roundBeforeCompare": "Arredondar o total antes de comparar com a mínima",
+      "roundingScale": "Casas do arredondamento",
+      "roundingHint": "Desligado (padrão): 6,99 não aprova com mínima 7. Ligado com 1 casa: 6,95 vira 7,0 e aprova. Confira a regra da sua faculdade.",
+      "digits": {
+        "0": "Inteiro (6,5 → 7)",
+        "1": "1 casa (6,95 → 7,0)",
+        "2": "2 casas"
+      },
+      "pointsCap": "Teto do total (opcional)",
+      "pointsCapHint": "Com pontos extras, o total não passa disso. Vazio = sem teto."
     }
   },
   "flashcards": {

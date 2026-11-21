@@ -1,8 +1,17 @@
 import { useTranslation } from 'react-i18next';
-import { Button, Card, Chip, ProgressBar } from '@/components/ui';
-import type { SubjectGrades } from '@/lib/api/grades';
+import { Button, Card, Chip, Icon, ProgressBar } from '@/components/ui';
+import type { SubjectGrades, SumView } from '@/lib/api/grades';
 import { cn } from '@/lib/cn';
-import { attendanceTone, formatGrade, formatNumber, standingTone, toneColor } from './format';
+import {
+  attendanceTone,
+  formatGrade,
+  formatNumber,
+  standingIcon,
+  standingTone,
+  toneColor,
+} from './format';
+import { ScaleMismatchNote } from './GradeDialogs';
+import { gradeHeadline, headlineSubjectOf } from './summary';
 
 interface SubjectGradeCardProps {
   subject: SubjectGrades;
@@ -12,7 +21,7 @@ interface SubjectGradeCardProps {
   onEditRule: () => void;
 }
 
-/** Cartão da matéria: média atual, nota necessária, exame, situação e faltas. */
+/** Cartão da matéria: média (ou pontos), nota necessária, exame, situação e faltas. */
 export function SubjectGradeCard({
   subject,
   selected,
@@ -26,6 +35,11 @@ export function SubjectGradeCard({
   const tone = standingTone(result.standing);
   const titleId = `grade-card-${subject.subjectId}`;
   const dropped = subject.status === 'DROPPED';
+  const sum = rule.method === 'SUM' ? result.sum : undefined;
+  const standingLabel =
+    rule.method === 'SUM'
+      ? t(`grades.standingSum.${result.standing}`)
+      : t(`grades.standing.${result.standing}`);
 
   return (
     <Card
@@ -52,12 +66,15 @@ export function SubjectGradeCard({
           </p>
         </div>
         <Chip tone={tone} className="shrink-0">
-          {t(`grades.standing.${result.standing}`)}
+          <Icon name={standingIcon(result.standing)} size={14} />
+          {standingLabel}
         </Chip>
       </header>
 
       {result.standing === 'NO_ASSESSMENTS' ? (
         <p className="text-sm text-text-secondary">{t('grades.card.noAssessments')}</p>
+      ) : sum ? (
+        <SumBody subject={subject} sum={sum} />
       ) : (
         <>
           <dl className="m-0 grid grid-cols-2 gap-4">
@@ -124,6 +141,110 @@ export function SubjectGradeCard({
         </Button>
       </div>
     </Card>
+  );
+}
+
+/**
+ * Soma de pontos: "5,50 de 7,00 pontos", barra até a nota mínima, quanto falta, quanto ainda dá
+ * para ganhar e a lista de avaliações com a situação de cada uma.
+ */
+function SumBody({ subject, sum }: { subject: SubjectGrades; sum: SumView }) {
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
+  const { result, rule } = subject;
+  const tone = standingTone(result.standing);
+  const color = toneColor(tone);
+  const pending = result.gradedCount < result.totalCount;
+  const headline = gradeHeadline(headlineSubjectOf(subject), result, lang);
+
+  return (
+    <>
+      <div className="flex flex-col gap-3">
+        <p className="m-0">
+          <span className="label block text-text-muted">{t('grades.sum.points')}</span>
+          <span className="tabular text-3xl font-[650] leading-none tracking-card">
+            {t('grades.sum.ofPassing', {
+              total: formatGrade(sum.total, lang),
+              passing: formatGrade(rule.passingGrade, lang),
+            })}
+          </span>
+        </p>
+        <ProgressBar
+          value={sum.total}
+          max={rule.passingGrade > 0 ? rule.passingGrade : 1}
+          color={color}
+          label={t('grades.sum.progressLabel', {
+            total: formatGrade(sum.total, lang),
+            passing: formatGrade(rule.passingGrade, lang),
+          })}
+        />
+        {headline && (
+          <p className="flex items-start gap-2 text-sm" style={{ color }}>
+            <Icon name={standingIcon(result.standing)} size={18} className="mt-0.5 shrink-0" />
+            <span>{t(`grades.headline.${headline.key}`, headline.values)}</span>
+          </p>
+        )}
+        {pending && sum.pointsToPass > 0 && (
+          <p className="tabular text-sm text-text-secondary">
+            {t('grades.sum.missing', { points: formatGrade(sum.pointsToPass, lang) })}
+            {sum.pointsAvailable > 0 && (
+              <>
+                {' · '}
+                {t('grades.sum.canStillEarn', {
+                  points: formatGrade(sum.pointsAvailable, lang),
+                })}
+              </>
+            )}
+          </p>
+        )}
+        {sum.scaleMismatch && (
+          <ScaleMismatchNote planned={sum.plannedPoints} scaleMax={rule.scaleMax} />
+        )}
+        {sum.missingMaxPoints > 0 && (
+          <p role="note" className="flex items-start gap-2 text-sm text-warning">
+            <Icon name="alert" size={18} className="mt-0.5 shrink-0" />
+            <span>{t('grades.sum.missingMaxPoints', { count: sum.missingMaxPoints })}</span>
+          </p>
+        )}
+      </div>
+
+      <ul
+        className="m-0 flex list-none flex-col gap-1 p-0"
+        aria-label={t('grades.card.assessments')}
+      >
+        {subject.assessments.map((a, i) => {
+          const needed = sum.requiredPerItem[i];
+          return (
+            <li
+              key={a.id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-inner px-3 py-1.5 hover:bg-surface-raised"
+            >
+              <span className="min-w-0 text-sm">
+                <span className="font-semibold">{a.name}</span>{' '}
+                <span className="text-text-muted">
+                  {a.maxPoints !== undefined
+                    ? t('grades.sum.worth', { points: formatGrade(a.maxPoints, lang) })
+                    : t('grades.sum.worthUnknown')}
+                  {a.bonus && ` · ${t('grades.assessments.bonus')}`}
+                </span>
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="tabular text-sm">{formatGrade(a.score, lang)}</span>
+                {a.score !== undefined ? (
+                  <Chip tone="neutral">{t('grades.sum.itemGraded')}</Chip>
+                ) : needed !== null && needed !== undefined && needed > 0 ? (
+                  <Chip tone={tone}>
+                    {t('grades.sum.itemNeeds', { points: formatGrade(needed, lang) })}
+                  </Chip>
+                ) : (
+                  <Chip tone="neutral">{t('grades.sum.itemPending')}</Chip>
+                )}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </>
   );
 }
 

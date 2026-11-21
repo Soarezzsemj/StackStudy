@@ -217,7 +217,8 @@
         "workloadHours": "Workload (h)",
         "color": "Color",
         "status": "Status",
-        "semester": "Semester"
+        "semester": "Semester",
+        "gradingRuleInherit": "Use my preference"
       },
       "status": {
         "IN_PROGRESS": "In progress",
@@ -421,7 +422,8 @@
     "simulationHint": "Simulations are never saved: they are only for trying scenarios.",
     "method": {
       "WEIGHTED": "Weighted average",
-      "ARITHMETIC": "Simple average"
+      "ARITHMETIC": "Simple average",
+      "SUM": "Sum of points"
     },
     "gpaScale": {
       "TEN": "0 to 10",
@@ -542,7 +544,7 @@
       "hint": "Apply to every subject without its own rule.",
       "method": "Average type",
       "scaleMax": "Maximum grade (scale)",
-      "passingGrade": "Pass mark",
+      "passingGrade": "Passing grade",
       "maxAbsencePct": "Absence limit (%)",
       "finalExam": "Final exam",
       "finalExamEnabled": "There is a final exam",
@@ -563,7 +565,8 @@
       "totalClassesHint": "Empty = uses the subject workload.",
       "finalExamScore": "Final exam grade (if taken)",
       "yes": "Yes",
-      "no": "No"
+      "no": "No",
+      "switchHint": "Changing the rule reinterprets the grades already entered. Weights and point values are kept."
     },
     "assessments": {
       "title": "Assessments of {{name}}",
@@ -579,12 +582,77 @@
       "arithmeticHint": "Simple average: weights are ignored. Empty grade = not out yet.",
       "totalWeight": "Total weight: {{total}}",
       "empty": "No assessments yet.",
-      "row": "Assessment {{n}}"
+      "row": "Assessment {{n}}",
+      "maxPoints": "Worth how many points",
+      "scoreObtained": "Score",
+      "bonus": "Bonus",
+      "sumHint": "Sum of points: enter how much each assessment is worth. The score goes from 0 up to that value. Bonus adds to the total outside the plan. Empty score = not out yet."
     },
     "stackLine": {
       "average": "Average {{value}}",
       "absences_one": "{{count}} absence",
-      "absences_other": "{{count}} absences"
+      "absences_other": "{{count}} absences",
+      "points": "{{total}} of {{passing}} pts"
+    },
+    "methodQuestion": "How does your school calculate the grade?",
+    "methodHint": {
+      "SUM": "Points from all assessments are added up; pass with 7 or more",
+      "WEIGHTED": "Weighted average",
+      "ARITHMETIC": "Simple average"
+    },
+    "standingSum": {
+      "NO_ASSESSMENTS": "No assessments",
+      "NOT_STARTED": "No grades yet",
+      "SECURED": "Already passed",
+      "ON_TRACK": "Possible",
+      "AT_RISK": "At risk",
+      "EXAM": "Final exam",
+      "IMPOSSIBLE": "Cannot pass",
+      "PASSED": "Passed",
+      "FAILED": "Failed"
+    },
+    "headline": {
+      "exam": "Needs {{value}} on the final exam",
+      "sumSecured": "Passed with {{total}} points; the rest is extra",
+      "sumPassed": "Passed with {{total}} points",
+      "sumFailed": "Failed with {{total}} of {{passing}} points",
+      "sumImpossible": "Needs {{points}} more points but only {{available}} are left",
+      "sumNeeds": "Needs {{points}} points to pass",
+      "averageSecured": "Pass secured",
+      "averagePassed": "Passed with an average of {{value}}",
+      "averageFailed": "Failed with an average of {{value}}",
+      "averageImpossible": "Cannot pass directly even with full marks on what is left",
+      "averageNeedsOne": "Needs {{value}} on {{name}} to pass directly",
+      "averageNeedsEach": "Needs {{value}} on each remaining assessment to pass directly"
+    },
+    "sum": {
+      "points": "Points",
+      "ofPassing": "{{total}} of {{passing}} points",
+      "progressLabel": "{{total}} of {{passing}} points towards the passing grade",
+      "missing": "{{points}} points to go",
+      "canStillEarn": "up to {{points}} still available",
+      "stillMissing": "Still missing (points)",
+      "available": "Still available",
+      "plannedTotal": "Planned total: {{total}} of {{max}} points",
+      "mismatch": "The assessments add up to {{total}} of {{max}} points. You can still save (extra points or assessments not defined yet).",
+      "missingMaxPoints_one": "{{count}} assessment has no point value: edit the assessments.",
+      "missingMaxPoints_other": "{{count}} assessments have no point value: edit the assessments.",
+      "worth": "worth {{points}}",
+      "worthUnknown": "no point value",
+      "itemGraded": "graded",
+      "itemPending": "pending",
+      "itemNeeds": "needs {{points}}",
+      "rounding": "Rounding (sum of points)",
+      "roundBeforeCompare": "Round the total before comparing with the passing grade",
+      "roundingScale": "Rounding digits",
+      "roundingHint": "Off (default): 6.99 does not pass with a passing grade of 7. On with 1 digit: 6.95 becomes 7.0 and passes. Check your school’s rule.",
+      "digits": {
+        "0": "Whole number (6.5 → 7)",
+        "1": "1 digit (6.95 → 7.0)",
+        "2": "2 digits"
+      },
+      "pointsCap": "Total cap (optional)",
+      "pointsCapHint": "With extra points, the total never goes above this. Empty = no cap."
     }
   },
   "flashcards": {

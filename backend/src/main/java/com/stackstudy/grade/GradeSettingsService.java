@@ -43,7 +43,9 @@ public class GradeSettingsService {
         r.finalExamAverageWeight(),
         r.finalExamPassingGrade(),
         r.gpaScale(),
-        r.gpaWeight());
+        r.gpaWeight(),
+        Boolean.TRUE.equals(r.roundBeforeCompare()),
+        r.roundingScale() == null ? 1 : r.roundingScale());
     return GradeResponses.Settings.from(settings.save(entity));
   }
 

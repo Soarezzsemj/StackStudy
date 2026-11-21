@@ -3,6 +3,7 @@ import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider, type RouteObject } from 'react-router-dom';
 import { vi } from 'vitest';
+import type { GradesOverview } from '@/lib/api/grades';
 import type { User } from '@/lib/api/types';
 
 export const testUser: User = {
@@ -42,7 +43,7 @@ export const emptyPage = {
   hasNext: false,
 };
 
-export const emptyOverview = {
+export const emptyOverview: GradesOverview = {
   settings: {
     method: 'WEIGHTED',
     scaleMax: 10,
@@ -52,6 +53,8 @@ export const emptyOverview = {
     finalExamMinAverage: 4,
     finalExamAverageWeight: 50,
     finalExamPassingGrade: 5,
+    roundBeforeCompare: false,
+    roundingScale: 1,
     gpaScale: 'TEN',
     gpaWeight: 'CREDITS',
   },

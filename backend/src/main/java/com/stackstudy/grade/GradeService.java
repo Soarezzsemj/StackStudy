@@ -6,7 +6,7 @@ import com.stackstudy.common.error.ErrorCode;
 import com.stackstudy.common.security.CurrentUser;
 import com.stackstudy.grade.GradeCalculator.FinalExamRule;
 import com.stackstudy.grade.GradeCalculator.GpaItem;
-import com.stackstudy.grade.GradeCalculator.Method;
+import com.stackstudy.grade.GradeCalculator.SumOptions;
 import com.stackstudy.grade.GradeSettings.GpaWeight;
 import com.stackstudy.grade.dto.GradeRequests;
 import com.stackstudy.grade.dto.GradeResponses.AssessmentView;
@@ -137,9 +137,13 @@ public class GradeService {
             r.finalExamMinAverage(),
             r.finalExamAverageWeight(),
             r.finalExamPassingGrade(),
-            r.finalExamScore());
+            r.finalExamScore(),
+            r.roundBeforeCompare(),
+            r.roundingScale(),
+            r.pointsCap());
     EffectiveRule rule = resolve(subject, overrides, settingsService.forUser(currentUser.id()));
     validateRule(rule, r.finalExamScore(), assessments.maxScore(subjectId));
+    // Trocar de regra não apaga nada: pesos e "quanto vale" das avaliações ficam guardados.
     subject.updateGrading(overrides);
     return load(subject);
   }
@@ -171,10 +175,29 @@ public class GradeService {
           problems.add(new ApiError.FieldProblem("items[" + i + "].id", "must be unique"));
         }
       }
-      if (item.score() != null && item.score().compareTo(rule.scaleMax()) > 0) {
-        problems.add(
-            new ApiError.FieldProblem(
-                "items[" + i + "].score", "must not exceed the scale (" + rule.scaleMax() + ")"));
+      String at = "items[" + i + "].";
+      if (rule.method() == GradingRule.SUM) {
+        // Soma: cada avaliação diz quanto vale, e a nota não passa disso.
+        if (item.maxPoints() == null) {
+          problems.add(new ApiError.FieldProblem(at + "maxPoints", "is required for SUM"));
+        } else if (item.maxPoints().compareTo(rule.scaleMax()) > 0) {
+          problems.add(
+              new ApiError.FieldProblem(
+                  at + "maxPoints", "must not exceed the scale (" + rule.scaleMax() + ")"));
+        } else if (item.score() != null && item.score().compareTo(item.maxPoints()) > 0) {
+          problems.add(
+              new ApiError.FieldProblem(
+                  at + "score", "must not exceed maxPoints (" + item.maxPoints() + ")"));
+        }
+      } else {
+        if (rule.method() == GradingRule.WEIGHTED && item.weight() == null) {
+          problems.add(new ApiError.FieldProblem(at + "weight", "is required for WEIGHTED"));
+        }
+        if (item.score() != null && item.score().compareTo(rule.scaleMax()) > 0) {
+          problems.add(
+              new ApiError.FieldProblem(
+                  at + "score", "must not exceed the scale (" + rule.scaleMax() + ")"));
+        }
       }
     }
     if (!problems.isEmpty()) {
@@ -189,7 +212,16 @@ public class GradeService {
       GradeRequests.AssessmentItem item = items.get(i);
       Assessment entity =
           item.id() != null ? existing.get(item.id()) : new Assessment(subject.getId());
-      entity.update(item.name().trim(), item.weight(), item.score(), i);
+      // Peso ausente (soma ou aritmética) mantém o que já estava; avaliação nova fica com 1.
+      BigDecimal weight =
+          item.weight() != null
+              ? item.weight()
+              : entity.getWeight() != null ? entity.getWeight() : BigDecimal.ONE;
+      entity.update(item.name().trim(), weight, item.score(), i);
+      // "Quanto vale" e bônus ausentes (nas médias) também mantêm o que já estava.
+      BigDecimal maxPoints = item.maxPoints() != null ? item.maxPoints() : entity.getMaxPoints();
+      boolean bonus = item.bonus() != null ? item.bonus() : entity.isBonus();
+      entity.updatePoints(maxPoints, bonus);
       saved.add(entity);
     }
     assessments.saveAll(saved);
@@ -233,7 +265,7 @@ public class GradeService {
       base = null;
     }
     return new EffectiveRule(
-        o.method() != null ? Method.valueOf(o.method()) : d.getMethod(),
+        o.method() != null ? GradingRule.valueOf(o.method()) : d.getMethod(),
         or(o.scaleMax(), d.getScaleMax()),
         or(o.passingGrade(), d.getPassingGrade()),
         or(o.maxAbsencePct(), d.getMaxAbsencePct()),
@@ -241,7 +273,27 @@ public class GradeService {
         o.finalExamEnabled() != null ? o.finalExamEnabled() : d.isFinalExamEnabled(),
         or(o.finalExamMinAverage(), d.getFinalExamMinAverage()),
         or(o.finalExamAverageWeight(), d.getFinalExamAverageWeight()),
-        or(o.finalExamPassingGrade(), d.getFinalExamPassingGrade()));
+        or(o.finalExamPassingGrade(), d.getFinalExamPassingGrade()),
+        o.roundBeforeCompare() != null ? o.roundBeforeCompare() : d.isRoundBeforeCompare(),
+        o.roundingScale() != null ? o.roundingScale() : d.getRoundingScale(),
+        // O teto é só da matéria (não há teto nas preferências).
+        o.pointsCap());
+  }
+
+  /**
+   * Avaliação da entidade → entrada da calculadora. Na soma, uma nota acima do "quanto vale" (dado
+   * antigo, de quando a matéria usava média) vira avaliação sem "quanto vale": a calculadora conta
+   * em {@code missingMaxPoints} e a tela pede para corrigir, em vez de quebrar.
+   */
+  static GradeCalculator.Assessment toCalculatorAssessment(GradingRule method, Assessment a) {
+    BigDecimal max = a.getMaxPoints();
+    if (method == GradingRule.SUM
+        && max != null
+        && a.getScore() != null
+        && a.getScore().compareTo(max) > 0) {
+      max = null;
+    }
+    return new GradeCalculator.Assessment(a.getWeight(), a.getScore(), max, a.isBonus());
   }
 
   static GradeCalculator.Rule toCalculatorRule(EffectiveRule r) {
@@ -253,19 +305,27 @@ public class GradeService {
                 r.finalExamAverageWeight(),
                 r.finalExamPassingGrade())
             : FinalExamRule.disabled();
-    return new GradeCalculator.Rule(r.method(), r.scaleMax(), r.passingGrade(), exam);
+    return new GradeCalculator.Rule(
+        r.method(),
+        r.scaleMax(),
+        r.passingGrade(),
+        exam,
+        new SumOptions(r.roundBeforeCompare(), r.roundingScale(), r.pointsCap()));
+  }
+
+  /** Calcula a matéria pela regra efetiva: o único caminho entre o banco e a calculadora. */
+  static GradeCalculator.Result evaluate(
+      EffectiveRule rule, List<Assessment> list, BigDecimal examScore) {
+    List<GradeCalculator.Assessment> input =
+        list.stream().map(a -> toCalculatorAssessment(rule.method(), a)).toList();
+    return GradeCalculator.evaluate(toCalculatorRule(rule), input, examScore);
   }
 
   private static SubjectGrades build(
       Subject subject, GradeSettings settings, List<Assessment> list, long absenceCount) {
     GradingOverrides overrides = subject.getGrading();
     EffectiveRule rule = resolve(subject, overrides, settings);
-    List<GradeCalculator.Assessment> input =
-        list.stream()
-            .map(a -> new GradeCalculator.Assessment(a.getWeight(), a.getScore()))
-            .toList();
-    GradeCalculator.Result result =
-        GradeCalculator.evaluate(toCalculatorRule(rule), input, overrides.finalExamScore());
+    GradeCalculator.Result result = evaluate(rule, list, overrides.finalExamScore());
     GradeCalculator.Attendance attendance =
         GradeCalculator.attendance(
             rule.attendanceBase(), Math.toIntExact(absenceCount), rule.maxAbsencePct());
@@ -302,6 +362,9 @@ public class GradeService {
         problems.add(
             new ApiError.FieldProblem("finalExamMinAverage", "must not exceed passingGrade"));
       }
+    }
+    if (r.pointsCap() != null && r.pointsCap().compareTo(r.passingGrade()) < 0) {
+      problems.add(new ApiError.FieldProblem("pointsCap", "must be at least passingGrade"));
     }
     if (examScore != null && examScore.compareTo(scale) > 0) {
       problems.add(new ApiError.FieldProblem("finalExamScore", "must not exceed scaleMax"));

@@ -408,5 +408,1085 @@
       "finalGrade": "3.32",
       "complete": false
     }
+  },
+  {
+    "examScore": null,
+    "name": "soma: nenhuma nota lançada",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": null,
+        "bonus": false
+      },
+      {
+        "maxPoints": "2",
+        "score": null,
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": null,
+        "bonus": false
+      },
+      {
+        "maxPoints": "1",
+        "score": null,
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "NOT_STARTED",
+      "gradedWeightPct": "0",
+      "currentAverage": null,
+      "minimumAverage": "0",
+      "maximumAverage": "10",
+      "requiredScore": "7",
+      "examRequired": null,
+      "finalGrade": null,
+      "complete": false,
+      "sum": {
+        "earned": "0",
+        "total": "0",
+        "pointsToPass": "7",
+        "pointsAvailable": "10",
+        "maxReachable": "10",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          "2.1",
+          "1.4",
+          "2.8",
+          "0.7"
+        ]
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: tudo lançado e aprovado",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": "2.5",
+        "bonus": false
+      },
+      {
+        "maxPoints": "2",
+        "score": "2",
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": "2.5",
+        "bonus": false
+      },
+      {
+        "maxPoints": "1",
+        "score": "1",
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "PASSED",
+      "gradedWeightPct": "100",
+      "currentAverage": "8",
+      "minimumAverage": "8",
+      "maximumAverage": "8",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "8",
+      "complete": true,
+      "sum": {
+        "earned": "8",
+        "total": "8",
+        "pointsToPass": "0",
+        "pointsAvailable": "0",
+        "maxReachable": "8",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: tudo lançado e reprovado",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": "2",
+        "bonus": false
+      },
+      {
+        "maxPoints": "2",
+        "score": "1",
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": "2",
+        "bonus": false
+      },
+      {
+        "maxPoints": "1",
+        "score": "1",
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "FAILED",
+      "gradedWeightPct": "100",
+      "currentAverage": "6",
+      "minimumAverage": "6",
+      "maximumAverage": "6",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "6",
+      "complete": true,
+      "sum": {
+        "earned": "6",
+        "total": "6",
+        "pointsToPass": "1",
+        "pointsAvailable": "0",
+        "maxReachable": "6",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: exatamente 7,0 aprova",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": "3",
+        "bonus": false
+      },
+      {
+        "maxPoints": "2",
+        "score": "2",
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": "1.5",
+        "bonus": false
+      },
+      {
+        "maxPoints": "1",
+        "score": "0.5",
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "PASSED",
+      "gradedWeightPct": "100",
+      "currentAverage": "7",
+      "minimumAverage": "7",
+      "maximumAverage": "7",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "7",
+      "complete": true,
+      "sum": {
+        "earned": "7",
+        "total": "7",
+        "pointsToPass": "0",
+        "pointsAvailable": "0",
+        "maxReachable": "7",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: 6,99 não aprova (compara o valor exato)",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": "3",
+        "bonus": false
+      },
+      {
+        "maxPoints": "3",
+        "score": "3",
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": "0.99",
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "FAILED",
+      "gradedWeightPct": "100",
+      "currentAverage": "6.99",
+      "minimumAverage": "6.99",
+      "maximumAverage": "6.99",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "6.99",
+      "complete": true,
+      "sum": {
+        "earned": "6.99",
+        "total": "6.99",
+        "pointsToPass": "0.01",
+        "pointsAvailable": "0",
+        "maxReachable": "6.99",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          null
+        ],
+        "comparedTotal": "6.99"
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: arredondando antes de comparar (1 casa), 6,95 vira 7,0 e aprova",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": true,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": "3",
+        "bonus": false
+      },
+      {
+        "maxPoints": "3",
+        "score": "3",
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": "0.95",
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "PASSED",
+      "gradedWeightPct": "100",
+      "currentAverage": "6.95",
+      "minimumAverage": "6.95",
+      "maximumAverage": "6.95",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "6.95",
+      "complete": true,
+      "sum": {
+        "earned": "6.95",
+        "total": "6.95",
+        "pointsToPass": "0",
+        "pointsAvailable": "0",
+        "maxReachable": "6.95",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          null
+        ],
+        "comparedTotal": "7"
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: arredondando antes de comparar (1 casa), 6,94 vira 6,9 e reprova",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": true,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": "3",
+        "bonus": false
+      },
+      {
+        "maxPoints": "3",
+        "score": "3",
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": "0.94",
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "FAILED",
+      "gradedWeightPct": "100",
+      "currentAverage": "6.94",
+      "minimumAverage": "6.94",
+      "maximumAverage": "6.94",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "6.94",
+      "complete": true,
+      "sum": {
+        "earned": "6.94",
+        "total": "6.94",
+        "pointsToPass": "0.01",
+        "pointsAvailable": "0",
+        "maxReachable": "6.94",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          null
+        ],
+        "comparedTotal": "6.9"
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: já passou com avaliação pendente (o resto é bônus)",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": "3",
+        "bonus": false
+      },
+      {
+        "maxPoints": "2",
+        "score": "2",
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": "2.5",
+        "bonus": false
+      },
+      {
+        "maxPoints": "1",
+        "score": null,
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "SECURED",
+      "gradedWeightPct": "90",
+      "currentAverage": "7.5",
+      "minimumAverage": "7.5",
+      "maximumAverage": "8.5",
+      "requiredScore": "0",
+      "examRequired": null,
+      "finalGrade": null,
+      "complete": false,
+      "sum": {
+        "earned": "7.5",
+        "total": "7.5",
+        "pointsToPass": "0",
+        "pointsAvailable": "1",
+        "maxReachable": "8.5",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          null,
+          "0"
+        ]
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: precisa de 1,5 na única avaliação pendente",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": "2.5",
+        "bonus": false
+      },
+      {
+        "maxPoints": "2",
+        "score": "2",
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": null,
+        "bonus": false
+      },
+      {
+        "maxPoints": "1",
+        "score": "1",
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "ON_TRACK",
+      "gradedWeightPct": "60",
+      "currentAverage": "5.5",
+      "minimumAverage": "5.5",
+      "maximumAverage": "9.5",
+      "requiredScore": "1.5",
+      "examRequired": null,
+      "finalGrade": null,
+      "complete": false,
+      "sum": {
+        "earned": "5.5",
+        "total": "5.5",
+        "pointsToPass": "1.5",
+        "pointsAvailable": "4",
+        "maxReachable": "9.5",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          "1.5",
+          null
+        ]
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: várias pendentes, mínimo repartido e em risco (precisa de 75% do que falta)",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": "2",
+        "bonus": false
+      },
+      {
+        "maxPoints": "2",
+        "score": null,
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": null,
+        "bonus": false
+      },
+      {
+        "maxPoints": "1",
+        "score": "0.5",
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "AT_RISK",
+      "gradedWeightPct": "40",
+      "currentAverage": "2.5",
+      "minimumAverage": "2.5",
+      "maximumAverage": "8.5",
+      "requiredScore": "4.5",
+      "examRequired": null,
+      "finalGrade": null,
+      "complete": false,
+      "sum": {
+        "earned": "2.5",
+        "total": "2.5",
+        "pointsToPass": "4.5",
+        "pointsAvailable": "6",
+        "maxReachable": "8.5",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          "1.5",
+          "3",
+          null
+        ]
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: impossível (faltam 5 e só dá para ganhar 4)",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": "1",
+        "bonus": false
+      },
+      {
+        "maxPoints": "2",
+        "score": "0.5",
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": null,
+        "bonus": false
+      },
+      {
+        "maxPoints": "1",
+        "score": "0.5",
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "IMPOSSIBLE",
+      "gradedWeightPct": "60",
+      "currentAverage": "2",
+      "minimumAverage": "2",
+      "maximumAverage": "6",
+      "requiredScore": "5",
+      "examRequired": null,
+      "finalGrade": null,
+      "complete": false,
+      "sum": {
+        "earned": "2",
+        "total": "2",
+        "pointsToPass": "5",
+        "pointsAvailable": "4",
+        "maxReachable": "6",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: pontuações que não fecham 10 (aviso, sem erro)",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": null,
+        "bonus": false
+      },
+      {
+        "maxPoints": "2",
+        "score": null,
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": null,
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "NOT_STARTED",
+      "gradedWeightPct": "0",
+      "currentAverage": null,
+      "minimumAverage": "0",
+      "maximumAverage": "9",
+      "requiredScore": "7",
+      "examRequired": null,
+      "finalGrade": null,
+      "complete": false,
+      "sum": {
+        "earned": "0",
+        "total": "0",
+        "pointsToPass": "7",
+        "pointsAvailable": "9",
+        "maxReachable": "9",
+        "plannedPoints": "9",
+        "bonusPoints": "0",
+        "scaleMismatch": true,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          "2.34",
+          "1.56",
+          "3.12"
+        ]
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: bônus soma ao total e o teto limita em 10",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": "10"
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": "3",
+        "bonus": false
+      },
+      {
+        "maxPoints": "2",
+        "score": "2",
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": "4",
+        "bonus": false
+      },
+      {
+        "maxPoints": "1",
+        "score": "1",
+        "bonus": false
+      },
+      {
+        "maxPoints": "1",
+        "score": "1",
+        "bonus": true
+      }
+    ],
+    "expected": {
+      "standing": "PASSED",
+      "gradedWeightPct": "100",
+      "currentAverage": "10",
+      "minimumAverage": "10",
+      "maximumAverage": "10",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "10",
+      "complete": true,
+      "sum": {
+        "earned": "11",
+        "total": "10",
+        "pointsToPass": "0",
+        "pointsAvailable": "0",
+        "maxReachable": "10",
+        "plannedPoints": "10",
+        "bonusPoints": "1",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: escala 0 a 100",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "100",
+      "passingGrade": "70",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "30",
+        "score": "25",
+        "bonus": false
+      },
+      {
+        "maxPoints": "30",
+        "score": "30",
+        "bonus": false
+      },
+      {
+        "maxPoints": "40",
+        "score": null,
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "ON_TRACK",
+      "gradedWeightPct": "60",
+      "currentAverage": "55",
+      "minimumAverage": "55",
+      "maximumAverage": "95",
+      "requiredScore": "15",
+      "examRequired": null,
+      "finalGrade": null,
+      "complete": false,
+      "sum": {
+        "earned": "55",
+        "total": "55",
+        "pointsToPass": "15",
+        "pointsAvailable": "40",
+        "maxReachable": "95",
+        "plannedPoints": "100",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          "15"
+        ]
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: sem erro de ponto flutuante (3,3 + 3,6 + 0,1 = 7,0 aprova)",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": null,
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3.5",
+        "score": "3.3",
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": "3.6",
+        "bonus": false
+      },
+      {
+        "maxPoints": "1",
+        "score": "0.1",
+        "bonus": false
+      },
+      {
+        "maxPoints": "1.5",
+        "score": "0",
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "PASSED",
+      "gradedWeightPct": "100",
+      "currentAverage": "7",
+      "minimumAverage": "7",
+      "maximumAverage": "7",
+      "requiredScore": null,
+      "examRequired": null,
+      "finalGrade": "7",
+      "complete": true,
+      "sum": {
+        "earned": "7",
+        "total": "7",
+        "pointsToPass": "0",
+        "pointsAvailable": "0",
+        "maxReachable": "7",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "examScore": null,
+    "name": "soma: abaixo de 7 e acima de 4 vai para o exame",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": {
+        "minAverage": "4",
+        "averageWeight": "50",
+        "passingGrade": "5"
+      },
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": "2",
+        "bonus": false
+      },
+      {
+        "maxPoints": "3",
+        "score": "2",
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": "1.5",
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "EXAM",
+      "gradedWeightPct": "100",
+      "currentAverage": "5.5",
+      "minimumAverage": "5.5",
+      "maximumAverage": "5.5",
+      "requiredScore": null,
+      "examRequired": "4.49",
+      "finalGrade": "5.5",
+      "complete": false,
+      "sum": {
+        "earned": "5.5",
+        "total": "5.5",
+        "pointsToPass": "1.5",
+        "pointsAvailable": "0",
+        "maxReachable": "5.5",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          null
+        ]
+      }
+    }
+  },
+  {
+    "examScore": "5",
+    "name": "soma: exame compõe com o total (5,5 e 5 → 5,25, aprova)",
+    "rule": {
+      "method": "SUM",
+      "scaleMax": "10",
+      "passingGrade": "7",
+      "exam": {
+        "minAverage": "4",
+        "averageWeight": "50",
+        "passingGrade": "5"
+      },
+      "sum": {
+        "roundBeforeCompare": false,
+        "roundingScale": 1,
+        "pointsCap": null
+      }
+    },
+    "assessments": [
+      {
+        "maxPoints": "3",
+        "score": "2",
+        "bonus": false
+      },
+      {
+        "maxPoints": "3",
+        "score": "2",
+        "bonus": false
+      },
+      {
+        "maxPoints": "4",
+        "score": "1.5",
+        "bonus": false
+      }
+    ],
+    "expected": {
+      "standing": "PASSED",
+      "gradedWeightPct": "100",
+      "currentAverage": "5.5",
+      "minimumAverage": "5.5",
+      "maximumAverage": "5.5",
+      "requiredScore": null,
+      "examRequired": "4.49",
+      "finalGrade": "5.25",
+      "complete": true,
+      "sum": {
+        "earned": "5.5",
+        "total": "5.5",
+        "pointsToPass": "1.5",
+        "pointsAvailable": "0",
+        "maxReachable": "5.5",
+        "plannedPoints": "10",
+        "bonusPoints": "0",
+        "scaleMismatch": false,
+        "missingMaxPoints": 0,
+        "requiredPerItem": [
+          null,
+          null,
+          null
+        ]
+      }
+    }
   }
 ]

@@ -1,5 +1,6 @@
 package com.stackstudy.subject.dto;
 
+import com.stackstudy.grade.GradingRule;
 import com.stackstudy.subject.SubjectColors;
 import com.stackstudy.subject.SubjectStatus;
 import jakarta.validation.constraints.Max;
@@ -12,7 +13,8 @@ import java.util.UUID;
 
 /**
  * Criar ou editar matéria. Sem {@code color}, a matéria recebe a próxima cor da paleta; sem {@code
- * status}, fica "cursando".
+ * status}, fica "cursando". {@code gradingRule}: como a nota é calculada (null = usa a preferência
+ * do usuário); é o mesmo campo da regra no Grade Predictor.
  */
 public record SubjectRequest(
     @NotNull UUID semesterId,
@@ -26,4 +28,5 @@ public record SubjectRequest(
             flags = Pattern.Flag.CASE_INSENSITIVE,
             message = "must be one of the subject palette colors")
         String color,
-    SubjectStatus status) {}
+    SubjectStatus status,
+    GradingRule gradingRule) {}

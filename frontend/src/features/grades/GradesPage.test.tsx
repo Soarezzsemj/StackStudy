@@ -27,6 +27,8 @@ const rule = {
   finalExamMinAverage: 4,
   finalExamAverageWeight: 50,
   finalExamPassingGrade: 5,
+  roundBeforeCompare: false,
+  roundingScale: 1,
 };
 
 // Cálculo: P1 = 4 (peso 50), P2 sem nota (peso 50) → precisa 7,99; em risco.
@@ -306,11 +308,11 @@ describe('GradesPage', () => {
     const card = await screen.findByRole('article', { name: /Cálculo I/ });
     await user.click(within(card).getByRole('button', { name: 'Regra de Cálculo I' }));
     const dialog = screen.getByRole('dialog', { name: 'Regra de Cálculo I' });
-    expect(within(dialog).getByLabelText('Média mínima para aprovação')).toHaveAttribute(
+    expect(within(dialog).getByLabelText('Nota mínima para aprovação')).toHaveAttribute(
       'placeholder',
       'Padrão: 6',
     );
-    await user.type(within(dialog).getByLabelText('Média mínima para aprovação'), '7');
+    await user.type(within(dialog).getByLabelText('Nota mínima para aprovação'), '7');
     await user.click(within(dialog).getByRole('button', { name: 'Salvar' }));
     await waitFor(() =>
       expect(calls(fetchMock, 'PUT', '/api/subjects/sub1/grading')).toHaveLength(1),

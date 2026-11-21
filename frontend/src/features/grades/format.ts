@@ -1,4 +1,4 @@
-import type { ChipTone } from '@/components/ui';
+import type { ChipTone, IconName } from '@/components/ui';
 import type { AttendanceStatus, Standing } from '@/lib/api/grades';
 
 /** Nota com 2 casas no idioma da interface; sem valor vira travessão. */
@@ -31,6 +31,23 @@ export function standingTone(standing: Standing): ChipTone {
       return 'danger';
     default:
       return 'neutral';
+  }
+}
+
+/** Ícone da situação, para não depender só da cor. */
+export function standingIcon(standing: Standing): IconName {
+  switch (standing) {
+    case 'PASSED':
+    case 'SECURED':
+      return 'check';
+    case 'AT_RISK':
+    case 'EXAM':
+      return 'alert';
+    case 'IMPOSSIBLE':
+    case 'FAILED':
+      return 'ban';
+    default:
+      return 'target';
   }
 }
 

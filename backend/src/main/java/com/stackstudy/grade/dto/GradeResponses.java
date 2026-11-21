@@ -5,10 +5,10 @@ import com.stackstudy.grade.Assessment;
 import com.stackstudy.grade.GradeCalculator;
 import com.stackstudy.grade.GradeCalculator.AttendanceStatus;
 import com.stackstudy.grade.GradeCalculator.GpaScale;
-import com.stackstudy.grade.GradeCalculator.Method;
 import com.stackstudy.grade.GradeCalculator.Standing;
 import com.stackstudy.grade.GradeSettings;
 import com.stackstudy.grade.GradeSettings.GpaWeight;
+import com.stackstudy.grade.GradingRule;
 import com.stackstudy.subject.GradingOverrides;
 import com.stackstudy.subject.SubjectStatus;
 import java.math.BigDecimal;
@@ -22,7 +22,7 @@ public final class GradeResponses {
   private GradeResponses() {}
 
   public record Settings(
-      Method method,
+      GradingRule method,
       BigDecimal scaleMax,
       BigDecimal passingGrade,
       BigDecimal maxAbsencePct,
@@ -31,7 +31,9 @@ public final class GradeResponses {
       BigDecimal finalExamAverageWeight,
       BigDecimal finalExamPassingGrade,
       GpaScale gpaScale,
-      GpaWeight gpaWeight) {
+      GpaWeight gpaWeight,
+      boolean roundBeforeCompare,
+      int roundingScale) {
 
     public static Settings from(GradeSettings s) {
       return new Settings(
@@ -44,7 +46,9 @@ public final class GradeResponses {
           s.getFinalExamAverageWeight(),
           s.getFinalExamPassingGrade(),
           s.getGpaScale(),
-          s.getGpaWeight());
+          s.getGpaWeight(),
+          s.isRoundBeforeCompare(),
+          s.getRoundingScale());
     }
   }
 
@@ -52,9 +56,10 @@ public final class GradeResponses {
    * Regra que vale para a matéria (própria ou herdada das preferências).
    *
    * @param attendanceBase total de aulas usado nas faltas (null = sem carga horária)
+   * @param pointsCap teto do total na soma de pontos (null = sem teto)
    */
   public record EffectiveRule(
-      Method method,
+      GradingRule method,
       BigDecimal scaleMax,
       BigDecimal passingGrade,
       BigDecimal maxAbsencePct,
@@ -62,11 +67,14 @@ public final class GradeResponses {
       boolean finalExamEnabled,
       BigDecimal finalExamMinAverage,
       BigDecimal finalExamAverageWeight,
-      BigDecimal finalExamPassingGrade) {}
+      BigDecimal finalExamPassingGrade,
+      boolean roundBeforeCompare,
+      int roundingScale,
+      BigDecimal pointsCap) {}
 
   /** Valores gravados na matéria (null = herda). Usado pelo formulário de regra. */
   public record RuleOverrides(
-      Method method,
+      GradingRule method,
       BigDecimal scaleMax,
       BigDecimal passingGrade,
       BigDecimal maxAbsencePct,
@@ -74,11 +82,14 @@ public final class GradeResponses {
       Boolean finalExamEnabled,
       BigDecimal finalExamMinAverage,
       BigDecimal finalExamAverageWeight,
-      BigDecimal finalExamPassingGrade) {
+      BigDecimal finalExamPassingGrade,
+      Boolean roundBeforeCompare,
+      Integer roundingScale,
+      BigDecimal pointsCap) {
 
     public static RuleOverrides from(GradingOverrides o) {
       return new RuleOverrides(
-          o.method() == null ? null : Method.valueOf(o.method()),
+          o.method() == null ? null : GradingRule.valueOf(o.method()),
           o.scaleMax(),
           o.passingGrade(),
           o.maxAbsencePct(),
@@ -86,18 +97,64 @@ public final class GradeResponses {
           o.finalExamEnabled(),
           o.finalExamMinAverage(),
           o.finalExamAverageWeight(),
-          o.finalExamPassingGrade());
+          o.finalExamPassingGrade(),
+          o.roundBeforeCompare(),
+          o.roundingScale(),
+          o.pointsCap());
     }
   }
 
-  public record AssessmentView(UUID id, String name, BigDecimal weight, BigDecimal score) {
+  /**
+   * @param maxPoints quanto vale (soma de pontos); null se nunca foi informado
+   * @param bonus ponto extra (soma de pontos)
+   */
+  public record AssessmentView(
+      UUID id,
+      String name,
+      BigDecimal weight,
+      BigDecimal score,
+      BigDecimal maxPoints,
+      boolean bonus) {
 
     public static AssessmentView from(Assessment a) {
-      return new AssessmentView(a.getId(), a.getName(), a.getWeight(), a.getScore());
+      return new AssessmentView(
+          a.getId(), a.getName(), a.getWeight(), a.getScore(), a.getMaxPoints(), a.isBonus());
     }
   }
 
-  /** Resultado das notas (ver {@link GradeCalculator.Result}). */
+  /** Detalhe da soma de pontos (ver {@link GradeCalculator.SumDetail}). */
+  public record SumView(
+      BigDecimal earned,
+      BigDecimal total,
+      BigDecimal comparedTotal,
+      BigDecimal pointsToPass,
+      BigDecimal pointsAvailable,
+      BigDecimal maxReachable,
+      BigDecimal plannedPoints,
+      BigDecimal bonusPoints,
+      boolean scaleMismatch,
+      int missingMaxPoints,
+      List<BigDecimal> requiredPerItem) {
+
+    static SumView from(GradeCalculator.SumDetail d) {
+      return d == null
+          ? null
+          : new SumView(
+              d.earned(),
+              d.total(),
+              d.comparedTotal(),
+              d.pointsToPass(),
+              d.pointsAvailable(),
+              d.maxReachable(),
+              d.plannedPoints(),
+              d.bonusPoints(),
+              d.scaleMismatch(),
+              d.missingMaxPoints(),
+              d.requiredPerItem());
+    }
+  }
+
+  /** Resultado das notas (ver {@link GradeCalculator.Result}). {@code sum} só na soma. */
   public record GradeResult(
       Standing standing,
       int totalCount,
@@ -110,7 +167,8 @@ public final class GradeResponses {
       BigDecimal requiredScore,
       BigDecimal examRequired,
       BigDecimal finalGrade,
-      boolean complete) {
+      boolean complete,
+      SumView sum) {
 
     public static GradeResult from(GradeCalculator.Result r) {
       return new GradeResult(
@@ -125,7 +183,8 @@ public final class GradeResponses {
           r.requiredScore(),
           r.examRequired(),
           r.finalGrade(),
-          r.complete());
+          r.complete(),
+          SumView.from(r.sum()));
     }
   }
 

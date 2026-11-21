@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, Chip, SelectField } from '@/components/ui';
+import { Button, Card, Chip, Icon, SelectField } from '@/components/ui';
 import type { SubjectGrades } from '@/lib/api/grades';
-import { formatGrade, formatNumber, standingTone } from './format';
-import { hasWhatIf, parseScore, simulate, type WhatIf } from './simulation';
+import { cn } from '@/lib/cn';
+import { formatGrade, formatNumber, standingIcon, standingTone, toneColor } from './format';
+import { hasWhatIf, maxScoreOf, parseScore, simulate, type WhatIf } from './simulation';
+import { gradeHeadline, headlineSubjectOf } from './summary';
 
 interface SimulatorCardProps {
   subjects: SubjectGrades[];
@@ -53,6 +55,7 @@ function SimulatorBody({ subject }: { subject: SubjectGrades }) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language;
   const max = subject.rule.scaleMax;
+  const isSum = subject.rule.method === 'SUM';
   const [texts, setTexts] = useState<Record<string, string>>({});
   const [examText, setExamText] = useState('');
 
@@ -60,7 +63,8 @@ function SimulatorBody({ subject }: { subject: SubjectGrades }) {
     const whatIf: WhatIf = {};
     const invalid = new Set<string>();
     for (const [id, text] of Object.entries(texts)) {
-      const value = parseScore(text, max);
+      const a = subject.assessments.find((x) => x.id === id);
+      const value = parseScore(text, a ? maxScoreOf(subject, a) : max);
       if (value === 'invalid') invalid.add(id);
       else if (value !== null) whatIf[id] = value;
     }
@@ -71,13 +75,24 @@ function SimulatorBody({ subject }: { subject: SubjectGrades }) {
       exam: examValue === 'invalid' || examValue === null ? undefined : examValue,
       examInvalid: examValue === 'invalid',
     };
-  }, [texts, examText, max]);
+  }, [texts, examText, max, subject]);
 
   const result = useMemo(
     () => simulate(subject, parsed.whatIf, parsed.exam),
     [subject, parsed.whatIf, parsed.exam],
   );
   const simulating = hasWhatIf(parsed.whatIf, parsed.exam);
+  // Mesma mensagem do cartão, agora sobre o resultado simulado ("e se" preenchido conta como nota).
+  const headline = gradeHeadline(
+    {
+      ...headlineSubjectOf(subject),
+      pendingNames: subject.assessments
+        .filter((a) => a.score === undefined && parsed.whatIf[a.id] === undefined)
+        .map((a) => a.name),
+    },
+    result,
+    lang,
+  );
   // Exame só faz sentido quando a regra tem exame e ainda não há nota de exame gravada.
   const showExam =
     subject.rule.finalExamEnabled &&
@@ -94,10 +109,13 @@ function SimulatorBody({ subject }: { subject: SubjectGrades }) {
       <div>
         <p className="mb-4 text-sm text-text-secondary">{t('grades.simulator.hint')}</p>
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
-          {subject.assessments.map((a) => {
+          {subject.assessments.map((a, i) => {
             const inputId = `whatif-${a.id}`;
             const errorId = `${inputId}-error`;
             const isInvalid = parsed.invalid.has(a.id);
+            const itemMax = maxScoreOf(subject, a);
+            // Na soma, o necessário é por avaliação (repartido); nas médias, igual em todas.
+            const needed = isSum ? (result.sum?.requiredPerItem[i] ?? null) : result.requiredScore;
             return (
               <li
                 key={a.id}
@@ -108,6 +126,14 @@ function SimulatorBody({ subject }: { subject: SubjectGrades }) {
                   {subject.rule.method === 'WEIGHTED' && (
                     <p className="text-xs text-text-muted">
                       {t('grades.assessments.weight')} {formatNumber(a.weight, lang)}
+                    </p>
+                  )}
+                  {isSum && (
+                    <p className="text-xs text-text-muted">
+                      {a.maxPoints !== undefined
+                        ? t('grades.sum.worth', { points: formatGrade(a.maxPoints, lang) })
+                        : t('grades.sum.worthUnknown')}
+                      {a.bonus && ` · ${t('grades.assessments.bonus')}`}
                     </p>
                   )}
                 </div>
@@ -129,10 +155,8 @@ function SimulatorBody({ subject }: { subject: SubjectGrades }) {
                       autoComplete="off"
                       className="input tabular w-32 text-right"
                       placeholder={
-                        result.requiredScore !== null && result.requiredScore <= max
-                          ? t('grades.simulator.needed', {
-                              value: formatGrade(result.requiredScore, lang),
-                            })
+                        needed !== null && needed <= itemMax
+                          ? t('grades.simulator.needed', { value: formatGrade(needed, lang) })
                           : undefined
                       }
                       value={texts[a.id] ?? ''}
@@ -142,7 +166,7 @@ function SimulatorBody({ subject }: { subject: SubjectGrades }) {
                     />
                     {isInvalid && (
                       <p id={errorId} className="text-xs text-danger">
-                        {t('grades.simulator.invalid', { max: formatNumber(max, lang) })}
+                        {t('grades.simulator.invalid', { max: formatNumber(itemMax, lang) })}
                       </p>
                     )}
                   </div>
@@ -194,52 +218,108 @@ function SimulatorBody({ subject }: { subject: SubjectGrades }) {
             {simulating ? t('grades.simulator.simulated') : t('grades.simulator.real')}
           </p>
           <Chip tone={standingTone(result.standing)}>
-            {t(`grades.standing.${result.standing}`)}
+            <Icon name={standingIcon(result.standing)} size={14} />
+            {isSum
+              ? t(`grades.standingSum.${result.standing}`)
+              : t(`grades.standing.${result.standing}`)}
           </Chip>
         </div>
-        <dl className="m-0 flex flex-col gap-4">
-          <div>
-            <dt className="label text-text-muted">{t('grades.simulator.average')}</dt>
-            <dd className="tabular m-0 text-4xl font-[650] leading-none tracking-card">
-              {formatGrade(result.finalGrade, lang)}
-            </dd>
-          </div>
-          {result.requiredScore !== null && (
+        {isSum && result.sum ? (
+          <dl className="m-0 flex flex-col gap-4">
             <div>
-              <dt className="label text-text-muted">{t('grades.simulator.stillNeeds')}</dt>
-              <dd
-                className={
-                  result.requiredScore > max
-                    ? 'tabular m-0 text-xl font-semibold text-danger'
-                    : 'tabular m-0 text-xl font-semibold'
-                }
-              >
-                {formatGrade(result.requiredScore, lang)}
-                {result.requiredScore > max && (
-                  <span className="ml-2 text-sm font-normal">
-                    ({t('grades.card.aboveMax', { max: formatNumber(max, lang) })})
-                  </span>
-                )}
+              <dt className="label text-text-muted">{t('grades.sum.points')}</dt>
+              <dd className="tabular m-0 text-4xl font-[650] leading-none tracking-card">
+                {t('grades.sum.ofPassing', {
+                  total: formatGrade(result.sum.total, lang),
+                  passing: formatGrade(subject.rule.passingGrade, lang),
+                })}
               </dd>
             </div>
-          )}
-          {result.examRequired !== null && result.standing !== 'PASSED' && (
+            {result.sum.pointsToPass > 0 && (
+              <div>
+                <dt className="label text-text-muted">{t('grades.sum.stillMissing')}</dt>
+                <dd
+                  className={cn(
+                    'tabular m-0 text-xl font-semibold',
+                    result.standing === 'IMPOSSIBLE' && 'text-danger',
+                  )}
+                >
+                  {formatGrade(result.sum.pointsToPass, lang)}
+                </dd>
+              </div>
+            )}
+            {result.sum.pointsAvailable > 0 && (
+              <div>
+                <dt className="label text-text-muted">{t('grades.sum.available')}</dt>
+                <dd className="tabular m-0 text-xl font-semibold">
+                  {formatGrade(result.sum.pointsAvailable, lang)}
+                </dd>
+              </div>
+            )}
+            {result.examRequired !== null && result.standing !== 'PASSED' && (
+              <div>
+                <dt className="label text-text-muted">{t('grades.simulator.examNeeded')}</dt>
+                <dd className="tabular m-0 text-xl font-semibold">
+                  {formatGrade(result.examRequired, lang)}
+                </dd>
+              </div>
+            )}
+          </dl>
+        ) : (
+          <dl className="m-0 flex flex-col gap-4">
             <div>
-              <dt className="label text-text-muted">{t('grades.simulator.examNeeded')}</dt>
-              <dd
-                className={
-                  result.examRequired > max
-                    ? 'tabular m-0 text-xl font-semibold text-danger'
-                    : 'tabular m-0 text-xl font-semibold'
-                }
-              >
-                {formatGrade(result.examRequired, lang)}
+              <dt className="label text-text-muted">{t('grades.simulator.average')}</dt>
+              <dd className="tabular m-0 text-4xl font-[650] leading-none tracking-card">
+                {formatGrade(result.finalGrade, lang)}
               </dd>
             </div>
-          )}
-        </dl>
-        {result.standing === 'IMPOSSIBLE' && (
-          <p className="text-sm text-danger">{t('grades.card.impossibleBody')}</p>
+            {result.requiredScore !== null && (
+              <div>
+                <dt className="label text-text-muted">{t('grades.simulator.stillNeeds')}</dt>
+                <dd
+                  className={
+                    result.requiredScore > max
+                      ? 'tabular m-0 text-xl font-semibold text-danger'
+                      : 'tabular m-0 text-xl font-semibold'
+                  }
+                >
+                  {formatGrade(result.requiredScore, lang)}
+                  {result.requiredScore > max && (
+                    <span className="ml-2 text-sm font-normal">
+                      ({t('grades.card.aboveMax', { max: formatNumber(max, lang) })})
+                    </span>
+                  )}
+                </dd>
+              </div>
+            )}
+            {result.examRequired !== null && result.standing !== 'PASSED' && (
+              <div>
+                <dt className="label text-text-muted">{t('grades.simulator.examNeeded')}</dt>
+                <dd
+                  className={
+                    result.examRequired > max
+                      ? 'tabular m-0 text-xl font-semibold text-danger'
+                      : 'tabular m-0 text-xl font-semibold'
+                  }
+                >
+                  {formatGrade(result.examRequired, lang)}
+                </dd>
+              </div>
+            )}
+          </dl>
+        )}
+        {headline ? (
+          <p
+            className="flex items-start gap-2 text-sm"
+            style={{ color: toneColor(standingTone(result.standing)) }}
+          >
+            <Icon name={standingIcon(result.standing)} size={18} className="mt-0.5 shrink-0" />
+            <span>{t(`grades.headline.${headline.key}`, headline.values)}</span>
+          </p>
+        ) : (
+          result.standing === 'IMPOSSIBLE' && (
+            <p className="text-sm text-danger">{t('grades.card.impossibleBody')}</p>
+          )
         )}
         {simulating && (
           <Button variant="secondary" onClick={clear}>

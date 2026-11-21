@@ -2,7 +2,6 @@ package com.stackstudy.grade;
 
 import com.stackstudy.common.persistence.BaseEntity;
 import com.stackstudy.grade.GradeCalculator.GpaScale;
-import com.stackstudy.grade.GradeCalculator.Method;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,7 +12,7 @@ import java.util.UUID;
 
 /**
  * Preferências de nota do usuário: padrão das matérias sem regra própria e configuração do CR. Sem
- * linha no banco, valem os padrões abaixo (iguais aos DEFAULT da V4).
+ * linha no banco, valem os padrões abaixo (iguais aos DEFAULT da V4 e da V6).
  */
 @Entity
 @Table(name = "grade_settings")
@@ -30,7 +29,7 @@ public class GradeSettings extends BaseEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "grade_method", nullable = false, length = 10)
-  private Method method = Method.WEIGHTED;
+  private GradingRule method = GradingRule.WEIGHTED;
 
   @Column(name = "grade_scale_max", nullable = false, precision = 6, scale = 2)
   private BigDecimal scaleMax = new BigDecimal("10.00");
@@ -61,6 +60,14 @@ public class GradeSettings extends BaseEntity {
   @Column(name = "gpa_weight", nullable = false, length = 10)
   private GpaWeight gpaWeight = GpaWeight.CREDITS;
 
+  /** Soma de pontos: arredondar o total antes de comparar com a mínima (padrão: não). */
+  @Column(name = "round_before_compare", nullable = false)
+  private boolean roundBeforeCompare;
+
+  /** Casas desse arredondamento (0 a 2). */
+  @Column(name = "rounding_scale", nullable = false)
+  private int roundingScale = 1;
+
   protected GradeSettings() {}
 
   public GradeSettings(UUID userId) {
@@ -68,7 +75,7 @@ public class GradeSettings extends BaseEntity {
   }
 
   public void update(
-      Method method,
+      GradingRule method,
       BigDecimal scaleMax,
       BigDecimal passingGrade,
       BigDecimal maxAbsencePct,
@@ -77,7 +84,9 @@ public class GradeSettings extends BaseEntity {
       BigDecimal finalExamAverageWeight,
       BigDecimal finalExamPassingGrade,
       GpaScale gpaScale,
-      GpaWeight gpaWeight) {
+      GpaWeight gpaWeight,
+      boolean roundBeforeCompare,
+      int roundingScale) {
     this.method = method;
     this.scaleMax = scaleMax;
     this.passingGrade = passingGrade;
@@ -88,13 +97,15 @@ public class GradeSettings extends BaseEntity {
     this.finalExamPassingGrade = finalExamPassingGrade;
     this.gpaScale = gpaScale;
     this.gpaWeight = gpaWeight;
+    this.roundBeforeCompare = roundBeforeCompare;
+    this.roundingScale = roundingScale;
   }
 
   public UUID getUserId() {
     return userId;
   }
 
-  public Method getMethod() {
+  public GradingRule getMethod() {
     return method;
   }
 
@@ -132,5 +143,13 @@ public class GradeSettings extends BaseEntity {
 
   public GpaWeight getGpaWeight() {
     return gpaWeight;
+  }
+
+  public boolean isRoundBeforeCompare() {
+    return roundBeforeCompare;
+  }
+
+  public int getRoundingScale() {
+    return roundingScale;
   }
 }

@@ -73,6 +73,15 @@ public class Subject extends BaseEntity {
   @Column(name = "final_exam_score", precision = 6, scale = 2)
   private BigDecimal finalExamScore;
 
+  @Column(name = "round_before_compare")
+  private Boolean roundBeforeCompare;
+
+  @Column(name = "rounding_scale")
+  private Integer roundingScale;
+
+  @Column(name = "points_cap", precision = 6, scale = 2)
+  private BigDecimal pointsCap;
+
   protected Subject() {}
 
   public Subject(UUID semesterId, String name, String color) {
@@ -112,6 +121,18 @@ public class Subject extends BaseEntity {
     this.finalExamAverageWeight = o.finalExamAverageWeight();
     this.finalExamPassingGrade = o.finalExamPassingGrade();
     this.finalExamScore = o.finalExamScore();
+    this.roundBeforeCompare = o.roundBeforeCompare();
+    this.roundingScale = o.roundingScale();
+    this.pointsCap = o.pointsCap();
+  }
+
+  /** Troca só a regra de cálculo (null = herda), mantendo o resto da regra própria. */
+  public void setGradeMethod(String method) {
+    this.gradeMethod = method;
+  }
+
+  public String getGradeMethod() {
+    return gradeMethod;
   }
 
   public GradingOverrides getGrading() {
@@ -125,7 +146,10 @@ public class Subject extends BaseEntity {
         finalExamMinAverage,
         finalExamAverageWeight,
         finalExamPassingGrade,
-        finalExamScore);
+        finalExamScore,
+        roundBeforeCompare,
+        roundingScale,
+        pointsCap);
   }
 
   public int getTotalClasses() {

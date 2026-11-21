@@ -2,6 +2,13 @@ package com.stackstudy.common.dev;
 
 import com.stackstudy.auth.User;
 import com.stackstudy.auth.UserRepository;
+import com.stackstudy.flashcard.Card;
+import com.stackstudy.flashcard.CardRepository;
+import com.stackstudy.flashcard.CardReview;
+import com.stackstudy.flashcard.CardReviewRepository;
+import com.stackstudy.flashcard.Deck;
+import com.stackstudy.flashcard.DeckRepository;
+import com.stackstudy.flashcard.Sm2;
 import com.stackstudy.grade.Absence;
 import com.stackstudy.grade.AbsenceRepository;
 import com.stackstudy.grade.Assessment;
@@ -62,6 +69,9 @@ public class DemoDataSeeder implements ApplicationRunner {
   private final StudySessionRepository sessions;
   private final AssessmentRepository assessments;
   private final AbsenceRepository absences;
+  private final DeckRepository decks;
+  private final CardRepository cards;
+  private final CardReviewRepository cardReviews;
   private final PasswordEncoder passwordEncoder;
   private final Clock clock;
 
@@ -73,6 +83,9 @@ public class DemoDataSeeder implements ApplicationRunner {
       StudySessionRepository sessions,
       AssessmentRepository assessments,
       AbsenceRepository absences,
+      DeckRepository decks,
+      CardRepository cards,
+      CardReviewRepository cardReviews,
       PasswordEncoder passwordEncoder,
       Clock clock) {
     this.users = users;
@@ -82,6 +95,9 @@ public class DemoDataSeeder implements ApplicationRunner {
     this.sessions = sessions;
     this.assessments = assessments;
     this.absences = absences;
+    this.decks = decks;
+    this.cards = cards;
+    this.cardReviews = cardReviews;
     this.passwordEncoder = passwordEncoder;
     this.clock = clock;
   }
@@ -224,6 +240,7 @@ public class DemoDataSeeder implements ApplicationRunner {
 
     seedSessions(user, created, today);
     seedGrades(user, created, today);
+    seedFlashcards(user, created, today);
 
     log.info("Demo data created: {} / {}", DEMO_EMAIL, DEMO_PASSWORD);
     return true;
@@ -266,7 +283,8 @@ public class DemoDataSeeder implements ApplicationRunner {
     // Anatomia: passar direto não dá mais, o exame final ainda salva; faltas acima do limite.
     Subject anatomy = subjects.get(2);
     anatomy.updateGrading(
-        new GradingOverrides(null, null, null, null, null, true, null, null, null, null));
+        new GradingOverrides(
+            null, null, null, null, null, true, null, null, null, null, null, null, null));
     // Salva explícito: o seed pode rodar sem transação (chamado de dentro do próprio bean).
     this.subjects.save(anatomy);
     grades(
@@ -274,12 +292,42 @@ public class DemoDataSeeder implements ApplicationRunner {
     absences(anatomy, today, 12, 2);
     // Contabilidade: média aritmética.
     Subject accounting = subjects.get(3);
-    accounting.updateGrading(
-        new GradingOverrides("ARITHMETIC", null, null, null, null, null, null, null, null, null));
+    accounting.updateGrading(GradingOverrides.ofMethod("ARITHMETIC"));
     this.subjects.save(accounting);
     grades(accounting, new Object[][] {{"P1", "1", "7"}, {"P2", "1", "6.5"}, {"P3", "1", null}});
-    // História: tudo lançado, aprovada.
-    grades(subjects.get(4), new Object[][] {{"Resenha", "1", "9"}});
+    // História: soma de pontos, aprova com 7. Tem 5,5; faltam 1,5 e ainda pode ganhar 4,0.
+    Subject history = subjects.get(4);
+    history.updateGrading(
+        new GradingOverrides(
+            "SUM",
+            null,
+            new BigDecimal("7"),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null));
+    this.subjects.save(history);
+    String[][] points = {{"P1", "3", "2.5"}, {"Trabalho", "2", "2"}, {"P2", "4", null}};
+    for (int i = 0; i < points.length; i++) {
+      Assessment a = new Assessment(history.getId());
+      a.update(
+          points[i][0],
+          BigDecimal.ONE,
+          points[i][2] == null ? null : new BigDecimal(points[i][2]),
+          i);
+      a.updatePoints(new BigDecimal(points[i][1]), false);
+      assessments.save(a);
+    }
+    Assessment participation = new Assessment(history.getId());
+    participation.update("Participação", BigDecimal.ONE, new BigDecimal("1"), points.length);
+    participation.updatePoints(BigDecimal.ONE, false);
+    assessments.save(participation);
     // Programação fica sem avaliações (estado vazio do cartão).
 
     Semester past =
@@ -320,6 +368,63 @@ public class DemoDataSeeder implements ApplicationRunner {
     for (int i = 1; i <= days; i++) {
       absences.save(new Absence(subject.getId(), today.minusWeeks(i), each));
     }
+  }
+
+  /**
+   * Flashcards: um deck de Anatomia (com cartas novas, vencidas e algumas já respondidas, para a
+   * fila, as estatísticas e o heatmap de revisões) e um deck solto de idiomas.
+   */
+  private void seedFlashcards(User user, List<Subject> subjects, LocalDate today) {
+    Deck anatomy = new Deck(user.getId());
+    anatomy.update("Anatomia: ossos", subjects.get(2).getId(), null, null);
+    decks.save(anatomy);
+    Deck english = new Deck(user.getId());
+    english.update("Inglês: phrasal verbs", null, 10, null);
+    decks.save(english);
+
+    String[][] bones = {
+      {"Maior osso do corpo humano?", "**Fêmur**", "ossos membro-inferior"},
+      {"Quantos ossos tem o adulto?", "206", "ossos"},
+      {"Osso da *coxa*?", "Fêmur", "ossos membro-inferior"},
+      {"Ossos do antebraço?", "- Rádio\n- Ulna", "ossos membro-superior"},
+      {"Menor osso do corpo?", "Estribo (orelha média)", "ossos"},
+      {"Onde fica a patela?", "Na frente do joelho", "ossos membro-inferior"},
+      {"Ossos da perna (abaixo do joelho)?", "- Tíbia\n- Fíbula", "ossos membro-inferior"},
+      {"O que é a clavícula?", "Osso que liga o esterno à escápula", "ossos"},
+    };
+    String[][] verbs = {
+      {"give up", "desistir", "phrasal-verbs"},
+      {"look after", "cuidar de", "phrasal-verbs"},
+      {"run out of", "ficar sem", "phrasal-verbs"},
+      {"put off", "adiar", "phrasal-verbs"},
+    };
+    List<Card> anatomyCards = cards(user, anatomy, bones);
+    cards(user, english, verbs);
+
+    // As 5 primeiras já foram estudadas: respostas nos últimos dias, algumas vencendo hoje.
+    Instant now = clock.instant();
+    for (int i = 0; i < 5; i++) {
+      Card card = anatomyCards.get(i);
+      int daysAgo = 6 - i;
+      Instant at = now.minus(daysAgo, ChronoUnit.DAYS);
+      Sm2.Rating rating = i == 3 ? Sm2.Rating.AGAIN : Sm2.Rating.GOOD;
+      Sm2.State next = Sm2.review(card.state(), rating);
+      cardReviews.save(CardReview.before(card, rating, next.intervalDays(), at));
+      // Vencidas hoje (i par) ou nos próximos dias (i ímpar).
+      LocalDate due = i % 2 == 0 ? today.minusDays(i) : today.plusDays(i);
+      card.schedule(next, due, at);
+      cards.save(card);
+    }
+  }
+
+  private List<Card> cards(User user, Deck deck, String[][] rows) {
+    List<Card> out = new ArrayList<>();
+    for (String[] row : rows) {
+      Card card = new Card(user.getId(), deck.getId());
+      card.update(deck.getId(), row[0], row[1], List.of(row[2].split(" ")));
+      out.add(cards.save(card));
+    }
+    return out;
   }
 
   private Instant endOfDay(LocalDate day) {

@@ -212,6 +212,180 @@ class GradeIntegrationTest extends IntegrationTest {
     assertThat(cleared.path("finalExamScore").isMissingNode()).isTrue();
   }
 
+  private static Map<String, Object> points(String name, Object maxPoints, Object score) {
+    Map<String, Object> m = new LinkedHashMap<>();
+    m.put("name", name);
+    m.put("maxPoints", maxPoints);
+    m.put("score", score);
+    return m;
+  }
+
+  private JsonNode putRule(Api api, String subjectId, Map<String, Object> rule) throws Exception {
+    return api.read(
+        api.put("/api/subjects/" + subjectId + "/grading", rule).andExpect(status().isOk()));
+  }
+
+  @Test
+  void sumRuleSwitchCalculateAndSwitchBack() throws Exception {
+    // Começa em média ponderada, com pesos.
+    JsonNode weighted =
+        putAssessments(alice, subject, List.of(item("P1", 40, 2.5), item("P2", 60, null)));
+    assertThat(weighted.path("result").path("sum").isMissingNode()).isTrue();
+
+    // Troca para soma de pontos, aprova com 7.
+    JsonNode switched =
+        putRule(alice, subject, new HashMap<>(Map.of("method", "SUM", "passingGrade", 7)));
+    assertThat(switched.path("rule").path("method").asText()).isEqualTo("SUM");
+    assertThat(switched.path("rule").path("roundBeforeCompare").asBoolean()).isFalse();
+    // Avaliações antigas ainda sem "quanto vale": a conta não quebra, só avisa.
+    assertThat(switched.path("result").path("sum").path("missingMaxPoints").asInt()).isEqualTo(2);
+
+    // P1 vale 3, trabalho 2, P2 4, participação 1 (fecha 10). Peso não é enviado.
+    List<Map<String, Object>> items = new java.util.ArrayList<>();
+    Map<String, Object> p1 = points("P1", 3, 2.5);
+    p1.put("id", weighted.path("assessments").get(0).path("id").asText());
+    items.add(p1);
+    items.add(points("Trabalho", 2, 2));
+    Map<String, Object> p2 = points("P2", 4, null);
+    p2.put("id", weighted.path("assessments").get(1).path("id").asText());
+    items.add(p2);
+    items.add(points("Participação", 1, 1));
+    JsonNode sum = putAssessments(alice, subject, items);
+    JsonNode result = sum.path("result");
+    assertThat(result.path("standing").asText()).isEqualTo("ON_TRACK");
+    assertThat(result.path("currentAverage").decimalValue()).isEqualByComparingTo("5.5");
+    assertThat(result.path("finalGrade").isMissingNode()).isTrue();
+    JsonNode detail = result.path("sum");
+    assertThat(detail.path("total").decimalValue()).isEqualByComparingTo("5.5");
+    assertThat(detail.path("pointsToPass").decimalValue()).isEqualByComparingTo("1.5");
+    assertThat(detail.path("pointsAvailable").decimalValue()).isEqualByComparingTo("4");
+    assertThat(detail.path("scaleMismatch").asBoolean()).isFalse();
+    assertThat(detail.path("requiredPerItem").get(2).decimalValue()).isEqualByComparingTo("1.5");
+    assertThat(sum.path("assessments").get(0).path("maxPoints").decimalValue())
+        .isEqualByComparingTo("3");
+    // O peso antigo foi preservado.
+    assertThat(sum.path("assessments").get(0).path("weight").decimalValue())
+        .isEqualByComparingTo("40");
+
+    // Bônus e teto.
+    Map<String, Object> bonus = points("Extra", 1, 1);
+    bonus.put("bonus", true);
+    items.add(bonus);
+    JsonNode withBonus = putAssessments(alice, subject, items);
+    assertThat(withBonus.path("result").path("sum").path("bonusPoints").decimalValue())
+        .isEqualByComparingTo("1");
+    assertThat(withBonus.path("assessments").get(4).path("bonus").asBoolean()).isTrue();
+
+    // Pontuação que não fecha 10 salva normalmente (só aviso).
+    items.remove(4);
+    items.remove(3);
+    JsonNode nine = putAssessments(alice, subject, items);
+    assertThat(nine.path("result").path("sum").path("plannedPoints").decimalValue())
+        .isEqualByComparingTo("9");
+    assertThat(nine.path("result").path("sum").path("scaleMismatch").asBoolean()).isTrue();
+
+    // Volta para média ponderada: os pesos de antes valem de novo.
+    JsonNode back =
+        putRule(alice, subject, new HashMap<>(Map.of("method", "WEIGHTED", "passingGrade", 6)));
+    assertThat(back.path("rule").path("method").asText()).isEqualTo("WEIGHTED");
+    assertThat(back.path("result").path("sum").isMissingNode()).isTrue();
+    assertThat(back.path("assessments").get(0).path("weight").decimalValue())
+        .isEqualByComparingTo("40");
+  }
+
+  @Test
+  void sumRuleValidation() throws Exception {
+    putRule(alice, subject, new HashMap<>(Map.of("method", "SUM", "passingGrade", 7)));
+    String path = "/api/subjects/" + subject + "/assessments";
+
+    // Valores negativos (Bean Validation).
+    alice
+        .put(path, Map.of("items", List.of(points("P1", -1, -2))))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.details[?(@.field == 'items[0].maxPoints')]").exists())
+        .andExpect(jsonPath("$.details[?(@.field == 'items[0].score')]").exists());
+    // Nota acima do que a avaliação vale e avaliação sem "quanto vale".
+    alice
+        .put(path, Map.of("items", List.of(points("P1", 3, 3.5), points("P2", null, 1))))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.details[?(@.field == 'items[0].score')]").exists())
+        .andExpect(jsonPath("$.details[?(@.field == 'items[1].maxPoints')]").exists());
+    // Uma avaliação não vale mais que a escala.
+    alice
+        .put(path, Map.of("items", List.of(points("P1", 11, null))))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.details[?(@.field == 'items[0].maxPoints')]").exists());
+
+    // Regra: escala inválida, casa de arredondamento inválida, teto abaixo da mínima.
+    alice
+        .put("/api/subjects/" + subject + "/grading", Map.of("method", "SUM", "scaleMax", 0))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.details[?(@.field == 'scaleMax')]").exists());
+    alice
+        .put("/api/subjects/" + subject + "/grading", Map.of("method", "SUM", "scaleMax", 101))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.details[?(@.field == 'scaleMax')]").exists());
+    alice
+        .put("/api/subjects/" + subject + "/grading", Map.of("roundingScale", 3))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.details[?(@.field == 'roundingScale')]").exists());
+    alice
+        .put(
+            "/api/subjects/" + subject + "/grading",
+            Map.of("method", "SUM", "passingGrade", 7, "pointsCap", 6))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.details[?(@.field == 'pointsCap')]").exists());
+    alice
+        .put("/api/subjects/" + subject + "/grading", Map.of("method", "MEDIAN"))
+        .andExpect(status().isBadRequest());
+
+    // Arredondar antes de comparar: 6,95 aprova com 1 casa.
+    putRule(
+        alice,
+        subject,
+        new HashMap<>(
+            Map.of(
+                "method",
+                "SUM",
+                "passingGrade",
+                7,
+                "roundBeforeCompare",
+                true,
+                "roundingScale",
+                1)));
+    JsonNode rounded =
+        putAssessments(alice, subject, List.of(points("P1", 5, 5), points("P2", 5, 1.95)));
+    assertThat(rounded.path("result").path("standing").asText()).isEqualTo("PASSED");
+    assertThat(rounded.path("result").path("finalGrade").decimalValue())
+        .isEqualByComparingTo("6.95");
+  }
+
+  @Test
+  void subjectCreatedWithSumRuleAndOtherUserCannotTouchIt() throws Exception {
+    Map<String, Object> body = new HashMap<>();
+    body.put("semesterId", semester);
+    body.put("name", "História");
+    body.put("gradingRule", "SUM");
+    JsonNode created = alice.create("/api/subjects", body);
+    assertThat(created.path("gradingRule").asText()).isEqualTo("SUM");
+    String id = created.path("id").asText();
+    JsonNode grades = alice.fetch("/api/subjects/" + id + "/grades");
+    assertThat(grades.path("rule").path("method").asText()).isEqualTo("SUM");
+
+    // Editar a matéria sem regra volta a herdar a preferência.
+    body.put("gradingRule", null);
+    alice.put("/api/subjects/" + id, body).andExpect(status().isOk());
+    assertThat(alice.fetch("/api/subjects/" + id + "/grades").path("rule").path("method").asText())
+        .isEqualTo("WEIGHTED");
+
+    // Outro usuário: 404 em tudo.
+    bob.get("/api/subjects/" + id + "/grades").andExpect(status().isNotFound());
+    bob.put("/api/subjects/" + id + "/grading", Map.of("method", "SUM"))
+        .andExpect(status().isNotFound());
+    bob.put("/api/subjects/" + id + "/assessments", Map.of("items", List.of(points("P1", 3, 1))))
+        .andExpect(status().isNotFound());
+  }
+
   @Test
   void settingsDefaultsAndValidation() throws Exception {
     JsonNode defaults = alice.fetch("/api/grades/settings");

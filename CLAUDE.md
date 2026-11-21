@@ -20,7 +20,7 @@ Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 2
 | 1 | The Stack: semestres (atual/arquivar), matérias, tarefas por prazo, filtros, atalhos | ✅ |
 | 2 | Deep Work: sessões no servidor (pausa/retomada), Pomodoro/Flow, heatmap, streak, meta | ✅ |
 | 3 | Grade Predictor: avaliações, nota necessária, exame final, what-if, faltas, CR/GPA | ✅ |
-| 4 | Flashcards: CRUD, Markdown + KaTeX, SM-2 (serviço puro), previsão 7 dias | ⏳ |
+| 4 | Flashcards: decks, cartas Markdown, SM-2 puro, fila diária com limites, revisão, CSV | ✅ |
 | 5 | Cockpit e polimento: dashboard, radar de risco, estados vazios, atalhos | ⏳ |
 
 ## Estrutura
@@ -59,11 +59,16 @@ app/            App, router, NAV_ITEMS (rotas e breadcrumbs)
 components/ui/  Button, Card, Chip, ProgressBar, PageTitle, StatBlock, Heatmap, Icon, TextField,
                 SelectField, TextAreaField, Dialog, Loading/Error/EmptyState, Wordmark
 components/shell/ AppShell, Sidebar, Topbar, StatusBar, CommandPalette
-features/<x>/   telas e hooks por módulo (auth, stack, deepwork, grades)
+features/<x>/   telas e hooks por módulo (auth, stack, deepwork, grades, flashcards)
+features/flashcards/ FlashcardsPage (decks, busca, estatísticas), DeckPage (cartas, CSV),
+                ReviewPage (revisão em foco), FlashcardDialogs (host lido do flashcardStore),
+                CardList, Markdown.tsx; lógica pura e testada em markdownParse.ts,
+                reviewSession.ts, csv.ts, days.ts
 features/grades/ GradesPage, SubjectGradeCard, SimulatorCard ("e se"), SideCards (CR e faltas),
                 GradeDialogs (preferências, regra, avaliações, faltas), SubjectGradeLine (linha na
-                Stack); calculator.ts = espelho do GradeCalculator (BigInt em centésimos),
-                simulation.ts, format.ts
+                Stack), GradingRulePicker (seletor de regra, também no diálogo de matéria);
+                calculator.ts = espelho do GradeCalculator (BigInt em centésimos),
+                simulation.ts, format.ts, summary.ts (mensagem única por matéria)
 features/deepwork/ DeepWorkPage, TimerCard, InsightsSections (stats, heatmap, histórico), dialogs;
                 DeepWorkEngine (montado no AppShell: fim do pomodoro, pausas, alertas, título da aba);
                 lógica pura e testada em clock.ts, pomodoro.ts, heatmapGrid.ts, format.ts
@@ -71,10 +76,11 @@ features/stack/ StackPage, SubjectPanel, TaskToolbar (filtros + criação rápid
                 Task/Subject/Semester dialogs; lógica pura e testada em due.ts, grouping.ts,
                 filters.ts, shortcuts.ts; queries.ts (TanStack Query)
 lib/api/        client.ts (fetch, refresh automático, retry de GET), auth.ts, stack.ts, deepwork.ts,
-                grades.ts,
+                grades.ts, flashcards.ts,
                 types.ts,
                 config.ts (VITE_API_URL, tempos), slow.ts (aviso de lentidão), wake.ts (wake-up ping)
-stores/         Zustand: authStore, uiStore, networkStore, stackStore (filtros, seleção e diálogo
+stores/         Zustand: authStore, uiStore, networkStore, flashcardStore (diálogo aberto, também
+                pelo Ctrl K), stackStore (filtros, seleção e diálogo
                 do The Stack), deepWorkStore (modo, matéria, ciclo e pausa; persistido no localStorage)
 lib/            keyboard.ts (guardas dos atalhos), useNow.ts (re-render do timer), useDebouncedValue.ts
 i18n/           react-i18next; locales/pt-BR.json (padrão) e en.json
@@ -225,7 +231,67 @@ Regras de cálculo (conferir com a faculdade de cada um):
 - CR = Σ(nota final convertida × peso) ÷ Σ(peso), peso = créditos (ou carga horária). Conversão
   linear (nota × máx. do CR ÷ máx. da matéria), escala 0–10 ou 0–4.0. Entram matérias não
   trancadas com nota (parcial conta e é marcada como "parcial"); sem créditos/horas ficam de fora.
-  O acumulado pondera todas as matérias juntas (não é a média dos semestres).
+  O acumulado pondera todas as matérias juntas (não é a média dos semestres). Nota acima da
+  escala (soma com bônus sem teto) entra como o máximo.
+
+### Regra SUM (soma de pontos)
+
+Regras de nota = enum `grade.GradingRule` (`WEIGHTED`, `ARITHMETIC`, `SUM`), gravado em
+`subjects.grade_method` / `grade_settings.grade_method` (a coluna é da V4; a V6 só ampliou o
+`CHECK`). Padrão das preferências continua `WEIGHTED` / 6,0 (nada existente muda); escolher SUM
+nas preferências sugere mínima 7. O diálogo de matéria (The Stack) também escolhe a regra
+(`gradingRule` em `POST/PUT /api/subjects`, null = herda).
+
+- Avaliação na soma: `maxPoints` (vale quantos pontos, > 0, ≤ escala, obrigatório) e `score` de 0
+  até `maxPoints`. Sem peso (o peso antigo fica guardado; trocar de regra não apaga nada).
+- Total = Σ notas lançadas (exato). Aprova com total ≥ mínima comparando o valor **exato**
+  (6,99 reprova com 7). `roundBeforeCompare` (padrão false) + `roundingScale` (0–2, padrão 1):
+  arredonda o total meio para cima antes de comparar (6,95 → 7,0 aprova). Exibição: 2 casas.
+- Faltam = limiar − total, para cima (2 casas). Pode ganhar = Σ `maxPoints` das sem nota.
+  Já passou (`SECURED`) com pendentes; possível (`NOT_STARTED`/`ON_TRACK`/`AT_RISK`, em risco
+  quando precisa de > mínima ÷ escala do que falta); impossível quando faltam > pode ganhar.
+  Necessário por avaliação = faltam × vale ÷ pode ganhar (para cima), em `sum.requiredPerItem`.
+- Σ `maxPoints` (sem bônus) ≠ escala: só aviso (`scaleMismatch`), nunca bloqueia.
+- Bônus (`assessments.bonus`): soma ao total, fora do previsto. Teto opcional por matéria
+  (`subjects.points_cap`, ≥ mínima). Padrão: sem bônus e sem teto.
+- Exame: mesma regra das médias, com o total no lugar da média. Enquanto houver avaliação sem
+  nota, `finalGrade` é null (pontos parciais não entram no CR).
+- Nota acima de `maxPoints` gravada antes (matéria que era média) vira "sem vale quantos pontos"
+  (`missingMaxPoints`), em vez de quebrar.
+
+**Adicionar uma regra nova (um lugar só para a conta):** valor em `GradingRule`; ramo em
+`GradeCalculator.evaluate` e no espelho `calculator.ts`; casos no JSON compartilhado; migration
+ampliando os dois `CHECK`; textos `grades.method.*`, `grades.methodHint.*` e, se precisar, ramo em
+`summary.ts` (`gradeHeadline`). Telas (cartão, Stack, simulador, Cockpit/radar futuros) **só leem**
+o resultado e usam `gradeHeadline` para a mensagem; nenhuma refaz a conta.
+
+## Flashcards (Fase 4)
+
+API (`/api/flashcards`, tudo do usuário logado; de outro usuário = 404):
+
+- `GET /decks?tz=` (contagens total/novas/vencidas e quantas entram hoje), `POST /decks`,
+  `PUT/DELETE /decks/{id}` (apaga as cartas), `GET /decks/{id}/export` (`{ fileName, content }`),
+  `POST /decks/{id}/import` (`{ csv }` → `{ imported, errors: [{ line, code }] }`).
+- `GET /cards?deckId=&q=&page=&size=` (busca em frente, verso e tags), `POST /cards`,
+  `GET/PUT/DELETE /cards/{id}` (`deckId` diferente move a carta, com o progresso).
+- `GET /queue?deckId=&tz=`, `POST /cards/{id}/review` (`{ rating, tz }` → `{ reviewId, card }`),
+  `DELETE /reviews/{id}` (desfaz; só a última da carta, senão `REVIEW_NOT_LATEST` 409).
+- `GET /stats?deckId=&tz=`, `GET/PUT /settings` (padrão 20 novas e 100 revisões por dia).
+
+Regras (`flashcard.Sm2`, puro e testado):
+
+- Botões → qualidade: Errei 2, Difícil 3, Bom 4, Fácil 5 (`q < 3` = falha).
+- Acerto: 1 dia, 6 dias, depois intervalo × EF (o EF **de antes** da resposta), meio para cima.
+  Falha: repetições 0, intervalo 1, lapso se já tinha sido aprendida. EF muda em toda resposta
+  (EF + 0,1 − (5 − q)(0,08 + (5 − q)·0,02)), mínimo 1,3. "Errei" volta amanhã (sem repetir na
+  mesma sessão).
+- Próxima revisão = **data local** de hoje (fuso do navegador) + intervalo (`cards.due_on`).
+  Nova = nunca revisada (`due_on` nulo). Madura = intervalo ≥ 21 dias.
+- Fila: vencidas (mais antigas primeiro) e depois novas (ordem de criação), cortadas pelos
+  limites menos o que já foi respondido hoje (dia local). Limite próprio do deck nunca passa do
+  global. Até 2.000 candidatas por tipo (`DailyLimits` puro).
+- CSV (`CardCsv`, RFC 4180): `frente,verso[,tags]`, cabeçalho opcional, até 1 MB e 2.000 linhas;
+  linha inválida vira erro com código (o frontend traduz) e não derruba as outras.
 
 ## Auth (como funciona)
 
@@ -380,3 +446,23 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
     calculadora não quebra: mostra "impossível".
 46. **Faltas na Stack** vêm do mesmo `GET /api/grades/overview` (cache do TanStack Query); salvar
     matéria ou semestre invalida as notas.
+47. **Cartas e revisões com `user_id`** (V5), como as tarefas: a fila usa o índice
+    `(user_id, due_on)` sem join até o semestre. Deck também tem dono direto (matéria opcional);
+    apagar a matéria deixa o deck solto (`ON DELETE SET NULL`) em vez de perder as cartas.
+48. **Próxima revisão como `DATE` local**, não instante: "vence hoje" é comparado com a data do
+    fuso enviado. Viajar de fuso pode adiantar/atrasar um dia, como no Deep Work.
+49. **Desfazer guarda o estado anterior na própria revisão** (`prev_*` em `card_reviews`);
+    desfazer apaga a revisão, então o limite do dia volta a contar certo.
+50. **Markdown simples próprio** (`markdownParse.ts`), sem HTML cru nem dependência; KaTeX ficou
+    de fora. Import/export de CSV trafegam como JSON (sem multipart nem mudar o cliente HTTP).
+    Export não neutraliza fórmulas de planilha (`=...`): o arquivo é do próprio usuário.
+51. A fila é lida uma vez por sessão de revisão (sem refetch); ao sair, decks e estatísticas são
+    invalidados.
+52. **Soma de pontos reaproveita `grade_method`** (V6) em vez de criar `grading_rule`: a coluna já
+    era a regra por matéria (null = herda). Criar outra duplicaria a fonte da verdade.
+53. **Soma compara o valor exato por padrão**; arredondar antes é opção (`roundBeforeCompare`).
+    Médias continuam como antes (2 casas, comparação com a média arredondada).
+54. **Soma parcial não entra no CR** (`finalGrade` null até tudo lançado): 3 de 10 pontos no começo
+    do semestre não é nota 3. Médias seguem entrando como parciais.
+55. **Trocar de regra preserva dados**: peso, `maxPoints` e bônus ausentes no PUT de avaliações
+    mantêm o valor gravado; a conta usa só os campos da regra efetiva.

@@ -90,6 +90,24 @@ const paths = {
       <path d="M3.5 10h17M8 3v4M16 3v4" />
     </>
   ),
+  alert: (
+    <>
+      <path d="M12 4l9 16H3l9-16z" />
+      <path d="M12 10v4M12 17h.01" />
+    </>
+  ),
+  ban: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M5.6 5.6l12.8 12.8" />
+    </>
+  ),
+  target: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="4" />
+    </>
+  ),
   star: <path d="M12 4l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 19.2l.9-5.5-4-3.9 5.5-.8L12 4z" />,
   globe: (
     <>

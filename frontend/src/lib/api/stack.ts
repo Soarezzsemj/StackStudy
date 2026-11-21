@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { GradeMethod } from './grades';
 
 // Tipos e chamadas do The Stack: semestres, matérias e tarefas.
 
@@ -53,6 +54,8 @@ export interface Subject {
   color: string;
   status: SubjectStatus;
   pendingTasks: number;
+  /** Regra de nota própria (ausente = usa a preferência). */
+  gradingRule?: GradeMethod;
 }
 
 export interface SubjectInput {
@@ -64,6 +67,8 @@ export interface SubjectInput {
   workloadHours?: number | null;
   color?: string;
   status?: SubjectStatus;
+  /** Null = usa a preferência do usuário. */
+  gradingRule?: GradeMethod | null;
 }
 
 export interface Task {

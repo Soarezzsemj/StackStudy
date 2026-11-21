@@ -10,10 +10,11 @@ import com.stackstudy.grade.GradeCalculator.AttendanceStatus;
 import com.stackstudy.grade.GradeCalculator.FinalExamRule;
 import com.stackstudy.grade.GradeCalculator.GpaItem;
 import com.stackstudy.grade.GradeCalculator.GpaScale;
-import com.stackstudy.grade.GradeCalculator.Method;
 import com.stackstudy.grade.GradeCalculator.Result;
 import com.stackstudy.grade.GradeCalculator.Rule;
 import com.stackstudy.grade.GradeCalculator.Standing;
+import com.stackstudy.grade.GradeCalculator.SumDetail;
+import com.stackstudy.grade.GradeCalculator.SumOptions;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 class GradeCalculatorTest {
 
   private static final Rule DEFAULT =
-      new Rule(Method.WEIGHTED, bd("10"), bd("6"), FinalExamRule.disabled());
+      new Rule(GradingRule.WEIGHTED, bd("10"), bd("6"), FinalExamRule.disabled());
 
   private static BigDecimal bd(String v) {
     return new BigDecimal(v);
@@ -69,21 +70,32 @@ class GradeCalculatorTest {
                 bd(e.path("minAverage").asText()),
                 bd(e.path("averageWeight").asText()),
                 bd(e.path("passingGrade").asText()));
+    JsonNode s = r.path("sum");
+    SumOptions sum =
+        s.isMissingNode() || s.isNull()
+            ? SumOptions.defaults()
+            : new SumOptions(
+                s.path("roundBeforeCompare").asBoolean(),
+                s.path("roundingScale").asInt(),
+                optional(s.path("pointsCap")));
     Rule rule =
         new Rule(
-            Method.valueOf(r.path("method").asText()),
+            GradingRule.valueOf(r.path("method").asText()),
             bd(r.path("scaleMax").asText()),
             bd(r.path("passingGrade").asText()),
-            exam);
+            exam,
+            sum);
     List<Assessment> items = new ArrayList<>();
     c.path("assessments")
         .forEach(
             x ->
                 items.add(
-                    a(
-                        x.path("weight").asText(),
-                        x.path("score").isNull() ? null : x.path("score").asText())));
-    BigDecimal examScore = c.path("examScore").isNull() ? null : bd(c.path("examScore").asText());
+                    new Assessment(
+                        optional(x.path("weight")),
+                        optional(x.path("score")),
+                        optional(x.path("maxPoints")),
+                        x.path("bonus").asBoolean(false))));
+    BigDecimal examScore = optional(c.path("examScore"));
 
     Result result = GradeCalculator.evaluate(rule, items, examScore);
     JsonNode x = c.path("expected");
@@ -97,11 +109,50 @@ class GradeCalculatorTest {
     assertDecimal("requiredScore", result.requiredScore(), x);
     assertDecimal("examRequired", result.examRequired(), x);
     assertDecimal("finalGrade", result.finalGrade(), x);
+
+    JsonNode es = x.path("sum");
+    if (es.isMissingNode()) {
+      assertThat(result.sum()).as("sum").isNull();
+      return;
+    }
+    SumDetail d = result.sum();
+    assertThat(d).as("sum").isNotNull();
+    assertDecimal("earned", d.earned(), es);
+    assertDecimal("total", d.total(), es);
+    assertDecimal("pointsToPass", d.pointsToPass(), es);
+    assertDecimal("pointsAvailable", d.pointsAvailable(), es);
+    assertDecimal("maxReachable", d.maxReachable(), es);
+    assertDecimal("plannedPoints", d.plannedPoints(), es);
+    assertDecimal("bonusPoints", d.bonusPoints(), es);
+    if (es.has("comparedTotal")) {
+      assertDecimal("comparedTotal", d.comparedTotal(), es);
+    }
+    assertThat(d.scaleMismatch())
+        .as("scaleMismatch")
+        .isEqualTo(es.path("scaleMismatch").asBoolean());
+    assertThat(d.missingMaxPoints())
+        .as("missingMaxPoints")
+        .isEqualTo(es.path("missingMaxPoints").asInt());
+    JsonNode perItem = es.path("requiredPerItem");
+    assertThat(d.requiredPerItem()).as("requiredPerItem").hasSize(perItem.size());
+    for (int i = 0; i < perItem.size(); i++) {
+      BigDecimal want = optional(perItem.get(i));
+      BigDecimal got = d.requiredPerItem().get(i);
+      if (want == null) {
+        assertThat(got).as("requiredPerItem[%d]", i).isNull();
+      } else {
+        assertThat(got).as("requiredPerItem[%d]", i).isEqualByComparingTo(want);
+      }
+    }
+  }
+
+  private static BigDecimal optional(JsonNode node) {
+    return node == null || node.isNull() || node.isMissingNode() ? null : bd(node.asText());
   }
 
   private static void assertDecimal(String field, BigDecimal actual, JsonNode expected) {
     JsonNode node = expected.path(field);
-    if (node.isNull()) {
+    if (node.isNull() || node.isMissingNode()) {
       assertThat(actual).as(field).isNull();
     } else {
       assertThat(actual).as(field).isEqualByComparingTo(node.asText());
@@ -167,7 +218,7 @@ class GradeCalculatorTest {
 
     @Test
     void passingGradeAboveScaleIsImpossible() {
-      Rule rule = new Rule(Method.WEIGHTED, bd("10"), bd("11"), FinalExamRule.disabled());
+      Rule rule = new Rule(GradingRule.WEIGHTED, bd("10"), bd("11"), FinalExamRule.disabled());
       Result r = GradeCalculator.evaluate(rule, List.of(a("1", null)), null);
       assertThat(r.standing()).isEqualTo(Standing.IMPOSSIBLE);
       assertThat(r.requiredScore()).isEqualByComparingTo("11.00");
@@ -175,7 +226,7 @@ class GradeCalculatorTest {
 
     @Test
     void zeroPassingGradeIsSecuredFromTheStart() {
-      Rule rule = new Rule(Method.WEIGHTED, bd("10"), bd("0"), FinalExamRule.disabled());
+      Rule rule = new Rule(GradingRule.WEIGHTED, bd("10"), bd("0"), FinalExamRule.disabled());
       Result r = GradeCalculator.evaluate(rule, List.of(a("1", null)), null);
       assertThat(r.standing()).isEqualTo(Standing.SECURED);
       assertThat(r.requiredScore()).isEqualByComparingTo("0");
@@ -185,7 +236,7 @@ class GradeCalculatorTest {
     void examScoreIsIgnoredWhenNotEligible() {
       Rule rule =
           new Rule(
-              Method.ARITHMETIC,
+              GradingRule.ARITHMETIC,
               bd("10"),
               bd("6"),
               new FinalExamRule(true, bd("4"), bd("50"), bd("5")));
@@ -220,17 +271,179 @@ class GradeCalculatorTest {
       assertThatThrownBy(() -> new FinalExamRule(true, bd("4"), bd("100"), bd("5")))
           .isInstanceOf(IllegalArgumentException.class);
       assertThatThrownBy(
-              () -> new Rule(Method.WEIGHTED, bd("0"), bd("6"), FinalExamRule.disabled()))
+              () -> new Rule(GradingRule.WEIGHTED, bd("0"), bd("6"), FinalExamRule.disabled()))
           .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void arithmeticAcceptsMissingWeights() {
-      Rule rule = new Rule(Method.ARITHMETIC, bd("10"), bd("6"), FinalExamRule.disabled());
+      Rule rule = new Rule(GradingRule.ARITHMETIC, bd("10"), bd("6"), FinalExamRule.disabled());
       Result r =
           GradeCalculator.evaluate(
               rule, List.of(new Assessment(null, bd("8")), new Assessment(null, bd("6"))), null);
       assertThat(r.finalGrade()).isEqualByComparingTo("7");
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // soma de pontos (os cenários principais estão no JSON compartilhado)
+  // -------------------------------------------------------------------------
+
+  @Nested
+  class Sum {
+
+    private Rule sum(String passing, SumOptions options) {
+      return new Rule(GradingRule.SUM, bd("10"), bd(passing), FinalExamRule.disabled(), options);
+    }
+
+    private final Rule plain = sum("7", SumOptions.defaults());
+
+    private Assessment p(String max, String score) {
+      return Assessment.points(bd(max), score == null ? null : bd(score), false);
+    }
+
+    @Test
+    void neverAveragesAndIgnoresWeights() {
+      // Pesos absurdos não mudam nada: a nota é a soma.
+      Result r =
+          GradeCalculator.evaluate(
+              plain,
+              List.of(
+                  new Assessment(bd("100"), bd("3"), bd("5"), false),
+                  new Assessment(bd("1"), bd("4"), bd("5"), false)),
+              null);
+      assertThat(r.finalGrade()).isEqualByComparingTo("7");
+      assertThat(r.standing()).isEqualTo(Standing.PASSED);
+    }
+
+    @Test
+    void roundBeforeCompareWithZeroAndTwoDecimals() {
+      Rule zero = sum("7", new SumOptions(true, 0, null));
+      // 6,5 arredonda para 7 (meio para cima); 6,49 para 6.
+      assertThat(GradeCalculator.evaluate(zero, List.of(p("10", "6.5")), null).standing())
+          .isEqualTo(Standing.PASSED);
+      assertThat(GradeCalculator.evaluate(zero, List.of(p("10", "6.49")), null).standing())
+          .isEqualTo(Standing.FAILED);
+      // Com 2 casas o valor já é o mesmo: 6,99 continua reprovando.
+      Rule two = sum("7", new SumOptions(true, 2, null));
+      assertThat(GradeCalculator.evaluate(two, List.of(p("10", "6.99")), null).standing())
+          .isEqualTo(Standing.FAILED);
+      // Mínima fora da grade (6,95 com 0 casas): precisa arredondar para 7, ou seja, ≥ 6,5.
+      Rule offGrid = sum("6.95", new SumOptions(true, 0, null));
+      assertThat(GradeCalculator.sumThreshold(bd("6.95"), offGrid.sum()))
+          .isEqualByComparingTo("6.5");
+      assertThat(GradeCalculator.evaluate(offGrid, List.of(p("10", "6.45")), null).standing())
+          .isEqualTo(Standing.FAILED);
+    }
+
+    @Test
+    void roundingOnlyChangesTheComparisonNotTheDisplayedTotal() {
+      Rule rounded = sum("7", new SumOptions(true, 1, null));
+      Result r = GradeCalculator.evaluate(rounded, List.of(p("10", "6.96")), null);
+      assertThat(r.standing()).isEqualTo(Standing.PASSED);
+      assertThat(r.finalGrade()).isEqualByComparingTo("6.96");
+      assertThat(r.sum().comparedTotal()).isEqualByComparingTo("7.0");
+    }
+
+    @Test
+    void pointsToPassIsTheSmallestThatPassesWithOnePending() {
+      // Para vários totais, os pontos que faltam aprovam e 0,01 a menos reprova.
+      for (Rule rule :
+          List.of(
+              plain, sum("7", new SumOptions(true, 1, null)), sum("6.5", SumOptions.defaults()))) {
+        for (int cents = 0; cents <= 600; cents += 23) {
+          String first = BigDecimal.valueOf(cents, 2).toPlainString();
+          Result r = GradeCalculator.evaluate(rule, List.of(p("6", first), p("4", null)), null);
+          BigDecimal x = r.requiredScore();
+          if (x.signum() == 0 || x.compareTo(bd("4")) > 0) {
+            continue;
+          }
+          Result ok =
+              GradeCalculator.evaluate(
+                  rule, List.of(p("6", first), p("4", x.toPlainString())), null);
+          Result below =
+              GradeCalculator.evaluate(
+                  rule,
+                  List.of(p("6", first), p("4", x.subtract(bd("0.01")).toPlainString())),
+                  null);
+          assertThat(ok.standing()).as("first=%s x=%s", first, x).isEqualTo(Standing.PASSED);
+          assertThat(below.standing()).as("first=%s x=%s", first, x).isEqualTo(Standing.FAILED);
+          assertThat(r.sum().requiredPerItem().get(1)).isEqualByComparingTo(x);
+        }
+      }
+    }
+
+    @Test
+    void distributedRequirementNeverAddsUpBelowWhatIsMissing() {
+      Result r =
+          GradeCalculator.evaluate(
+              plain, List.of(p("1", "0"), p("3", null), p("3", null), p("3", null)), null);
+      BigDecimal sumOfParts =
+          r.sum().requiredPerItem().stream()
+              .filter(java.util.Objects::nonNull)
+              .reduce(BigDecimal.ZERO, BigDecimal::add);
+      // 7 ÷ 3 = 2,333… → 2,34 em cada: 7,02 ≥ 7.
+      assertThat(r.sum().requiredPerItem().get(1)).isEqualByComparingTo("2.34");
+      assertThat(sumOfParts).isGreaterThanOrEqualTo(r.sum().pointsToPass());
+    }
+
+    @Test
+    void partialPointsDoNotBecomeAFinalGrade() {
+      Result r = GradeCalculator.evaluate(plain, List.of(p("3", "3"), p("7", null)), null);
+      assertThat(r.finalGrade()).isNull();
+      assertThat(r.currentAverage()).isEqualByComparingTo("3");
+      assertThat(r.complete()).isFalse();
+    }
+
+    @Test
+    void capLimitsReachableTotal() {
+      Rule capped = sum("7", new SumOptions(false, 1, bd("10")));
+      Result r =
+          GradeCalculator.evaluate(
+              capped, List.of(p("10", "6"), Assessment.points(bd("2"), null, true)), null);
+      assertThat(r.sum().maxReachable()).isEqualByComparingTo("8");
+      Result over =
+          GradeCalculator.evaluate(
+              capped, List.of(p("10", "9.5"), Assessment.points(bd("2"), bd("2"), true)), null);
+      assertThat(over.sum().earned()).isEqualByComparingTo("11.5");
+      assertThat(over.finalGrade()).isEqualByComparingTo("10");
+      assertThat(over.sum().bonusPoints()).isEqualByComparingTo("2");
+      assertThat(over.sum().scaleMismatch()).isFalse();
+    }
+
+    @Test
+    void missingMaxPointsIsReportedInsteadOfFailing() {
+      Result r =
+          GradeCalculator.evaluate(
+              plain,
+              List.of(new Assessment(bd("1"), bd("5")), new Assessment(bd("1"), null)),
+              null);
+      assertThat(r.sum().missingMaxPoints()).isEqualTo(2);
+      assertThat(r.sum().earned()).isEqualByComparingTo("5");
+      assertThat(r.sum().pointsAvailable()).isEqualByComparingTo("0");
+      assertThat(r.standing()).isEqualTo(Standing.IMPOSSIBLE);
+    }
+
+    @Test
+    void invalidInputsAreRejected() {
+      assertThatThrownBy(() -> GradeCalculator.evaluate(plain, List.of(p("3", "3.01")), null))
+          .isInstanceOf(IllegalArgumentException.class)
+          .hasMessageContaining("maxPoints");
+      assertThatThrownBy(() -> GradeCalculator.evaluate(plain, List.of(p("3", "-1")), null))
+          .isInstanceOf(IllegalArgumentException.class);
+      assertThatThrownBy(() -> GradeCalculator.evaluate(plain, List.of(p("0", null)), null))
+          .isInstanceOf(IllegalArgumentException.class);
+      assertThatThrownBy(() -> new SumOptions(false, 3, null))
+          .isInstanceOf(IllegalArgumentException.class);
+      assertThatThrownBy(() -> new SumOptions(false, 1, bd("0")))
+          .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void gpaClampsBonusAboveTheScale() {
+      // Soma 11 sem teto numa escala 10 entra no CR como 10.
+      assertThat(GradeCalculator.gpa(List.of(new GpaItem(bd("11"), bd("10"), 4)), GpaScale.TEN))
+          .isEqualByComparingTo("10.00");
     }
   }
 

@@ -3,7 +3,9 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { GradeMethod, Standing, SubjectGrades } from '@/lib/api/grades';
 import { evaluate, examRequired, type CalcRule } from './calculator';
-import { hasWhatIf, parseScore, simulate } from './simulation';
+import i18n from '@/i18n';
+import { hasWhatIf, parseScore, plannedPointsOf, simulate } from './simulation';
+import { gradeHeadline } from './summary';
 import { attendanceTone, formatGrade, standingTone } from './format';
 
 // Mesmos casos do teste do backend (GradeCalculatorTest): as duas implementações batem.
@@ -14,10 +16,20 @@ interface SharedCase {
     scaleMax: string;
     passingGrade: string;
     exam: { minAverage: string; averageWeight: string; passingGrade: string } | null;
+    sum?: { roundBeforeCompare: boolean; roundingScale: number; pointsCap: string | null };
   };
-  assessments: { weight: string; score: string | null }[];
+  assessments: {
+    weight?: string;
+    score: string | null;
+    maxPoints?: string | null;
+    bonus?: boolean;
+  }[];
   examScore: string | null;
-  expected: Record<string, string | boolean | null> & { standing: Standing; complete: boolean };
+  expected: Record<string, unknown> & {
+    standing: Standing;
+    complete: boolean;
+    sum?: Record<string, string | number | boolean | (string | null)[]>;
+  };
 }
 
 // Os testes rodam a partir de frontend/ (npm test), aqui e no CI.
@@ -27,11 +39,12 @@ const casesPath = resolve(
 );
 const cases = JSON.parse(readFileSync(casesPath, 'utf-8')) as SharedCase[];
 
-const num = (v: string | null) => (v === null ? null : Number(v));
+const num = (v: string | null | undefined) => (v === null || v === undefined ? null : Number(v));
 
 describe('evaluate (casos compartilhados com o backend)', () => {
   it('carrega os casos', () => {
     expect(cases.length).toBeGreaterThan(10);
+    expect(cases.some((c) => c.rule.method === 'SUM')).toBe(true);
   });
 
   it.each(cases.map((c) => [c.name, c] as const))('%s', (_name, c) => {
@@ -46,10 +59,22 @@ describe('evaluate (casos compartilhados com o backend)', () => {
             passingGrade: Number(c.rule.exam.passingGrade),
           }
         : null,
+      sum: c.rule.sum
+        ? {
+            roundBeforeCompare: c.rule.sum.roundBeforeCompare,
+            roundingScale: c.rule.sum.roundingScale,
+            pointsCap: num(c.rule.sum.pointsCap),
+          }
+        : undefined,
     };
     const result = evaluate(
       rule,
-      c.assessments.map((a) => ({ weight: Number(a.weight), score: num(a.score) })),
+      c.assessments.map((a) => ({
+        weight: num(a.weight),
+        score: num(a.score),
+        maxPoints: num(a.maxPoints),
+        bonus: a.bonus ?? false,
+      })),
       num(c.examScore),
     );
     const x = c.expected;
@@ -65,6 +90,21 @@ describe('evaluate (casos compartilhados com o backend)', () => {
       'finalGrade',
     ] as const) {
       expect(result[field], field).toBe(num(x[field] as string | null));
+    }
+    if (!x.sum) {
+      expect(result.sum).toBeNull();
+      return;
+    }
+    const s = result.sum!;
+    for (const [field, want] of Object.entries(x.sum)) {
+      const got = s[field as keyof typeof s];
+      if (field === 'requiredPerItem') {
+        expect(got, field).toEqual((want as (string | null)[]).map(num));
+      } else if (typeof want === 'string') {
+        expect(got, field).toBe(Number(want));
+      } else {
+        expect(got, field).toBe(want);
+      }
     }
   });
 });
@@ -128,6 +168,8 @@ const subject: SubjectGrades = {
     finalExamMinAverage: 4,
     finalExamAverageWeight: 50,
     finalExamPassingGrade: 5,
+    roundBeforeCompare: false,
+    roundingScale: 1,
   },
   overrides: {},
   assessments: [
@@ -199,5 +241,91 @@ describe('format', () => {
     expect(attendanceTone('OVER')).toBe('danger');
     expect(attendanceTone('OK')).toBe('action');
     expect(attendanceTone('UNKNOWN')).toBe('neutral');
+  });
+});
+
+describe('soma de pontos (frontend)', () => {
+  const sumRule: CalcRule = { method: 'SUM', scaleMax: 10, passingGrade: 7, exam: null };
+
+  it('0,1 + 0,2 + 6,7 = 7,0 aprova (centésimos inteiros, sem ponto flutuante)', () => {
+    const r = evaluate(sumRule, [
+      { score: 0.1, maxPoints: 1 },
+      { score: 0.2, maxPoints: 1 },
+      { score: 6.7, maxPoints: 8 },
+    ]);
+    expect(r.finalGrade).toBe(7);
+    expect(r.standing).toBe('PASSED');
+  });
+
+  it('rejeita nota acima do que a avaliação vale', () => {
+    expect(() => evaluate(sumRule, [{ score: 3.5, maxPoints: 3 }])).toThrow();
+  });
+
+  it('pontuação prevista ignora bônus e é null com valor inválido', () => {
+    const rule = {
+      ...subject.rule,
+      method: 'SUM' as const,
+      roundBeforeCompare: false,
+      roundingScale: 1,
+    };
+    expect(
+      plannedPointsOf(rule, [
+        { maxPoints: 3, bonus: false },
+        { maxPoints: 6, bonus: false },
+        { maxPoints: 1, bonus: true },
+      ]),
+    ).toBe(9);
+    expect(plannedPointsOf(rule, [{ maxPoints: 0, bonus: false }])).toBeNull();
+  });
+});
+
+describe('gradeHeadline (mensagem única por matéria)', () => {
+  const sumSubject = {
+    method: 'SUM' as const,
+    passingGrade: 7,
+    scaleMax: 10,
+    pendingNames: ['P2'],
+  };
+  const sum = { total: 5.5, pointsToPass: 1.5, pointsAvailable: 4 };
+
+  it('soma: depende da situação', () => {
+    expect(gradeHeadline(sumSubject, { standing: 'ON_TRACK', sum }, 'pt-BR')).toEqual({
+      key: 'sumNeeds',
+      values: { total: '5,50', passing: '7,00', points: '1,50', available: '4,00' },
+    });
+    expect(gradeHeadline(sumSubject, { standing: 'SECURED', sum }, 'pt-BR')?.key).toBe(
+      'sumSecured',
+    );
+    expect(gradeHeadline(sumSubject, { standing: 'IMPOSSIBLE', sum }, 'pt-BR')?.key).toBe(
+      'sumImpossible',
+    );
+    expect(
+      gradeHeadline(sumSubject, { standing: 'EXAM', examRequired: 4.49, sum }, 'pt-BR'),
+    ).toEqual({ key: 'exam', values: { value: '4,49' } });
+    expect(gradeHeadline(sumSubject, { standing: 'NO_ASSESSMENTS' }, 'pt-BR')).toBeNull();
+  });
+
+  it('média: cita a avaliação quando só falta uma', () => {
+    const avg = { method: 'WEIGHTED' as const, passingGrade: 6, scaleMax: 10 };
+    expect(
+      gradeHeadline(
+        { ...avg, pendingNames: ['P2'] },
+        { standing: 'AT_RISK', requiredScore: 7.2 },
+        'pt-BR',
+      ),
+    ).toEqual({ key: 'averageNeedsOne', values: { value: '7,20', name: 'P2' } });
+    expect(
+      gradeHeadline(
+        { ...avg, pendingNames: ['P2', 'P3'] },
+        { standing: 'ON_TRACK', requiredScore: 5 },
+        'pt-BR',
+      )?.key,
+    ).toBe('averageNeedsEach');
+    expect(i18n.t('grades.headline.averageNeedsOne', { value: '7,20', name: 'P2' })).toBe(
+      'Precisa de 7,20 na P2 para passar direto',
+    );
+    expect(i18n.t('grades.headline.sumNeeds', { points: '1,50' })).toBe(
+      'Precisa de 1,50 pontos para passar',
+    );
   });
 });

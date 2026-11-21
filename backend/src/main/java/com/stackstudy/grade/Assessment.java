@@ -28,6 +28,14 @@ public class Assessment extends BaseEntity {
   @Column(nullable = false)
   private int position;
 
+  /** Quanto a avaliação vale na soma de pontos (null se nunca foi informado). */
+  @Column(name = "max_points", precision = 6, scale = 2)
+  private BigDecimal maxPoints;
+
+  /** Ponto extra (soma de pontos): soma ao total, fora da pontuação prevista. */
+  @Column(nullable = false)
+  private boolean bonus;
+
   protected Assessment() {}
 
   public Assessment(UUID subjectId) {
@@ -39,6 +47,19 @@ public class Assessment extends BaseEntity {
     this.weight = weight;
     this.score = score;
     this.position = position;
+  }
+
+  public void updatePoints(BigDecimal maxPoints, boolean bonus) {
+    this.maxPoints = maxPoints;
+    this.bonus = bonus;
+  }
+
+  public BigDecimal getMaxPoints() {
+    return maxPoints;
+  }
+
+  public boolean isBonus() {
+    return bonus;
   }
 
   public UUID getSubjectId() {

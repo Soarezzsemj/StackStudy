@@ -3,6 +3,9 @@ package com.stackstudy.common.dev;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.stackstudy.auth.UserRepository;
+import com.stackstudy.flashcard.CardRepository;
+import com.stackstudy.flashcard.CardReviewRepository;
+import com.stackstudy.flashcard.DeckRepository;
 import com.stackstudy.grade.AbsenceRepository;
 import com.stackstudy.grade.AssessmentRepository;
 import com.stackstudy.session.StudySessionRepository;
@@ -27,6 +30,9 @@ class DemoDataSeederIntegrationTest extends IntegrationTest {
   @Autowired StudySessionRepository sessions;
   @Autowired AssessmentRepository assessments;
   @Autowired AbsenceRepository absences;
+  @Autowired DeckRepository decks;
+  @Autowired CardRepository cards;
+  @Autowired CardReviewRepository cardReviews;
   @Autowired PasswordEncoder passwordEncoder;
   @Autowired Clock clock;
   @Autowired TransactionTemplate tx;
@@ -48,6 +54,9 @@ class DemoDataSeederIntegrationTest extends IntegrationTest {
             sessions,
             assessments,
             absences,
+            decks,
+            cards,
+            cardReviews,
             passwordEncoder,
             clock);
 
@@ -66,6 +75,9 @@ class DemoDataSeederIntegrationTest extends IntegrationTest {
     assertThat(sessions.count()).isGreaterThan(100);
     assertThat(assessments.findAllOwned(user.getId())).hasSizeGreaterThan(10);
     assertThat(absences.totalsOwned(user.getId())).hasSize(3);
+    assertThat(decks.findAllOwned(user.getId())).hasSize(2);
+    assertThat(cards.count()).isGreaterThanOrEqualTo(12);
+    assertThat(cardReviews.count()).isGreaterThanOrEqualTo(5);
     // A regra própria precisa ser gravada mesmo com o seed rodando fora de transação.
     var anatomy = owned.stream().filter(s -> s.getName().equals("Anatomia")).findFirst();
     assertThat(anatomy.orElseThrow().getGrading().finalExamEnabled()).isTrue();
