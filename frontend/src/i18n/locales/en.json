@@ -81,14 +81,16 @@
     "name": "Name",
     "email": "Email",
     "password": "Password",
-    "passwordHint": "At least 8 characters.",
+    "passwordHint": "At least 10 characters.",
     "login": {
       "title": "Log in",
       "subtitle": "Welcome back. Pick up where you left off.",
       "submit": "Log in",
       "noAccount": "No account yet?",
       "toRegister": "Create account",
-      "expired": "Your session expired. Sign in again to continue."
+      "expired": "Your session expired. Sign in again to continue.",
+      "googleUnverified": "Your Google email is not verified. Sign in with email and password.",
+      "googleError": "Could not sign in with Google. Try again or use email and password."
     },
     "register": {
       "title": "Create account",
@@ -103,7 +105,7 @@
     "generic": "Something went wrong. Please try again.",
     "network": "Could not reach the server.",
     "INVALID_CREDENTIALS": "Wrong email or password.",
-    "EMAIL_ALREADY_REGISTERED": "This email is already registered.",
+    "EMAIL_ALREADY_REGISTERED": "Could not create an account with this email. If it is yours, sign in or recover access.",
     "VALIDATION_ERROR": "Check the highlighted fields.",
     "UNAUTHORIZED": "Your session expired. Please log in again.",
     "NOT_FOUND": "Not found.",
@@ -123,7 +125,10 @@
     "ROOM_FULL": "The room is full.",
     "ROOM_LIMIT_REACHED": "You reached the room limit.",
     "ROOM_OWNER_CANNOT_LEAVE": "The room creator cannot leave it: delete the room in its settings.",
-    "INVALID_INVITE_CODE": "Invalid invite code."
+    "INVALID_INVITE_CODE": "Invalid invite code.",
+    "EMAIL_NOT_VERIFIED": "Confirm your email with the link we sent before signing in.",
+    "INVALID_VERIFICATION_TOKEN": "This confirmation link is invalid or has expired.",
+    "UNSUPPORTED_IMAGE": "Use a JPEG or PNG image up to 2 MB."
   },
   "pages": {
     "cockpit": {
@@ -1114,7 +1119,7 @@
     "backToApp": "Back to the app",
     "backToLogin": "Sign in",
     "updated": "Updated on {{date}}",
-    "date": "November 21, 2026 (study rooms)",
+    "date": "November 21, 2026 (sign-up)",
     "terms": {
       "short": "Terms",
       "title": "Terms of use",
@@ -1173,65 +1178,72 @@
           ]
         },
         {
-          "title": "2. Why",
+          "title": "2. Sign-up",
+          "body": [
+            "To create the account we ask for: email and password (stored only as a hash), name, nickname, area, program, term and institution (program, term and institution are optional), and your routine preferences (weekly goal, focus rhythm, reminders, suggested roadmap and whether you want to appear in room rankings, off by default). They are used to build your Cockpit, suggest a roadmap and set up Deep Work.",
+            "We also keep your consent: the Terms of use and Privacy Policy versions you accepted, the date and the minimum age confirmation, so we can ask again if the texts change. A profile photo is optional and, for now, turned off (your avatar is your initials). In study rooms, your nickname is the only data of yours other people see."
+          ]
+        },
+        {
+          "title": "3. Why",
           "body": [
             "Only to run the service: sign you in, show and calculate your data, protect against abuse. The legal basis is performing the service you asked for (LGPD art. 7, V).",
             "We do not sell data, do not use it for advertising and there are no third-party trackers or analytics."
           ]
         },
         {
-          "title": "3. Cookies and local storage",
+          "title": "4. Cookies and local storage",
           "body": [
             "We use a single essential cookie: the session cookie (ss_refresh), HttpOnly and limited to authentication. In the browser we keep the language and a few screen preferences (localStorage)."
           ]
         },
         {
-          "title": "4. Where data lives",
+          "title": "5. Where data lives",
           "body": [
             "The app runs on cloud providers: Vercel (website), Render (server) and Neon (PostgreSQL database), with servers in the United States. Weekly encrypted backups are kept privately on GitHub. These providers process data only to host the service."
           ]
         },
         {
-          "title": "5. For how long",
+          "title": "6. For how long",
           "body": [
             "While the account exists. When you delete the account, the data leaves the database immediately; older backups expire within 90 days."
           ]
         },
         {
-          "title": "6. Your rights",
+          "title": "7. Your rights",
           "body": [
             "At any time you can: see and fix your data (Profile), download everything as JSON (Profile > Privacy and data > Export) and delete the account with all its data (Profile > Delete account). You can also ask about the processing through the contact below."
           ]
         },
         {
-          "title": "7. Operational metrics",
+          "title": "8. Operational metrics",
           "body": [
             "To run the service we keep aggregated records: the last time each account used the app (updated at most once a minute), the days with activity (one record per day, in UTC) and error counts per route and hour (only the route pattern, such as \"POST /api/auth/refresh\", and the error code; never content, parameters, emails or passwords).",
             "Only the StackStudy administrator sees these numbers, in a restricted dashboard, always aggregated; the only per-person information is the list of latest sign-ups with a masked email (e.g. an***@domain.com) and the program. Every access to the dashboard is logged. Error counts are deleted after 7 days, dashboard access logs after 90 days and activity days after about 13 months; everything goes away when the account is deleted and shows up in your data export."
           ]
         },
         {
-          "title": "8. Study progress and suggestions",
+          "title": "9. Study progress and suggestions",
           "body": [
             "If you follow a roadmap, we keep which trails you follow, the weekly goal, the status of each topic (to do, in progress, done), the hours you log and the hours of Deep Work sessions linked to a topic.",
             "Roadmap suggestions you send are stored with your account for the administrator to read; no email is sent. All of it shows up in your data export and is deleted with the account. Unfollowing a roadmap keeps the progress, so you can come back."
           ]
         },
         {
-          "title": "9. Study rooms",
+          "title": "10. Study rooms",
           "body": [
             "In rooms, other members only see the nickname you choose for that room, whether you are studying, paused or away, your session time and, if you allow it, your subject. There is no chat, image or video; reactions are ready-made phrases. Public rooms show up in search with only their name, member count and goal.",
             "Presence (\"who is studying now\") and reactions live only in the server memory and are gone after a restart. We store the rooms, memberships (nickname and preferences), room study sessions (which add to your Deep Work hours), blocks and the reports you send; reports are only read by the administrator. You can leave a room deleting your history in it; everything shows up in your data export and is deleted with the account."
           ]
         },
         {
-          "title": "10. Security",
+          "title": "11. Security",
           "body": [
             "Always-encrypted connection (HTTPS), hashed passwords, sessions you can end, sign-in attempt limits and data access only through your account."
           ]
         },
         {
-          "title": "11. Contact",
+          "title": "12. Contact",
           "body": [
             "Controller: the StackStudy maintainer. Questions or requests about your data: privacy@your-domain.com (replace with the real contact before launch)."
           ]
@@ -1725,6 +1737,155 @@
       "theRoom": "The room",
       "detail": "Detail (optional)",
       "detailHint": "Up to 300 characters, no HTML. Do not include personal data."
+    }
+  },
+  "signup": {
+    "title": "Create account",
+    "haveAccount": "Already have an account?",
+    "toLogin": "Sign in",
+    "continue": "Continue",
+    "back": "Back",
+    "create": "Create my account",
+    "creating": "Creating your account…",
+    "googleNoAccount": "There is no account with this Google email yet. Create yours here; later you can sign in with Google.",
+    "steps": {
+      "label": "Sign-up steps",
+      "number": "Step {{n}}",
+      "account": "Account",
+      "profile": "Profile",
+      "routine": "Routine",
+      "accountTitle": "Your account",
+      "profileTitle": "Your profile",
+      "routineTitle": "Your study routine"
+    },
+    "brand": {
+      "label": "About StackStudy",
+      "slogan": "Your program, your pace, all in one place.",
+      "benefits": {
+        "one": "Deadlines, subjects and grades organized by term.",
+        "two": "Focus with Pomodoro or a free timer, and rooms to study together.",
+        "three": "Roadmaps and flashcards to review at the right pace."
+      }
+    },
+    "preview": {
+      "label": "Your profile preview",
+      "title": "Profile preview",
+      "namePlaceholder": "Your name",
+      "nicknamePlaceholder": "@your-nickname",
+      "routine": "{{hours}} h per week goal · {{rhythm}}",
+      "visible": "In study rooms, others only see your nickname."
+    },
+    "account": {
+      "google": "Continue with Google",
+      "or": "or with email",
+      "email": "Email",
+      "password": "Password",
+      "show": "Show",
+      "hide": "Hide"
+    },
+    "password": {
+      "level": "Strength: {{level}}.",
+      "levels": {
+        "1": "weak",
+        "2": "fair",
+        "3": "good",
+        "4": "strong"
+      },
+      "hint": {
+        "empty": "Use at least 10 characters. A phrase with spaces is easy to remember.",
+        "short": "Use at least 10 characters.",
+        "common": "This password is too common. Pick another one.",
+        "fair": "Mix uppercase letters, digits or symbols, or make it longer.",
+        "good": "Good. A few more characters make it strong.",
+        "strong": "Great password."
+      }
+    },
+    "profile": {
+      "photo": "Choose photo (optional)",
+      "photoPreview": "Your photo preview",
+      "photoTooBig": "The photo can be up to 2 MB.",
+      "name": "Name",
+      "nickname": "Nickname",
+      "nicknameHint": "This is what shows in study rooms. Do not use your full name.",
+      "area": "Area",
+      "course": "Program (optional)",
+      "courseHint": "Write it your way, for example: Nursing, Law, high school senior year.",
+      "suggestion": "Based on your program, we will suggest the {{title}} roadmap.",
+      "period": "Term (optional)",
+      "periodHint": "E.g. 3rd semester, 2nd year.",
+      "institution": "Institution (optional)"
+    },
+    "areas": {
+      "TECH_EXACT": "Technology and sciences",
+      "HEALTH": "Health",
+      "LAW": "Law",
+      "HUMANITIES": "Humanities",
+      "BUSINESS": "Business",
+      "ARTS_DESIGN": "Arts and design",
+      "HIGH_SCHOOL": "High school/entrance exams",
+      "OTHER": "Other"
+    },
+    "routine": {
+      "goal": "Weekly focus goal",
+      "goalValue_one": "{{count}} hour per week",
+      "goalValue_other": "{{count}} hours per week",
+      "goalHint": "Suggestion for where you are: {{min}} to {{max}} h per week. You can change it later.",
+      "rhythm": "Focus rhythm",
+      "reminders": "Deadline reminders",
+      "remindersHint": "Notices about upcoming deadlines.",
+      "followRoadmap": "Follow the {{title}} roadmap",
+      "followRoadmapHint": "It shows on the Cockpit with the next topic.",
+      "rooms": "Appear in study rooms",
+      "roomsHint": "Show up in the ranking of rooms you join. It stays off if you prefer.",
+      "terms": "I have read and accept the <terms>Terms of use</terms> and the <privacy>Privacy Policy</privacy>.",
+      "age": "I confirm I am at least the minimum age to use StackStudy.",
+      "ageWithNumber": "I confirm I am at least {{age}}, the minimum age to use StackStudy."
+    },
+    "rhythms": {
+      "POMODORO_25_5": {
+        "label": "25/5",
+        "description": "25 min focus, 5 min break"
+      },
+      "POMODORO_50_10": {
+        "label": "50/10",
+        "description": "50 min focus, 10 min break"
+      },
+      "FREE": {
+        "label": "Free timer",
+        "description": "Continuous timer"
+      }
+    },
+    "errors": {
+      "emailRequired": "Enter your email.",
+      "emailInvalid": "Check the email (example: name@domain.com).",
+      "passwordRequired": "Create a password.",
+      "passwordLength": "The password needs 10 to 72 characters.",
+      "passwordCommon": "This password is too common. Pick another one.",
+      "passwordEmail": "The password cannot be your email.",
+      "nameRequired": "Enter your name.",
+      "nameInvalid": "Use up to 120 characters, no < or >.",
+      "nicknameRequired": "Pick a nickname.",
+      "nicknameInvalid": "Use 2 to 24 letters, digits, spaces, dots, hyphens or underscores.",
+      "areaRequired": "Pick an area.",
+      "courseInvalid": "Use up to 120 characters, no < or >.",
+      "periodInvalid": "Use up to 40 characters, no < or >.",
+      "institutionInvalid": "Use up to 120 characters, no < or >.",
+      "goal": "Pick between 1 and 60 hours.",
+      "terms": "To create the account, accept the Terms of use and the Privacy Policy.",
+      "age": "Confirm you are at least the minimum age."
+    },
+    "server": {
+      "emailTaken": "Could not create an account with this email. If it is yours, sign in or recover access.",
+      "password": "This password does not work: use 10 to 72 characters and avoid common passwords.",
+      "email": "Check the email.",
+      "name": "Check the name.",
+      "nickname": "Check the nickname."
+    },
+    "verify": {
+      "title": "Check your email",
+      "body": "If {{email}} can be used, we sent a link to confirm the account. Open it to sign in.",
+      "pageTitle": "Confirming your email",
+      "pageSubtitle": "Just a moment."
     }
   }
 }

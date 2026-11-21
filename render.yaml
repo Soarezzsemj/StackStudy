@@ -59,3 +59,24 @@ services:
       # Roadmaps: deixe false (ou sem valor) enquanto não houver assinatura (ver DEPLOY.md)
       - key: ROADMAPS_PREMIUM_ENABLED
         sync: false
+      # Cadastro (Fase 11): ver DEPLOY.md, "Cadastro". Google e e-mail ficam desligados.
+      - key: TERMS_VERSION
+        sync: false
+      - key: PRIVACY_VERSION
+        sync: false
+      - key: MIN_AGE
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: EMAIL_VERIFICATION_ENABLED
+        sync: false
+      - key: PROFILE_PHOTO_ENABLED
+        sync: false
+      - key: AUTH_GOOGLE_ENABLED
+        sync: false
+      - key: AUTH_GOOGLE_CLIENT_ID
+        sync: false
+      - key: AUTH_GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: AUTH_GOOGLE_REDIRECT_URI
+        sync: false

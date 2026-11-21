@@ -13,6 +13,10 @@ public enum ErrorCode {
   NOT_FOUND(HttpStatus.NOT_FOUND),
   METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED),
   EMAIL_ALREADY_REGISTERED(HttpStatus.CONFLICT),
+  // Cadastro com verificação de e-mail ligada, ainda sem confirmar (só depois da senha certa).
+  EMAIL_NOT_VERIFIED(HttpStatus.FORBIDDEN),
+  INVALID_VERIFICATION_TOKEN(HttpStatus.BAD_REQUEST),
+  UNSUPPORTED_IMAGE(HttpStatus.UNSUPPORTED_MEDIA_TYPE),
   // 400, não 401: o frontend usa 401 para renovar a sessão.
   INVALID_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST),
   RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS),

@@ -13,10 +13,12 @@ import org.springframework.validation.annotation.Validated;
  * @param premiumEnabled {@code ROADMAPS_PREMIUM_ENABLED}: false (padrão) libera tudo, inclusive o
  *     marcado como PREMIUM
  * @param suggestions sugestões de roadmap por usuário
+ * @param suggest {@code GET /api/roadmaps/suggest} (público) por IP
  */
 @Validated
 @ConfigurationProperties(prefix = "stackstudy.roadmaps")
-public record RoadmapProperties(boolean premiumEnabled, @Valid @NotNull Limit suggestions) {
+public record RoadmapProperties(
+    boolean premiumEnabled, @Valid @NotNull Limit suggestions, @Valid @NotNull Limit suggest) {
 
   /** {@code limit} pedidos a cada {@code window}. */
   public record Limit(@Min(1) int limit, @NotNull Duration window) {}

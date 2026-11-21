@@ -58,9 +58,7 @@ class RateLimitIntegrationTest extends IntegrationTest {
     return mvc.perform(
         from(post("/api/auth/register"), ip)
             .contentType(MediaType.APPLICATION_JSON)
-            .content(
-                json.writeValueAsString(
-                    Map.of("name", "Ana", "email", email, "password", "ana-password"))));
+            .content(json.writeValueAsString(AuthTestClient.body("Ana", email, "ana-password"))));
   }
 
   private static String ip() {
@@ -80,6 +78,18 @@ class RateLimitIntegrationTest extends IntegrationTest {
         .andExpect(header().exists(HttpHeaders.RETRY_AFTER));
     // Outro IP segue livre.
     login(AuthTestClient.uniqueEmail(), "whatever-123", ip()).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void registerIsAlsoLimitedPerEmailAcrossIps() throws Exception {
+    // Mesmo e-mail vindo de IPs diferentes: a 3ª tentativa (limite 2) dá 429, antes de dizer se o
+    // e-mail já existe.
+    String email = AuthTestClient.uniqueEmail();
+    register(email, ip()).andExpect(status().isCreated());
+    register(email, ip()).andExpect(status().isConflict());
+    register(email, ip())
+        .andExpect(status().isTooManyRequests())
+        .andExpect(jsonPath("$.code").value("RATE_LIMITED"));
   }
 
   @Test

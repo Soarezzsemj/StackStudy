@@ -15,6 +15,10 @@ export interface User {
   timeZone?: string;
   /** USER ou ADMIN. Só decide se o link do painel aparece; o servidor confere de novo. */
   role?: 'USER' | 'ADMIN';
+  /** Apelido padrão das salas de estudo (cadastro, Fase 11). */
+  nickname?: string;
+  studyArea?: string;
+  focusRhythm?: 'POMODORO_25_5' | 'POMODORO_50_10' | 'FREE';
 }
 
 export interface AuthResponse {

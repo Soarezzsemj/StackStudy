@@ -222,11 +222,12 @@ public class RoomRepository {
 
   public void insertMember(UUID roomId, UUID userId, MemberRole role, String nickname) {
     jdbc.update(
-        "INSERT INTO study_room_members (room_id, user_id, role, nickname) VALUES (?, ?, ?, ?)",
+        "INSERT INTO study_room_members (room_id, user_id, role, nickname, hide_from_ranking)"
+            + " SELECT ?, u.id, ?, ?, NOT u.rooms_visible FROM users u WHERE u.id = ?",
         roomId,
-        userId,
         role.name(),
-        nickname);
+        nickname,
+        userId);
   }
 
   public void updateMe(

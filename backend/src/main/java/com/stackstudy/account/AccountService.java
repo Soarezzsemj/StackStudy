@@ -5,6 +5,7 @@ import com.stackstudy.account.dto.AccountResponses.SessionView;
 import com.stackstudy.auth.ActiveSessionCache;
 import com.stackstudy.auth.AuthService;
 import com.stackstudy.auth.AuthSessionRepository;
+import com.stackstudy.auth.PasswordPolicy;
 import com.stackstudy.auth.User;
 import com.stackstudy.auth.UserRepository;
 import com.stackstudy.auth.dto.UserResponse;
@@ -114,6 +115,7 @@ public class AccountService {
   public AuthService.AuthResult changePassword(AccountRequests.ChangePassword r) {
     User user = user();
     requirePassword(user, r.currentPassword());
+    PasswordPolicy.check("newPassword", r.newPassword(), user.getEmail());
     if (passwordEncoder.matches(r.newPassword(), user.getPasswordHash())) {
       throw ApiException.invalidField("newPassword", "must be different from the current one");
     }

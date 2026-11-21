@@ -82,7 +82,7 @@ describe('Termos e Privacidade', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Política de Privacidade' }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: '6. Seus direitos' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '7. Seus direitos' })).toBeInTheDocument();
     expect(screen.getByText(/art\. 7º, V, da LGPD/)).toBeInTheDocument();
     const footer = screen.getByRole('navigation', { name: 'Documentos legais' });
     await userEvent.click(within(footer).getByRole('link', { name: 'Termos' }));
@@ -97,17 +97,13 @@ describe('Termos e Privacidade', () => {
     await act(() => i18n.changeLanguage('pt-BR'));
   });
 
-  it('o cadastro tem o aceite com links e o login tem o rodapé', async () => {
+  it('o endereço antigo do cadastro leva ao novo, com o rodapé legal', async () => {
     useAuthStore.getState().clear();
     mockApi({});
-    renderWithProviders(routes, { initialEntries: ['/register'] });
-    await screen.findByRole('heading', { name: 'Criar conta' });
-    expect(screen.getByText(/Ao criar a conta, você concorda/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Termos de uso' })).toHaveAttribute('href', '/terms');
-    expect(screen.getByRole('link', { name: 'Política de Privacidade' })).toHaveAttribute(
-      'href',
-      '/privacy',
-    );
+    const { router } = renderWithProviders(routes, { initialEntries: ['/register'] });
+    await screen.findByRole('heading', { level: 1, name: 'Criar conta' });
+    expect(router.state.location.pathname).toBe('/signup');
+    // O aceite com links fica no passo 3 (testado em SignupPage.test.tsx).
     expect(screen.getByRole('navigation', { name: 'Documentos legais' })).toBeInTheDocument();
   });
 });

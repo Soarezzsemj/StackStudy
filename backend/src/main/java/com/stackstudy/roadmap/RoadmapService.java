@@ -241,6 +241,27 @@ public class RoadmapService {
     return repository.insertSuggestion(userId, title, area, details);
   }
 
+  // cadastro (Fase 11) ---------------------------------------------------------------
+
+  /**
+   * Cadastro: começa a seguir o roadmap sugerido (sem usuário no contexto). Slug desconhecido =
+   * nada.
+   */
+  @Transactional
+  public boolean followForUser(UUID userId, String slug) {
+    Optional<RoadmapContent> r = catalog.bySlug(slug);
+    r.ifPresent(content -> ensureFollowing(userId, content));
+    return r.isPresent();
+  }
+
+  /** Roadmap mais compatível com a área e o curso (público, só leitura). */
+  public Optional<RoadmapSuggestion> suggest(String area, String course) {
+    return RoadmapMatcher.suggest(catalog.all(), area, course)
+        .map(r -> new RoadmapSuggestion(r.slug(), r.title(), r.area()));
+  }
+
+  public record RoadmapSuggestion(String slug, String title, String area) {}
+
   // integração ---------------------------------------------------------------------
 
   /** Deep Work: o tópico ligado à sessão precisa existir (roadmap ativo) e estar aberto. */

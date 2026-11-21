@@ -36,7 +36,10 @@ public class DataExportService {
     QUERIES.put(
         "profile",
         "SELECT id, name, email, locale, time_zone, course, institution, current_period, bio,"
-            + " avatar_color, role, last_seen_at, created_at, updated_at FROM users WHERE id = ?");
+            + " avatar_color, role, last_seen_at, nickname, study_area, focus_rhythm,"
+            + " deadline_reminders, rooms_visible, terms_version, privacy_version, consent_at,"
+            + " age_confirmed, age_confirmed_min, email_verified_at, google_sub IS NOT NULL AS"
+            + " google_linked, created_at, updated_at FROM users WHERE id = ?");
     QUERIES.put(
         "sessions",
         "SELECT id, user_agent, created_at, last_used_at, expires_at, revoked_at"
@@ -88,6 +91,11 @@ public class DataExportService {
             + " WHERE reporter_id = ? ORDER BY created_at");
     QUERIES.put(
         "userBlocks", "SELECT blocked_id, created_at FROM user_blocks WHERE blocker_id = ?");
+    // Cadastro (Fase 11): links de verificação de e-mail (sem o hash do token).
+    QUERIES.put(
+        "emailVerifications",
+        "SELECT id, expires_at, used_at, created_at FROM email_verification_tokens"
+            + " WHERE user_id = ? ORDER BY created_at");
     // Métricas de operação (Fase 8): dias com atividade e, para admins, acessos ao painel.
     QUERIES.put(
         "activityDays", "SELECT day FROM user_activity_daily WHERE user_id = ? ORDER BY day");

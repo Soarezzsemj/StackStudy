@@ -8,9 +8,52 @@ export interface LoginInput {
   password: string;
 }
 
-export interface RegisterInput extends LoginInput {
+export type StudyArea =
+  | 'TECH_EXACT'
+  | 'HEALTH'
+  | 'LAW'
+  | 'HUMANITIES'
+  | 'BUSINESS'
+  | 'ARTS_DESIGN'
+  | 'HIGH_SCHOOL'
+  | 'OTHER';
+
+export type FocusRhythm = 'POMODORO_25_5' | 'POMODORO_50_10' | 'FREE';
+
+/** Cadastro em 3 passos, enviado de uma vez no fim. */
+export interface SignupInput extends LoginInput {
   name: string;
+  nickname: string;
+  area: StudyArea;
+  course?: string;
+  period?: string;
+  institution?: string;
+  weeklyGoalHours: number;
+  focusRhythm: FocusRhythm;
+  deadlineReminders: boolean;
+  followRoadmap?: string;
+  roomsVisible: boolean;
+  acceptTerms: boolean;
+  confirmAge: boolean;
   locale: string;
+}
+
+/** Sessão aberta ou "verifique seu e-mail" (com a verificação ligada). */
+export type SignupResult = { kind: 'session'; user: User } | { kind: 'verify' };
+
+export interface SignupConfig {
+  googleEnabled: boolean;
+  emailVerificationEnabled: boolean;
+  profilePhotoEnabled: boolean;
+  minAge?: number;
+  termsVersion: string;
+  privacyVersion: string;
+}
+
+export interface RoadmapSuggestion {
+  slug: string;
+  title: string;
+  area: string;
 }
 
 export const authApi = {
@@ -24,14 +67,36 @@ export const authApi = {
     return data.user;
   },
 
-  async register(input: RegisterInput): Promise<User> {
-    const data = await apiRequest<AuthResponse>('/auth/register', {
+  async register(input: SignupInput): Promise<SignupResult> {
+    const data = await apiRequest<AuthResponse | { status: 'VERIFICATION_SENT' }>(
+      '/auth/register',
+      { method: 'POST', body: input, auth: false },
+    );
+    if ('status' in data) return { kind: 'verify' };
+    useAuthStore.getState().setSession(data.accessToken, data.user);
+    return { kind: 'session', user: data.user };
+  },
+
+  async verifyEmail(token: string): Promise<User> {
+    const data = await apiRequest<AuthResponse>('/auth/verify-email', {
       method: 'POST',
-      body: input,
+      body: { token },
       auth: false,
     });
     useAuthStore.getState().setSession(data.accessToken, data.user);
     return data.user;
+  },
+
+  /** Flags e versões do cadastro (público). */
+  config: () => apiRequest<SignupConfig>('/auth/config', { auth: false }),
+
+  /** Roadmap sugerido para a área e o curso (público); sem sugestão, null. */
+  async suggestRoadmap(area: string, course: string): Promise<RoadmapSuggestion | null> {
+    const q = new URLSearchParams({ area, course }).toString();
+    const data = await apiRequest<RoadmapSuggestion | undefined>('/roadmaps/suggest?' + q, {
+      auth: false,
+    });
+    return data ?? null;
   },
 
   async logout(): Promise<void> {

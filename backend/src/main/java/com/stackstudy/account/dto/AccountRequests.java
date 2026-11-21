@@ -58,9 +58,10 @@ public final class AccountRequests {
   public record ChangeEmail(
       @NotBlank @Email @Size(max = 254) String email, @NotBlank String currentPassword) {}
 
+  /** A regra completa (lista de senhas óbvias) fica em {@code auth.PasswordPolicy}. */
   public record ChangePassword(
       @NotBlank String currentPassword,
-      @NotBlank @Size(min = 8, max = 72, message = "must have between 8 and 72 characters")
+      @NotBlank @Size(min = 10, max = 72, message = "must have between 10 and 72 characters")
           String newPassword) {}
 
   /** Excluir a conta: digitar o e-mail da conta e confirmar com a senha. */

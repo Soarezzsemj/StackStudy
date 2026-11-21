@@ -12,6 +12,7 @@ import {
   type RoomMode,
   type RoomVisibility,
 } from '@/lib/api/rooms';
+import { useAuthStore } from '@/stores/authStore';
 import { useCreateRoom, useJoinRoom, useRoomAction, useUpdateMe, useUpdateRoom } from './queries';
 import { formatCodeInput, validNickname } from './roomLogic';
 
@@ -60,7 +61,7 @@ export function CreateRoomDialog({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate();
   const create = useCreateRoom();
   const [name, setName] = useState('');
-  const [nickname, setNickname] = useState('');
+  const [nickname, setNickname] = useState(useAuthStore.getState().user?.nickname ?? '');
   const [visibility, setVisibility] = useState<RoomVisibility>('PRIVATE');
   const [mode, setMode] = useState<RoomMode>('FREE');
   const [goal, setGoal] = useState('');
@@ -168,7 +169,7 @@ export function JoinRoomDialog({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate();
   const join = useJoinRoom();
   const [code, setCode] = useState('');
-  const [nickname, setNickname] = useState('');
+  const [nickname, setNickname] = useState(useAuthStore.getState().user?.nickname ?? '');
   const [touched, setTouched] = useState(false);
 
   function submit(e: FormEvent) {

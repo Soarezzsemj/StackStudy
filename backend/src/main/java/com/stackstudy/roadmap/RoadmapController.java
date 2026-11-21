@@ -1,14 +1,20 @@
 package com.stackstudy.roadmap;
 
+import com.stackstudy.common.error.RateLimitedException;
+import com.stackstudy.common.security.RateLimitProperties;
+import com.stackstudy.common.security.RateLimiter;
 import com.stackstudy.roadmap.dto.RoadmapRequests;
 import com.stackstudy.roadmap.dto.RoadmapResponses.RoadmapDetail;
 import com.stackstudy.roadmap.dto.RoadmapResponses.RoadmapList;
 import com.stackstudy.roadmap.dto.RoadmapResponses.SuggestionCreated;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,9 +32,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class RoadmapController {
 
   private final RoadmapService roadmaps;
+  private final RoadmapProperties properties;
+  private final RateLimiter limiter;
+  private final RateLimitProperties rateLimits;
 
-  public RoadmapController(RoadmapService roadmaps) {
+  public RoadmapController(
+      RoadmapService roadmaps,
+      RoadmapProperties properties,
+      RateLimiter limiter,
+      RateLimitProperties rateLimits) {
     this.roadmaps = roadmaps;
+    this.properties = properties;
+    this.limiter = limiter;
+    this.rateLimits = rateLimits;
   }
 
   @GetMapping
@@ -36,6 +52,30 @@ public class RoadmapController {
   public RoadmapList list(
       @RequestParam(required = false) String area, @RequestParam(required = false) String q) {
     return roadmaps.list(area, q);
+  }
+
+  /**
+   * Público (cadastro): roadmap mais compatível com a área e o curso, ou 204. Rate limit por IP.
+   */
+  @GetMapping("/suggest")
+  @Operation(summary = "Suggest the best roadmap for an area and course (public, rate limited)")
+  public ResponseEntity<RoadmapService.RoadmapSuggestion> suggest(
+      @RequestParam(required = false) @Size(max = 20) String area,
+      @RequestParam(required = false) @Size(max = 120) String course,
+      HttpServletRequest request) {
+    if (rateLimits.enabled()) {
+      RoadmapProperties.Limit rule = properties.suggest();
+      RateLimiter.Decision d =
+          limiter.acquire(
+              "roadmap-suggest:" + request.getRemoteAddr(), rule.limit(), rule.window());
+      if (!d.allowed()) {
+        throw new RateLimitedException(d.retryAfterSeconds());
+      }
+    }
+    return roadmaps
+        .suggest(area, course)
+        .map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.noContent().build());
   }
 
   @GetMapping("/{slug}")

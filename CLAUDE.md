@@ -28,6 +28,7 @@ Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 2
 | 8 | Admin: Status: papel ADMIN (ADMIN_EMAILS), métricas agregadas, saúde, erros, painel com Recharts | ✅ |
 | 9 | Roadmaps: trilhas por curso (seed de exemplo), mapa/lista, progresso, meta, sugestões, Premium preparado (desligado) | ✅ |
 | 10 | Salas de estudo: sem chat, presença em memória, Pomodoro compartilhado/tempo corrido, ranking, reações, moderação | ✅ |
+| 11 | Cadastro em 3 passos: conta, perfil, rotina, aceite (LGPD), senha forte; Google, verificação e foto preparados (desligados) | ✅ |
 
 ## Estrutura
 
@@ -389,6 +390,46 @@ lateral (grava na conta). Fuso por `useTimeZone()` nas consultas de heatmap, est
   com a pessoa logada = `clear('expired')` e o login mostra "Sua sessão expirou"; sem rede ou 429
   no refresh, a sessão **não** cai. Destino pós-login passa por `safeRedirect` (só caminho interno).
 
+## Cadastro em 3 passos (Fase 11)
+
+`POST /api/auth/register` recebe tudo de uma vez (Conta, Perfil, Rotina + aceites) e
+`RegistrationService` grava **numa transação**: usuário (nome, apelido, área em lista fechada,
+curso, período, instituição, ritmo, lembretes, `rooms_visible`), aceite (`terms_version`,
+`privacy_version`, `consent_at`, `age_confirmed`, `age_confirmed_min`), preferências do Deep
+Work (ritmo 25/5, 50/10 ou tempo corrido → foco/pausa; meta 1–60 h) e o roadmap sugerido
+(`RoadmapService.followForUser`; slug desconhecido é ignorado). Falha no meio = nada gravado
+(teste com spy). Resposta: 201 + sessão (login automático); com verificação de e-mail, 202.
+
+- **Senha**: `PasswordPolicy` (10–72, lista curta de senhas óbvias, poucos caracteres distintos,
+  igual ao e-mail) vale no cadastro e na troca de senha. Frontend tem o espelho em
+  `signupLogic.ts` e o indicador de força (4 níveis).
+- **Aceite**: `acceptTerms` e `confirmAge` obrigatórios (`@AssertTrue`). Versões em
+  `stackstudy.signup.*` (`TERMS_VERSION`, `PRIVACY_VERSION`, placeholders); `MIN_AGE` sem valor
+  padrão (decisão jurídica). Contas anteriores à V13 ficam sem aceite gravado.
+- **Enumeração**: verificação desligada = 409 `EMAIL_ALREADY_REGISTERED` com mensagem neutra, BCrypt
+  sempre, limite por IP (`RateLimitFilter`) e por e-mail (mesma regra `register`). Verificação
+  ligada = 202 idêntico para e-mail novo e existente (o dono recebe um aviso).
+- `role` e campos desconhecidos são ignorados (Fase 8 continua: só ADMIN_EMAILS).
+- **Flags (todas false)**: `EMAIL_VERIFICATION_ENABLED` (`email_verification_tokens`, SHA-256,
+  uso único, 24 h; `EmailSender` com `LogEmailSender`; login de conta pendente = 403
+  `EMAIL_NOT_VERIFIED` só depois da senha certa; prod recusa subir só com o log),
+  `AUTH_GOOGLE_ENABLED` (`google` package: OIDC + PKCE no servidor, `GoogleIdTokenVerifier`
+  testado com chaves locais; vincula só e-mail verificado de conta existente; `users.google_sub`),
+  `PROFILE_PHOTO_ENABLED` (`ProfilePhotoProcessor`: tipo pelo conteúdo, regrava PNG ≤ 256 px
+  sem metadados; WebP reconhecido mas recusado sem decodificador; exige `ProfilePhotoStorage`).
+- Rotas públicas novas: `POST /api/auth/verify-email`, `GET /api/auth/config`,
+  `GET /api/roadmaps/suggest` (rate limit por IP, `RoadmapMatcher`: palavras do curso pesam 2,
+  área 1; sem pontos = 204), `GET /api/auth/google/{start,callback}`.
+- **Salas**: `users.rooms_visible` (padrão false no cadastro; contas antigas true) vira
+  `hide_from_ranking` ao entrar numa sala. O apelido do cadastro preenche o apelido da sala.
+
+**Frontend** (`features/auth/signup/`): `SignupPage` (rascunho só em memória, nunca senha no
+navegador; barra de etapas que só avança com os passos anteriores válidos; foco no título do passo
+e no primeiro erro; erros só depois de tocar, ligados por `aria-describedby`), `SignupSteps`,
+`SignupFields` (chips como radiogroup, switches, caixas de aceite), `SignupBrand` (painel e prévia
+do perfil ao vivo; vira cabeçalho curto no celular). Links legais abrem em nova aba (sair apagaria
+o rascunho). `/register` redireciona para `/signup`; `/verify-email` confirma o link.
+
 ## Salas de estudo (Fase 10)
 
 Estudar junto, vendo quem está ativo, **sem chat livre** (nem imagem, vídeo ou nome: só o apelido da
@@ -567,7 +608,9 @@ exportação LGPD (o teste de cobertura falha sem isso).
 Ver `.env.example`. Principais: `JWT_SECRET` (obrigatório, ≥ 32 chars), `DB_URL`, `DB_USERNAME`,
 `DB_PASSWORD`, `JWT_ACCESS_TTL` (PT15M), `JWT_REFRESH_TTL` (P14D), `CORS_ALLOWED_ORIGINS`,
 `REFRESH_COOKIE_SECURE`, `REFRESH_COOKIE_SAME_SITE`, `RATE_LIMIT_ENABLED`, `ADMIN_EMAILS`,
-`ADMIN_LINK_*`, `ROADMAPS_PREMIUM_ENABLED` (padrão false), `VITE_API_PROXY_TARGET`,
+`ADMIN_LINK_*`, `ROADMAPS_PREMIUM_ENABLED` (padrão false), `TERMS_VERSION`, `PRIVACY_VERSION`,
+`MIN_AGE`, `APP_URL`, `EMAIL_VERIFICATION_ENABLED`, `PROFILE_PHOTO_ENABLED`, `AUTH_GOOGLE_*` (todas
+false por padrão), `VITE_API_PROXY_TARGET`,
 `VITE_API_URL`
 (padrão `/api`), `VITE_WAKE_URL`.
 Perfis Spring: `dev` (padrão, logs DEBUG), `prod` (ver abaixo), `test`.
@@ -612,7 +655,8 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
 4. **CSRF desabilitado**: a API é stateless (Bearer). O único cookie é o refresh, HttpOnly,
    SameSite=Strict e restrito a `/api/auth`.
 5. **E-mail normalizado** (trim + minúsculas) antes de salvar e de buscar.
-6. **Senha**: 8–72 caracteres (72 é o limite do BCrypt).
+6. **Senha**: 10–72 caracteres (72 é o limite do BCrypt) e fora da lista de senhas óbvias
+   (`PasswordPolicy`, Fase 11; antes eram 8). Senhas antigas continuam entrando.
 7. `study_sessions` tem índice único parcial: **no máximo uma sessão ativa por usuário**
    (`ended_at IS NULL`). Também há `CHECK`s de domínio (enums, faixas, cor `#rrggbb`).
 8. `tasks.due_date` é `TIMESTAMPTZ` (permite horário de entrega); `cards.tags` é `TEXT[]`;
@@ -805,3 +849,17 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
 92. **Sem decisão jurídica sobre idade mínima** nesta fase: o produto não pede idade; o desenho evita
     dados de menores (apelido, sem chat, privada por padrão), mas termos de uso e idade mínima
     precisam de revisão jurídica antes de abrir salas públicas em escala.
+93. **Cadastro num endpoint só** (os 3 passos montam um envio): uma transação, sem conta pela
+    metade nem rascunho no servidor. O rascunho fica só na memória da tela (recarregar recomeça).
+94. **Enumeração sem verificação de e-mail não some de todo** (Decisão 66 continua): o cadastro
+    abre sessão, então o 409 é inevitável; mensagem neutra + BCrypt sempre + limite por IP e por
+    e-mail. A verificação de e-mail (desligada) é o que fecha de vez (202 igual nos dois casos).
+95. **Google só entra em conta existente** e só vincula por e-mail verificado; não cria conta (o
+    cadastro precisa de aceite e perfil). Credenciais só por variável.
+96. **Foto desligada** (sem armazenamento no plano grátis): processador pronto (tipo pelo conteúdo,
+    regravação sem EXIF), WebP recusado até haver decodificador; avatar = iniciais.
+97. **"Aparecer nas salas" = aparecer no ranking** (a presença continua só para membros, com
+    apelido). Padrão desligado para cadastros novos; contas antigas mantêm o comportamento.
+98. **Idade mínima só confirmada** (`MIN_AGE` sem valor padrão): nenhuma data de nascimento é
+    pedida; a regra para menores e o número dependem de decisão jurídica.
+99. Tela de cadastro em chunk próprio (lazy), como as do app.

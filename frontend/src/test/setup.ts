@@ -49,6 +49,7 @@ vi.mock('@/app/lazyPages', async () => {
     adminStatus,
     roadmaps,
     rooms,
+    signup,
   ] = await Promise.all([
     import('@/features/cockpit/CockpitPage'),
     import('@/features/stack/StackPage'),
@@ -64,6 +65,7 @@ vi.mock('@/app/lazyPages', async () => {
     import('@/features/admin/AdminStatusPage'),
     import('@/features/roadmaps/RoadmapsPage'),
     import('@/features/rooms/RoomsPage'),
+    import('@/features/auth/signup/SignupPage'),
   ]);
   return {
     CockpitPage: cockpit.CockpitPage,
@@ -80,6 +82,7 @@ vi.mock('@/app/lazyPages', async () => {
     AdminStatusPage: adminStatus.AdminStatusPage,
     RoadmapsPage: roadmaps.RoadmapsPage,
     RoomsPage: rooms.RoomsPage,
+    SignupPage: signup.SignupPage,
   };
 });
 

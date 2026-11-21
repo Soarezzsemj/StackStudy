@@ -8,6 +8,7 @@ import java.util.UUID;
  * Usuário logado com o perfil. Nunca inclui o hash da senha.
  *
  * @param timeZone fuso IANA preferido (ausente = o do navegador)
+ * @param nickname apelido padrão das salas de estudo (Fase 11)
  * @param role USER ou ADMIN (só leitura: o frontend mostra o link do painel; o servidor confere de
  *     novo no banco a cada requisição de /api/admin)
  */
@@ -23,7 +24,10 @@ public record UserResponse(
     String bio,
     String avatarColor,
     String timeZone,
-    String role) {
+    String role,
+    String nickname,
+    String studyArea,
+    String focusRhythm) {
 
   public static UserResponse from(User user) {
     return new UserResponse(
@@ -38,6 +42,9 @@ public record UserResponse(
         user.getBio(),
         user.getAvatarColor(),
         user.getTimeZone(),
-        user.getRole());
+        user.getRole(),
+        user.getNickname(),
+        user.getStudyArea(),
+        user.getFocusRhythm());
   }
 }

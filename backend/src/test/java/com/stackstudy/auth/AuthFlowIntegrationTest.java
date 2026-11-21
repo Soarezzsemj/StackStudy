@@ -46,14 +46,7 @@ class AuthFlowIntegrationTest extends IntegrationTest {
                 post("/api/auth/register")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
-                        auth.toJson(
-                            Map.of(
-                                "name",
-                                "Ada",
-                                "email",
-                                email.toUpperCase(),
-                                "password",
-                                PASSWORD))))
+                        auth.toJson(AuthTestClient.body("Ada", email.toUpperCase(), PASSWORD))))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.tokenType").value("Bearer"))
             .andExpect(jsonPath("$.expiresIn").value(900))
@@ -125,8 +118,7 @@ class AuthFlowIntegrationTest extends IntegrationTest {
     mvc.perform(
             post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    auth.toJson(Map.of("name", "Other", "email", email, "password", PASSWORD))))
+                .content(auth.toJson(AuthTestClient.body("Other", email, PASSWORD))))
         .andExpect(status().isConflict())
         .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_REGISTERED"));
   }
@@ -140,7 +132,8 @@ class AuthFlowIntegrationTest extends IntegrationTest {
                     auth.toJson(Map.of("name", "", "email", "not-an-email", "password", "short"))))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
-        .andExpect(jsonPath("$.details.length()").value(3))
+        // nome, e-mail, senha e os dois aceites (Fase 11).
+        .andExpect(jsonPath("$.details.length()").value(5))
         .andExpect(jsonPath("$.details[*].field").isArray());
   }
 

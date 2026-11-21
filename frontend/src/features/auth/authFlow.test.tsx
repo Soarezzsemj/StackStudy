@@ -59,26 +59,6 @@ describe('auth flow (UI)', () => {
     expect(useAuthStore.getState().status).toBe('anonymous');
   });
 
-  it('registers and shows field errors from the backend', async () => {
-    useAuthStore.getState().clear();
-    mockFetch(async () =>
-      jsonResponse(400, {
-        code: 'VALIDATION_ERROR',
-        message: 'Request validation failed',
-        details: [{ field: 'password', message: 'must have between 8 and 72 characters' }],
-      }),
-    );
-    renderWithProviders(routes, { initialEntries: ['/register'] });
-
-    await userEvent.type(await screen.findByLabelText('Nome'), 'Ada');
-    await userEvent.type(screen.getByLabelText('E-mail'), 'ada@example.com');
-    await userEvent.type(screen.getByLabelText('Senha'), 'short');
-    await userEvent.click(screen.getByRole('button', { name: 'Criar conta' }));
-
-    expect(await screen.findByText('must have between 8 and 72 characters')).toBeInTheDocument();
-    expect(screen.getByLabelText('Senha')).toHaveAttribute('aria-invalid', 'true');
-  });
-
   it('command palette opens with Ctrl+K and navigates', async () => {
     useAuthStore.getState().setSession('t1', testUser);
     mockApi();

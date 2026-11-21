@@ -81,14 +81,16 @@
     "name": "Nome",
     "email": "E-mail",
     "password": "Senha",
-    "passwordHint": "Mínimo de 8 caracteres.",
+    "passwordHint": "Mínimo de 10 caracteres.",
     "login": {
       "title": "Entrar",
       "subtitle": "Bem-vindo de volta. Continue de onde parou.",
       "submit": "Entrar",
       "noAccount": "Ainda não tem conta?",
       "toRegister": "Criar conta",
-      "expired": "Sua sessão expirou. Entre de novo para continuar."
+      "expired": "Sua sessão expirou. Entre de novo para continuar.",
+      "googleUnverified": "Seu e-mail no Google não está verificado. Entre com e-mail e senha.",
+      "googleError": "Não foi possível entrar com o Google. Tente de novo ou use e-mail e senha."
     },
     "register": {
       "title": "Criar conta",
@@ -103,7 +105,7 @@
     "generic": "Algo deu errado. Tente novamente.",
     "network": "Não foi possível falar com o servidor.",
     "INVALID_CREDENTIALS": "E-mail ou senha incorretos.",
-    "EMAIL_ALREADY_REGISTERED": "Este e-mail já está cadastrado.",
+    "EMAIL_ALREADY_REGISTERED": "Não foi possível criar a conta com esse e-mail. Se ele já é seu, entre ou recupere o acesso.",
     "VALIDATION_ERROR": "Confira os campos destacados.",
     "UNAUTHORIZED": "Sua sessão expirou. Entre novamente.",
     "NOT_FOUND": "Não encontrado.",
@@ -123,7 +125,10 @@
     "ROOM_FULL": "A sala está cheia.",
     "ROOM_LIMIT_REACHED": "Você chegou ao limite de salas.",
     "ROOM_OWNER_CANNOT_LEAVE": "Quem criou a sala não sai dela: apague a sala nas configurações.",
-    "INVALID_INVITE_CODE": "Código de convite inválido."
+    "INVALID_INVITE_CODE": "Código de convite inválido.",
+    "EMAIL_NOT_VERIFIED": "Confirme seu e-mail pelo link que enviamos antes de entrar.",
+    "INVALID_VERIFICATION_TOKEN": "Este link de confirmação é inválido ou expirou.",
+    "UNSUPPORTED_IMAGE": "Use uma imagem JPEG ou PNG de até 2 MB."
   },
   "pages": {
     "cockpit": {
@@ -1114,7 +1119,7 @@
     "backToApp": "Voltar ao app",
     "backToLogin": "Entrar",
     "updated": "Atualizado em {{date}}",
-    "date": "21 de novembro de 2026 (salas de estudo)",
+    "date": "21 de novembro de 2026 (cadastro)",
     "terms": {
       "short": "Termos",
       "title": "Termos de uso",
@@ -1173,65 +1178,72 @@
           ]
         },
         {
-          "title": "2. Para quê",
+          "title": "2. Cadastro",
+          "body": [
+            "Para criar a conta pedimos: e-mail e senha (guardada só como hash), nome, apelido, área, curso, período e instituição (curso, período e instituição são opcionais), e as preferências da rotina (meta semanal, ritmo de foco, lembretes, roadmap sugerido e se você quer aparecer no ranking das salas, desligado por padrão). Servem para montar o seu Cockpit, sugerir um roadmap e ajustar o Deep Work.",
+            "Guardamos também o seu aceite: a versão dos Termos de uso e da Política aceitas, a data e a confirmação de idade mínima, para podermos pedir um novo aceite se os textos mudarem. A foto de perfil é opcional e, por enquanto, fica desligada (o avatar são as suas iniciais). Nas salas de estudo, o apelido é o único dado seu que outras pessoas veem."
+          ]
+        },
+        {
+          "title": "3. Para quê",
           "body": [
             "Só para fazer o serviço funcionar: entrar na conta, mostrar e calcular seus dados, proteger contra abuso. A base legal é a execução do serviço que você pediu (art. 7º, V, da LGPD).",
             "Não vendemos dados, não usamos para publicidade e não há rastreadores nem analytics de terceiros."
           ]
         },
         {
-          "title": "3. Cookies e armazenamento local",
+          "title": "4. Cookies e armazenamento local",
           "body": [
             "Usamos um único cookie, essencial: o de sessão (ss_refresh), HttpOnly e restrito à autenticação. No navegador guardamos o idioma e algumas preferências de tela (localStorage)."
           ]
         },
         {
-          "title": "4. Onde os dados ficam",
+          "title": "5. Onde os dados ficam",
           "body": [
             "O app roda em provedores de nuvem: Vercel (site), Render (servidor) e Neon (banco de dados PostgreSQL), com servidores nos Estados Unidos. Cópias de segurança semanais e criptografadas ficam guardadas de forma privada no GitHub. Esses provedores tratam os dados só para hospedar o serviço."
           ]
         },
         {
-          "title": "5. Por quanto tempo",
+          "title": "6. Por quanto tempo",
           "body": [
             "Enquanto a conta existir. Ao excluir a conta, os dados saem do banco na hora; as cópias de segurança antigas expiram em até 90 dias."
           ]
         },
         {
-          "title": "6. Seus direitos",
+          "title": "7. Seus direitos",
           "body": [
             "Você pode, a qualquer momento: ver e corrigir seus dados (Perfil), baixar tudo em JSON (Perfil > Privacidade e dados > Exportar) e excluir a conta com todos os dados (Perfil > Excluir conta). Também pode pedir informações sobre o tratamento pelo contato abaixo."
           ]
         },
         {
-          "title": "7. Métricas de operação",
+          "title": "8. Métricas de operação",
           "body": [
             "Para operar o serviço, registramos de forma agregada: a última vez que cada conta usou o app (no máximo uma atualização por minuto), os dias em que houve atividade (um registro por dia, em UTC) e a contagem de erros por rota e hora (só o padrão da rota, como \"POST /api/auth/refresh\", e o código de erro; nunca o conteúdo, parâmetros, e-mails ou senhas).",
             "Só o administrador do StackStudy vê esses números, num painel de acesso restrito, sempre agregados; a única informação individual é a lista dos últimos cadastros com o e-mail mascarado (ex.: an***@dominio.com) e o curso. Cada acesso ao painel fica registrado. Contagens de erro são apagadas em 7 dias, os registros de acesso ao painel em 90 dias e os dias de atividade em cerca de 13 meses; tudo some com a exclusão da conta e aparece na exportação dos seus dados."
           ]
         },
         {
-          "title": "8. Progresso de estudo e sugestões",
+          "title": "9. Progresso de estudo e sugestões",
           "body": [
             "Se você seguir um roadmap, guardamos quais trilhas segue, a meta semanal, o status de cada tópico (a fazer, em andamento, concluído), as horas que você lança e as horas das sessões de Deep Work ligadas a um tópico.",
             "Sugestões de roadmap que você envia ficam guardadas com a sua conta para o administrador ler; nenhum e-mail é enviado. Tudo isso aparece na exportação dos seus dados e é apagado com a exclusão da conta. Parar de seguir um roadmap mantém o progresso guardado, para você poder voltar."
           ]
         },
         {
-          "title": "9. Salas de estudo",
+          "title": "10. Salas de estudo",
           "body": [
             "Nas salas, os outros membros veem só o apelido que você escolher para aquela sala, se você está estudando, pausado ou ausente, o tempo da sessão e, se você permitir, a matéria. Não há chat, envio de imagens ou vídeo; as reações são frases prontas. Salas públicas aparecem na busca só com nome, número de membros e meta.",
             "A presença (\"quem está estudando agora\") e as reações ficam só na memória do servidor e somem ao reiniciar. Guardamos no banco as salas, as participações (apelido e preferências), as sessões de estudo da sala (que somam nas suas horas de Deep Work), os bloqueios e as denúncias que você fizer; as denúncias são lidas só pelo administrador. Você pode sair de uma sala apagando o seu histórico nela; tudo aparece na exportação dos seus dados e é apagado com a exclusão da conta."
           ]
         },
         {
-          "title": "10. Segurança",
+          "title": "11. Segurança",
           "body": [
             "Conexão sempre criptografada (HTTPS), senha com hash, sessões que você pode encerrar, limite de tentativas de login e acesso aos dados só pela sua conta."
           ]
         },
         {
-          "title": "11. Contato",
+          "title": "12. Contato",
           "body": [
             "Responsável pelo tratamento: o mantenedor do StackStudy. Dúvidas ou pedidos sobre seus dados: privacidade@seu-dominio.com (substitua pelo contato real antes de divulgar)."
           ]
@@ -1725,6 +1737,155 @@
       "theRoom": "A sala",
       "detail": "Detalhe (opcional)",
       "detailHint": "Até 300 caracteres, sem HTML. Não inclua dados pessoais."
+    }
+  },
+  "signup": {
+    "title": "Criar conta",
+    "haveAccount": "Já tem conta?",
+    "toLogin": "Entrar",
+    "continue": "Continuar",
+    "back": "Voltar",
+    "create": "Criar minha conta",
+    "creating": "Criando sua conta…",
+    "googleNoAccount": "Ainda não há conta com esse e-mail do Google. Crie a sua aqui; depois você poderá entrar com o Google.",
+    "steps": {
+      "label": "Etapas do cadastro",
+      "number": "Etapa {{n}}",
+      "account": "Conta",
+      "profile": "Perfil",
+      "routine": "Rotina",
+      "accountTitle": "Sua conta",
+      "profileTitle": "Seu perfil",
+      "routineTitle": "Sua rotina de estudos"
+    },
+    "brand": {
+      "label": "Sobre o StackStudy",
+      "slogan": "Seu curso, seu ritmo, tudo num lugar só.",
+      "benefits": {
+        "one": "Prazos, matérias e notas organizados por semestre.",
+        "two": "Foco com Pomodoro ou tempo corrido, e salas para estudar junto.",
+        "three": "Roadmaps e flashcards para revisar no ritmo certo."
+      }
+    },
+    "preview": {
+      "label": "Prévia do seu perfil",
+      "title": "Prévia do perfil",
+      "namePlaceholder": "Seu nome",
+      "nicknamePlaceholder": "@seu-apelido",
+      "routine": "Meta de {{hours}} h por semana · {{rhythm}}",
+      "visible": "Nas salas de estudo, os outros veem só o seu apelido."
+    },
+    "account": {
+      "google": "Continuar com Google",
+      "or": "ou com e-mail",
+      "email": "E-mail",
+      "password": "Senha",
+      "show": "Mostrar",
+      "hide": "Ocultar"
+    },
+    "password": {
+      "level": "Força: {{level}}.",
+      "levels": {
+        "1": "fraca",
+        "2": "razoável",
+        "3": "boa",
+        "4": "forte"
+      },
+      "hint": {
+        "empty": "Use pelo menos 10 caracteres. Uma frase com espaços é fácil de lembrar.",
+        "short": "Use pelo menos 10 caracteres.",
+        "common": "Essa senha é muito comum. Escolha outra.",
+        "fair": "Misture letras maiúsculas, números ou símbolos, ou deixe-a mais longa.",
+        "good": "Boa. Mais alguns caracteres a deixam forte.",
+        "strong": "Ótima senha."
+      }
+    },
+    "profile": {
+      "photo": "Escolher foto (opcional)",
+      "photoPreview": "Prévia da sua foto",
+      "photoTooBig": "A foto pode ter até 2 MB.",
+      "name": "Nome",
+      "nickname": "Apelido",
+      "nicknameHint": "É o que aparece nas salas de estudo. Não use seu nome completo.",
+      "area": "Área",
+      "course": "Curso (opcional)",
+      "courseHint": "Escreva como quiser, por exemplo: Enfermagem, Direito, 3º ano do ensino médio.",
+      "suggestion": "Com base no seu curso, vamos sugerir o roadmap de {{title}}.",
+      "period": "Período (opcional)",
+      "periodHint": "Ex.: 3º semestre, 2º ano.",
+      "institution": "Instituição (opcional)"
+    },
+    "areas": {
+      "TECH_EXACT": "Tecnologia e exatas",
+      "HEALTH": "Saúde",
+      "LAW": "Direito",
+      "HUMANITIES": "Humanas",
+      "BUSINESS": "Negócios",
+      "ARTS_DESIGN": "Artes e design",
+      "HIGH_SCHOOL": "Ensino médio/vestibular",
+      "OTHER": "Outro"
+    },
+    "routine": {
+      "goal": "Meta semanal de foco",
+      "goalValue_one": "{{count}} hora por semana",
+      "goalValue_other": "{{count}} horas por semana",
+      "goalHint": "Sugestão para o seu momento: de {{min}} a {{max}} h por semana. Dá para mudar depois.",
+      "rhythm": "Ritmo de foco",
+      "reminders": "Lembretes de entrega",
+      "remindersHint": "Avisos sobre prazos próximos.",
+      "followRoadmap": "Seguir o roadmap de {{title}}",
+      "followRoadmapHint": "Ele aparece no Cockpit com o próximo tópico.",
+      "rooms": "Aparecer nas salas de estudo",
+      "roomsHint": "Aparecer no ranking das salas em que você entrar. Fica desligado se você preferir.",
+      "terms": "Li e aceito os <terms>Termos de uso</terms> e a <privacy>Política de Privacidade</privacy>.",
+      "age": "Confirmo que tenho a idade mínima para usar o StackStudy.",
+      "ageWithNumber": "Confirmo que tenho pelo menos {{age}} anos, a idade mínima para usar o StackStudy."
+    },
+    "rhythms": {
+      "POMODORO_25_5": {
+        "label": "25/5",
+        "description": "25 min de foco, 5 de pausa"
+      },
+      "POMODORO_50_10": {
+        "label": "50/10",
+        "description": "50 min de foco, 10 de pausa"
+      },
+      "FREE": {
+        "label": "Tempo corrido",
+        "description": "Cronômetro contínuo"
+      }
+    },
+    "errors": {
+      "emailRequired": "Informe seu e-mail.",
+      "emailInvalid": "Confira o e-mail (exemplo: nome@dominio.com).",
+      "passwordRequired": "Crie uma senha.",
+      "passwordLength": "A senha precisa ter de 10 a 72 caracteres.",
+      "passwordCommon": "Essa senha é muito comum. Escolha outra.",
+      "passwordEmail": "A senha não pode ser igual ao seu e-mail.",
+      "nameRequired": "Informe seu nome.",
+      "nameInvalid": "Use até 120 caracteres, sem < ou >.",
+      "nicknameRequired": "Escolha um apelido.",
+      "nicknameInvalid": "Use de 2 a 24 letras, números, espaço, ponto, hífen ou sublinhado.",
+      "areaRequired": "Escolha uma área.",
+      "courseInvalid": "Use até 120 caracteres, sem < ou >.",
+      "periodInvalid": "Use até 40 caracteres, sem < ou >.",
+      "institutionInvalid": "Use até 120 caracteres, sem < ou >.",
+      "goal": "Escolha entre 1 e 60 horas.",
+      "terms": "Para criar a conta, aceite os Termos de uso e a Política de Privacidade.",
+      "age": "Confirme que você tem a idade mínima."
+    },
+    "server": {
+      "emailTaken": "Não foi possível criar a conta com esse e-mail. Se ele já é seu, entre ou recupere o acesso.",
+      "password": "Essa senha não serve: use de 10 a 72 caracteres e evite senhas comuns.",
+      "email": "Confira o e-mail.",
+      "name": "Confira o nome.",
+      "nickname": "Confira o apelido."
+    },
+    "verify": {
+      "title": "Confira seu e-mail",
+      "body": "Se {{email}} puder ser usado, enviamos um link para confirmar a conta. Abra o link para entrar.",
+      "pageTitle": "Confirmando seu e-mail",
+      "pageSubtitle": "Só um instante."
     }
   }
 }

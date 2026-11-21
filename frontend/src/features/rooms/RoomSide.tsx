@@ -22,6 +22,7 @@ import {
   type RoomMode,
 } from '@/lib/api/rooms';
 import { cn } from '@/lib/cn';
+import { useAuthStore } from '@/stores/authStore';
 import { useDebouncedValue } from '@/lib/useDebouncedValue';
 import {
   useBlocks,
@@ -252,7 +253,7 @@ export function PublicRoomsCard() {
   const search = useDebouncedValue(q.trim(), 250);
   const list = usePublicRooms(search);
   const join = useJoinPublic();
-  const [nickname, setNickname] = useState('');
+  const [nickname, setNickname] = useState(useAuthStore.getState().user?.nickname ?? '');
   const [joining, setJoining] = useState<string>();
 
   return (

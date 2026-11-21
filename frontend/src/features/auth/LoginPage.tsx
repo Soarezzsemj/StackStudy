@@ -17,6 +17,8 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const from = safeRedirect((location.state as { from?: string } | null)?.from);
   const expired = useAuthStore((s) => s.sessionExpired);
+  // Volta do login com Google (AUTH_GOOGLE_ENABLED): e-mail não verificado ou erro.
+  const google = new URLSearchParams(location.search).get('google');
 
   const login = useMutation({
     mutationFn: authApi.login,
@@ -33,19 +35,30 @@ export function LoginPage() {
       title={t('auth.login.title')}
       subtitle={t('auth.login.subtitle')}
       notice={
-        expired && (
+        google === 'unverified' || google === 'error' ? (
           <p
             role="status"
             className="mb-6 rounded-inner border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-text"
           >
-            {t('auth.login.expired')}
+            {google === 'unverified'
+              ? t('auth.login.googleUnverified')
+              : t('auth.login.googleError')}
           </p>
+        ) : (
+          expired && (
+            <p
+              role="status"
+              className="mb-6 rounded-inner border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-text"
+            >
+              {t('auth.login.expired')}
+            </p>
+          )
         )
       }
       footer={
         <>
           {t('auth.login.noAccount')}{' '}
-          <Link to="/register" className="font-semibold text-action hover:underline">
+          <Link to="/signup" className="font-semibold text-action hover:underline">
             {t('auth.login.toRegister')}
           </Link>
         </>

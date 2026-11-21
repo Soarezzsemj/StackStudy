@@ -147,6 +147,11 @@ class AdminIntegrationTest extends IntegrationTest {
     assertThat(role(adminId)).isEqualTo("USER");
   }
 
+  private static Map<String, Object> withRole(Map<String, Object> body) {
+    body.put("role", "ADMIN");
+    return body;
+  }
+
   @Test
   void noRouteCanChangeTheRole() throws Exception {
     // Cadastro com "role": ignorado.
@@ -157,15 +162,7 @@ class AdminIntegrationTest extends IntegrationTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         json.writeValueAsString(
-                            Map.of(
-                                "name",
-                                "Eve",
-                                "email",
-                                email,
-                                "password",
-                                "eve-password",
-                                "role",
-                                "ADMIN"))))
+                            withRole(AuthTestClient.body("Eve", email, "eve-password")))))
             .andExpect(status().isCreated())
             .andReturn()
             .getResponse()

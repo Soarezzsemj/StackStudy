@@ -18,6 +18,11 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  # Foto de perfil (PROFILE_PHOTO_ENABLED): até 2 MB.
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 3MB
   jackson:
     default-property-inclusion: non_null
     serialization:
@@ -110,6 +115,10 @@ stackstudy:
     suggestions:
       limit: 5
       window: P1D
+    # Sugestão de roadmap no cadastro (GET /api/roadmaps/suggest, público), por IP.
+    suggest:
+      limit: 30
+      window: PT1M
   # Salas de estudo (Fase 10). Presença em memória; heartbeats não tocam no banco.
   rooms:
     max-owned-rooms: 5
@@ -143,3 +152,21 @@ stackstudy:
       reaction-pair:
         limit: 1
         window: PT10S
+  # Cadastro em 3 passos (Fase 11). Versões aceitas ficam no usuário (novo aceite no futuro).
+  signup:
+    # Placeholders: datas da última revisão das páginas /terms e /privacy. Troque quando os textos
+    # jurídicos definitivos existirem.
+    terms-version: ${TERMS_VERSION:2026-11-21}
+    privacy-version: ${PRIVACY_VERSION:2026-11-21}
+    # Idade mínima: sem valor = a caixa diz só "a idade mínima" (decisão jurídica pendente).
+    min-age: ${MIN_AGE:}
+    email-verification-enabled: ${EMAIL_VERIFICATION_ENABLED:false}
+    profile-photo-enabled: ${PROFILE_PHOTO_ENABLED:false}
+    verification-ttl: PT24H
+    # Endereço do frontend (links do e-mail e destino do login com Google).
+    app-url: ${APP_URL:http://localhost:5173}
+    google:
+      enabled: ${AUTH_GOOGLE_ENABLED:false}
+      client-id: ${AUTH_GOOGLE_CLIENT_ID:}
+      client-secret: ${AUTH_GOOGLE_CLIENT_SECRET:}
+      redirect-uri: ${AUTH_GOOGLE_REDIRECT_URI:}

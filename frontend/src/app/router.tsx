@@ -1,14 +1,17 @@
-import { createBrowserRouter, Outlet, type RouteObject } from 'react-router-dom';
+import { Suspense } from 'react';
+import { createBrowserRouter, Navigate, Outlet, type RouteObject } from 'react-router-dom';
 import { AppShell } from '@/components/shell/AppShell';
+import { RouteFallback } from '@/components/shell/RouteFallback';
 import { RedirectIfAuthenticated, RequireAuth } from '@/features/auth/RequireAuth';
 import { LoginPage } from '@/features/auth/LoginPage';
-import { RegisterPage } from '@/features/auth/RegisterPage';
+import { VerifyEmailPage } from '@/features/auth/VerifyEmailPage';
 import { RouteErrorPage } from '@/pages/RouteErrorPage';
 import { PublicPage } from '@/pages/PublicPage';
 import {
   AdminStatusPage,
   RoadmapsPage,
   RoomsPage,
+  SignupPage,
   CockpitPage,
   DeckPage,
   DeepWorkPage,
@@ -32,7 +35,17 @@ export const routes: RouteObject[] = [
         element: <RedirectIfAuthenticated />,
         children: [
           { path: '/login', element: <LoginPage /> },
-          { path: '/register', element: <RegisterPage /> },
+          // Cadastro em 3 passos (Fase 11); o endereço antigo continua valendo.
+          {
+            path: '/signup',
+            element: (
+              <Suspense fallback={<RouteFallback />}>
+                <SignupPage />
+              </Suspense>
+            ),
+          },
+          { path: '/register', element: <Navigate to="/signup" replace /> },
+          { path: '/verify-email', element: <VerifyEmailPage /> },
         ],
       },
       // Públicas, com ou sem login.

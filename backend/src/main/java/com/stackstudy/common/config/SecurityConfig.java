@@ -39,14 +39,27 @@ public class SecurityConfig {
    * logout é público porque só usa o cookie (que é HttpOnly e restrito a /api/auth).
    */
   static final String[] PUBLIC_POST = {
-    "/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout"
+    "/api/auth/register",
+    "/api/auth/login",
+    "/api/auth/refresh",
+    "/api/auth/logout",
+    // Cadastro (Fase 11): confirmação de e-mail (404 com a flag desligada).
+    "/api/auth/verify-email"
   };
 
   /**
    * Só os probes. O {@code /actuator/health} agregado e os componentes (ex.: {@code /db}) pedem
    * login: o liveness é o que se pinga, o readiness serve para diagnóstico.
    */
-  static final String[] PUBLIC_GET = {"/actuator/health/liveness", "/actuator/health/readiness"};
+  static final String[] PUBLIC_GET = {
+    "/actuator/health/liveness",
+    "/actuator/health/readiness",
+    // Cadastro (Fase 11): flags da tela, sugestão de roadmap e login com Google (404 desligado).
+    "/api/auth/config",
+    "/api/roadmaps/suggest",
+    "/api/auth/google/start",
+    "/api/auth/google/callback"
+  };
 
   /** Documentação da API: pública só quando ligada (desligada em produção, SWAGGER_ENABLED). */
   static final String[] DOCS_GET = {"/swagger-ui", "/swagger-ui/**", "/v3/api-docs/**"};

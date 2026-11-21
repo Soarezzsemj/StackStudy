@@ -35,6 +35,9 @@ export const NotFoundPage = lazy(() =>
 export const DesignPage = lazy(() =>
   import('@/pages/DesignPage').then((m) => ({ default: m.DesignPage })),
 );
+export const SignupPage = lazy(() =>
+  import('@/features/auth/signup/SignupPage').then((m) => ({ default: m.SignupPage })),
+);
 export const RoomsPage = lazy(() =>
   import('@/features/rooms/RoomsPage').then((m) => ({ default: m.RoomsPage })),
 );

@@ -46,6 +46,17 @@ services:
       ADMIN_LINK_BACKUP: ${ADMIN_LINK_BACKUP:-}
       # Roadmaps: true bloqueia as etapas PREMIUM (sem assinatura nesta fase, ninguém tem direito)
       ROADMAPS_PREMIUM_ENABLED: ${ROADMAPS_PREMIUM_ENABLED:-false}
+      # Cadastro (Fase 11): aceite, idade mínima e recursos desligados por padrão
+      TERMS_VERSION: ${TERMS_VERSION:-2026-11-21}
+      PRIVACY_VERSION: ${PRIVACY_VERSION:-2026-11-21}
+      MIN_AGE: ${MIN_AGE:-}
+      APP_URL: ${APP_URL:-http://localhost:5173}
+      EMAIL_VERIFICATION_ENABLED: ${EMAIL_VERIFICATION_ENABLED:-false}
+      PROFILE_PHOTO_ENABLED: ${PROFILE_PHOTO_ENABLED:-false}
+      AUTH_GOOGLE_ENABLED: ${AUTH_GOOGLE_ENABLED:-false}
+      AUTH_GOOGLE_CLIENT_ID: ${AUTH_GOOGLE_CLIENT_ID:-}
+      AUTH_GOOGLE_CLIENT_SECRET: ${AUTH_GOOGLE_CLIENT_SECRET:-}
+      AUTH_GOOGLE_REDIRECT_URI: ${AUTH_GOOGLE_REDIRECT_URI:-}
     ports:
       - "${BACKEND_PORT:-8080}:8080"
     volumes:

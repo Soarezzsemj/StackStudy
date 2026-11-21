@@ -37,7 +37,13 @@ class PublicEndpointsIntegrationTest extends IntegrationTest {
           "POST /api/auth/register",
           "POST /api/auth/login",
           "POST /api/auth/refresh",
-          "POST /api/auth/logout");
+          "POST /api/auth/logout",
+          // Cadastro (Fase 11): verificação de e-mail e Google respondem 404 com a flag desligada.
+          "POST /api/auth/verify-email",
+          "GET /api/auth/config",
+          "GET /api/roadmaps/suggest",
+          "GET /api/auth/google/start",
+          "GET /api/auth/google/callback");
 
   @Autowired MockMvc mvc;
 
@@ -137,7 +143,8 @@ class PublicEndpointsIntegrationTest extends IntegrationTest {
                     .content(
                         "{\"name\":\"Ana\",\"email\":\"cookie-"
                             + UUID.randomUUID()
-                            + "@example.com\",\"password\":\"ana-password\"}"))
+                            + "@example.com\",\"password\":\"ana-password\",\"acceptTerms\":true,"
+                            + "\"confirmAge\":true}"))
             .andExpect(status().isCreated())
             .andReturn()
             .getResponse()

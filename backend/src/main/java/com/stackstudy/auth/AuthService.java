@@ -2,7 +2,6 @@ package com.stackstudy.auth;
 
 import com.stackstudy.auth.dto.AuthResponse;
 import com.stackstudy.auth.dto.LoginRequest;
-import com.stackstudy.auth.dto.RegisterRequest;
 import com.stackstudy.auth.dto.UserResponse;
 import com.stackstudy.common.error.ApiException;
 import com.stackstudy.common.error.ErrorCode;
@@ -19,7 +18,6 @@ import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +48,7 @@ public class AuthService {
   private final SecurityProperties properties;
   private final RateLimiter limiter;
   private final RateLimitProperties rateLimits;
+  private final SignupProperties signup;
   private final Clock clock;
 
   /**
@@ -69,6 +68,7 @@ public class AuthService {
       SecurityProperties properties,
       RateLimiter limiter,
       RateLimitProperties rateLimits,
+      SignupProperties signup,
       Clock clock) {
     this.users = users;
     this.refreshTokens = refreshTokens;
@@ -80,29 +80,17 @@ public class AuthService {
     this.properties = properties;
     this.limiter = limiter;
     this.rateLimits = rateLimits;
+    this.signup = signup;
     this.clock = clock;
     this.dummyHash = passwordEncoder.encode("timing-equalizer-not-a-real-password");
   }
 
+  /**
+   * Abre uma sessão (tokens + cookie) para um usuário recém-criado ou verificado. O cadastro em si
+   * fica em {@link RegistrationService}.
+   */
   @Transactional
-  public AuthResult register(RegisterRequest request, String userAgent) {
-    String email = normalizeEmail(request.email());
-    if (users.existsByEmail(email)) {
-      throw new ApiException(ErrorCode.EMAIL_ALREADY_REGISTERED, "Email already registered");
-    }
-    String locale = request.locale() == null ? DEFAULT_LOCALE : request.locale();
-    User user;
-    try {
-      user =
-          users.saveAndFlush(
-              new User(
-                  request.name().trim(),
-                  email,
-                  passwordEncoder.encode(request.password()),
-                  locale));
-    } catch (DataIntegrityViolationException ex) {
-      throw new ApiException(ErrorCode.EMAIL_ALREADY_REGISTERED, "Email already registered");
-    }
+  public AuthResult startSession(User user, String userAgent) {
     return issueTokens(user, newSession(user, userAgent));
   }
 
@@ -134,6 +122,11 @@ public class AuthService {
     }
     limiter.reset(failKey);
     User user = found;
+    // Cadastro feito com a verificação de e-mail ligada: só entra depois de confirmar. A checagem
+    // vem depois da senha, para não revelar o estado da conta a quem não sabe a senha.
+    if (signup.emailVerificationEnabled() && user.isEmailVerificationRequired()) {
+      throw new ApiException(ErrorCode.EMAIL_NOT_VERIFIED, "Email not verified yet");
+    }
     sessions.deleteStale(user.getId(), clock.instant().minus(STALE_SESSIONS));
     return issueTokens(user, newSession(user, userAgent));
   }
