@@ -150,7 +150,7 @@ export function GradeSettingsDialog({
 
         {method === 'SUM' && (
           <fieldset className="flex flex-col gap-4">
-            <legend className="label mb-2 text-text-secondary">{t('grades.sum.rounding')}</legend>
+            <legend className="field-label mb-2 block">{t('grades.sum.rounding')}</legend>
             <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm">
               <input
                 type="checkbox"
@@ -178,9 +178,7 @@ export function GradeSettingsDialog({
         )}
 
         <fieldset className="flex flex-col gap-4">
-          <legend className="label mb-2 text-text-secondary">
-            {t('grades.settings.finalExam')}
-          </legend>
+          <legend className="field-label mb-2 block">{t('grades.settings.finalExam')}</legend>
           <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm">
             <input
               type="checkbox"
@@ -214,7 +212,7 @@ export function GradeSettingsDialog({
         </fieldset>
 
         <fieldset className="grid gap-4 sm:grid-cols-2">
-          <legend className="label mb-2 text-text-secondary">{t('grades.settings.gpa')}</legend>
+          <legend className="field-label mb-2 block">{t('grades.settings.gpa')}</legend>
           <SelectField
             label={t('grades.settings.gpaScale')}
             value={gpaScale}
@@ -385,7 +383,7 @@ export function RuleDialog({
 
         {effectiveMethod === 'SUM' && (
           <fieldset className="flex flex-col gap-4">
-            <legend className="label mb-2 text-text-secondary">{t('grades.sum.rounding')}</legend>
+            <legend className="field-label mb-2 block">{t('grades.sum.rounding')}</legend>
             <div className="grid gap-4 sm:grid-cols-2">
               <SelectField
                 label={t('grades.sum.roundBeforeCompare')}
@@ -430,9 +428,7 @@ export function RuleDialog({
         )}
 
         <fieldset className="flex flex-col gap-4">
-          <legend className="label mb-2 text-text-secondary">
-            {t('grades.settings.finalExam')}
-          </legend>
+          <legend className="field-label mb-2 block">{t('grades.settings.finalExam')}</legend>
           <SelectField
             label={t('grades.settings.finalExamEnabled')}
             value={examEnabled}

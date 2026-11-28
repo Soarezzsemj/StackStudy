@@ -16,15 +16,11 @@ export function GpaCard({ gpa, semesterId }: { gpa: Gpa; semesterId?: string }) 
       <dl className="m-0 grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1">
           <dt className="label text-text-muted">{t('grades.gpa.semester')}</dt>
-          <dd className="tabular m-0 text-4xl font-[650] leading-none tracking-card">
-            {formatGrade(shown?.value, lang)}
-          </dd>
+          <dd className="figure m-0">{formatGrade(shown?.value, lang)}</dd>
         </div>
         <div className="flex flex-col gap-1">
           <dt className="label text-text-muted">{t('grades.gpa.cumulative')}</dt>
-          <dd className="tabular m-0 text-4xl font-[650] leading-none tracking-card">
-            {formatGrade(gpa.cumulative, lang)}
-          </dd>
+          <dd className="figure m-0 text-action">{formatGrade(gpa.cumulative, lang)}</dd>
         </div>
       </dl>
       <p className="mt-4 text-sm text-text-secondary">

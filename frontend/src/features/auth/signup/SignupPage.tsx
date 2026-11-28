@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Button, Icon, Wordmark } from '@/components/ui';
-import { LegalLinks } from '@/components/shell/LegalLinks';
+import { Button } from '@/components/ui';
+import { AuthCorner, AuthFrame, AuthHeading } from '@/features/auth/AuthLayout';
 import { errorMessage, fieldErrors } from '@/features/auth/errorMessage';
 import { DEFAULT_LANGUAGE, isLanguage } from '@/i18n';
 import { authApi } from '@/lib/api/auth';
@@ -152,7 +152,7 @@ export function SignupPage() {
     return (
       <Shell draft={draft} photoUrl={photoUrl}>
         <div role="status" className="flex flex-col gap-4">
-          <h1 className="page-title text-[40px]">{t('signup.verify.title')}</h1>
+          <h1 className="auth-title">{t('signup.verify.title')}</h1>
           <p className="text-text-secondary">
             {t('signup.verify.body', { email: draft.email.trim() })}
           </p>
@@ -166,21 +166,6 @@ export function SignupPage() {
 
   return (
     <Shell draft={draft} photoUrl={photoUrl}>
-      <div className="flex flex-col gap-2">
-        <h1 className="page-title text-[40px]">{t('signup.title')}</h1>
-        <p className="text-text-secondary">
-          {t('signup.haveAccount')}{' '}
-          <Link to="/login" className="font-semibold text-action hover:underline">
-            {t('signup.toLogin')}
-          </Link>
-        </p>
-      </div>
-      {params.get('google') === 'no-account' && (
-        <p role="status" className="rounded-inner border border-border px-4 py-3 text-sm">
-          {t('signup.googleNoAccount')}
-        </p>
-      )}
-
       {/* Barra de etapas: só vai adiante se as anteriores valem; voltar sempre pode. */}
       <nav aria-label={t('signup.steps.label')}>
         <ol className="m-0 grid list-none grid-cols-3 gap-2 p-0">
@@ -193,21 +178,32 @@ export function SignupPage() {
                   aria-current={s === step ? 'step' : undefined}
                   disabled={!reachable}
                   onClick={() => setStep(s)}
-                  className={cn(
-                    'flex min-h-11 w-full flex-col items-start rounded-inner border px-3 py-2 text-left text-sm disabled:cursor-not-allowed disabled:opacity-50',
-                    s === step
-                      ? 'border-action bg-action/10'
-                      : i < index
-                        ? 'border-action/40'
-                        : 'border-border',
-                  )}
+                  className="group flex min-h-11 w-full flex-col items-start gap-2 pt-1 text-left text-sm disabled:cursor-not-allowed"
                 >
-                  <span className="label text-text-muted">
-                    {t('signup.steps.number', { n: i + 1 })}
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      'h-1 w-full rounded-pill',
+                      i <= index
+                        ? 'bg-action'
+                        : 'bg-surface-raised group-enabled:bg-border-control',
+                    )}
+                  />
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      'font-medium',
+                      s === step
+                        ? 'text-text'
+                        : reachable
+                          ? 'text-text-secondary'
+                          : 'text-text-muted',
+                    )}
+                  >
+                    {i + 1} · {t(`signup.steps.${s}`)}
                   </span>
-                  <span className="flex items-center gap-1 font-semibold">
-                    {i < index && <Icon name="check" size={14} className="text-action" />}
-                    {t(`signup.steps.${s}`)}
+                  <span className="sr-only">
+                    {t('signup.steps.number', { n: i + 1 })} {t(`signup.steps.${s}`)}
                   </span>
                 </button>
               </li>
@@ -215,6 +211,17 @@ export function SignupPage() {
           })}
         </ol>
       </nav>
+
+      <AuthHeading
+        eyebrow={t('signup.stepOf', { n: index + 1, total: STEPS.length })}
+        title={t('signup.title')}
+        subtitle={t('signup.subtitle')}
+      />
+      {params.get('google') === 'no-account' && (
+        <p role="status" className="rounded-inner border border-border px-4 py-3 text-sm">
+          {t('signup.googleNoAccount')}
+        </p>
+      )}
 
       {/* Prévia curta no celular (o painel lateral some). */}
       <div className="lg:hidden">
@@ -257,16 +264,15 @@ export function SignupPage() {
         )}
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          {index > 0 ? (
+          {index > 0 && (
             <Button variant="ghost" onClick={() => setStep(STEPS[index - 1]!)}>
               {t('signup.back')}
             </Button>
-          ) : (
-            <span />
           )}
+          {/* No primeiro passo o botão ocupa a largura toda (mockup); depois divide com o Voltar. */}
           <Button
             type="submit"
-            className="min-w-48"
+            className={cn('btn-lg min-w-48', index === 0 ? 'w-full' : 'flex-1 sm:flex-none')}
             disabled={signup.isPending}
             aria-busy={signup.isPending || undefined}
           >
@@ -298,21 +304,13 @@ function Shell({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="grid min-h-dvh lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      <SignupBrand draft={draft} photoUrl={photoUrl} />
-      <main
-        id="main"
-        className="flex items-start justify-center px-4 py-8 sm:px-8 lg:items-center lg:py-12"
-      >
-        <div className="flex w-full max-w-xl flex-col gap-6">
-          <div className="flex flex-col gap-1 lg:hidden">
-            <Wordmark className="text-2xl" />
-            <p className="text-sm text-text-secondary">{t('signup.brand.slogan')}</p>
-          </div>
-          {children}
-          <LegalLinks className="justify-center text-xs" />
-        </div>
-      </main>
-    </div>
+    <AuthFrame
+      brand={<SignupBrand draft={draft} photoUrl={photoUrl} />}
+      corner={
+        <AuthCorner prompt={t('signup.haveAccount')} to="/login" label={t('signup.toLogin')} />
+      }
+    >
+      {children}
+    </AuthFrame>
   );
 }

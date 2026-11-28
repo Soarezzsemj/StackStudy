@@ -28,8 +28,10 @@ export default {
           ink: c('--action-ink'),
         },
         space: { deep: c('--space-deep'), glow: c('--space-glow') },
+        success: c('--success'),
         danger: c('--danger'),
         warning: c('--warning'),
+        info: c('--info'),
         subject: {
           blue: c('--subject-blue'),
           amber: c('--subject-amber'),
@@ -47,20 +49,24 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['"Manrope Variable"', 'Manrope', 'system-ui', 'sans-serif'],
+        sans: 'var(--font-sans)',
       },
       borderRadius: {
         card: 'var(--radius-card)',
         inner: 'var(--radius-inner)',
-        pill: '999px',
+        small: 'var(--radius-small)',
+        pill: 'var(--radius-control)',
       },
       boxShadow: {
         action: 'var(--action-glow)',
+        dialog: 'var(--shadow-dialog)',
       },
       spacing: {
         sidebar: 'var(--sidebar-width)',
         topbar: 'var(--topbar-height)',
         statusbar: 'var(--statusbar-height)',
+        control: 'var(--control-height)',
+        'control-lg': 'var(--control-height-lg)',
       },
       letterSpacing: {
         title: '-0.045em',

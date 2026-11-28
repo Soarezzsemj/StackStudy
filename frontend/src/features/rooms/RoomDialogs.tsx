@@ -390,7 +390,7 @@ export function OwnerSettingsDialog({ room, onClose }: { room: RoomDetail; onClo
           {num(t('rooms.create.goal'), goal, setGoal, 0, 1000)}
         </div>
         <fieldset className="grid gap-4 sm:grid-cols-2">
-          <legend className="label mb-2 text-text-muted">{t('rooms.owner.pomodoro')}</legend>
+          <legend className="field-label mb-2 block">{t('rooms.owner.pomodoro')}</legend>
           {num(t('rooms.owner.focus'), focus, setFocus, 5, 120)}
           {num(t('rooms.owner.short'), shortBreak, setShortBreak, 1, 30)}
           {num(t('rooms.owner.long'), longBreak, setLongBreak, 1, 60)}

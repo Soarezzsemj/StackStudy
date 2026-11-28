@@ -195,9 +195,7 @@ export function SettingsDialog({
           />
         </div>
         <fieldset className="flex flex-col gap-2">
-          <legend className="label mb-2 text-text-secondary">
-            {t('deepWork.settings.alerts')}
-          </legend>
+          <legend className="field-label mb-2 block">{t('deepWork.settings.alerts')}</legend>
           <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm">
             <input
               type="checkbox"

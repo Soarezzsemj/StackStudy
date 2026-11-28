@@ -34,7 +34,7 @@ export function GradingRulePicker({
 
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="label mb-2 text-text-secondary">{t('grades.methodQuestion')}</legend>
+      <legend className="field-label mb-2 block">{t('grades.methodQuestion')}</legend>
       {options.map((o, i) => {
         const checked = value === o.value;
         const descId = o.description ? `${name}-${i}-desc` : undefined;

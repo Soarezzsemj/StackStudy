@@ -272,7 +272,7 @@ export function RoutineStep({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <label htmlFor="signup-goal" className="label flex justify-between text-text-secondary">
+        <label htmlFor="signup-goal" className="field-label flex justify-between">
           <span>{t('signup.routine.goal')}</span>
           <span className="tabular text-text">
             {t('signup.routine.goalValue', { count: draft.weeklyGoalHours })}

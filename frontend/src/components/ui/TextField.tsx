@@ -1,4 +1,5 @@
 import { forwardRef, useId, type InputHTMLAttributes } from 'react';
+import { cn } from '@/lib/cn';
 
 export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -7,7 +8,7 @@ export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, hint, error, id, ...rest },
+  { label, hint, error, id, className, ...rest },
   ref,
 ) {
   const autoId = useId();
@@ -16,13 +17,13 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
   const describedBy = error || hint ? hintId : undefined;
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={inputId} className="label text-text-secondary">
+      <label htmlFor={inputId} className="field-label">
         {label}
       </label>
       <input
         ref={ref}
         id={inputId}
-        className="input"
+        className={cn('input', className)}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
         {...rest}

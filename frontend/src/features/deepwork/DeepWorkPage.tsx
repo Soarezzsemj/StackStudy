@@ -77,7 +77,7 @@ export function DeepWorkPage() {
     <>
       <PageTitle
         title={t('pages.deepWork.title')}
-        description={t('pages.deepWork.description')}
+        eyebrow={t('pages.deepWork.eyebrow')}
         actions={
           <Button variant="secondary" onClick={() => setDialog({ kind: 'settings' })}>
             {t('deepWork.settings.open')}

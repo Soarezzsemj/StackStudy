@@ -7,23 +7,24 @@ import { useAuthStore } from '@/stores/authStore';
 import { authApi } from '@/lib/api/auth';
 import { changeLanguage, SUPPORTED_LANGUAGES, type Language } from '@/i18n';
 import { cn } from '@/lib/cn';
-import { useCurrentSubjects } from '@/features/stack/queries';
-import { useStackStore } from '@/stores/stackStore';
 import { LegalLinks } from './LegalLinks';
+import { SidebarSubjects } from './SidebarSubjects';
 
-export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+/**
+ * Barra lateral. `compact` = menu recolhido (tablet): só ícones, matérias como pontos coloridos e o
+ * avatar; idioma, sair e links legais ficam no menu completo (botão de menu do topo).
+ */
+export function Sidebar({
+  onNavigate,
+  compact = false,
+}: {
+  onNavigate?: () => void;
+  compact?: boolean;
+}) {
   const { t, i18n } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
-  // Matérias do semestre atual, com pendentes (mesma consulta da tela The Stack).
-  const { list: subjects, current } = useCurrentSubjects();
-  const setFilters = useStackStore((st) => st.setFilters);
-
-  function openSubject(id: string) {
-    setFilters({ subject: id });
-    navigate('/stack');
-    onNavigate?.();
-  }
+  const items = [...NAV_ITEMS, ...(user?.role === 'ADMIN' ? [ADMIN_ITEM] : [])];
 
   /** Troca o idioma na hora e grava na conta (vale no próximo login, em qualquer aparelho). */
   function pickLanguage(lang: Language) {
@@ -40,6 +41,49 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     navigate('/login', { replace: true });
   }
 
+  if (compact) {
+    return (
+      <div className="flex h-full flex-col items-center gap-6 px-2 py-5">
+        <span aria-hidden="true" className="text-xl font-bold">
+          s<span className="text-action">.</span>
+        </span>
+        <nav aria-label={t('nav.label')}>
+          <ul className="m-0 flex list-none flex-col items-center gap-1 p-0">
+            {items.map((item) => (
+              <li key={item.to}>
+                <NavLink
+                  to={item.to}
+                  end={item.to === '/'}
+                  title={t(item.labelKey)}
+                  aria-label={t(item.labelKey)}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex h-11 w-11 items-center justify-center rounded-pill transition-colors',
+                      isActive
+                        ? 'bg-surface-raised text-text'
+                        : 'text-text-secondary hover:bg-surface hover:text-text',
+                    )
+                  }
+                >
+                  <Icon name={item.icon} size={18} />
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <SidebarSubjects compact />
+        <NavLink
+          to={PROFILE_ITEM.to}
+          title={user?.name}
+          aria-label={t('shell.openProfile', { name: user?.name ?? '' })}
+          className="mt-auto flex h-11 w-11 items-center justify-center rounded-pill hover:bg-surface"
+        >
+          <Avatar name={user?.name} color={user?.avatarColor} />
+        </NavLink>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full flex-col gap-8 px-4 py-5">
       <div className="px-2">
@@ -48,7 +92,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
       <nav aria-label={t('nav.label')}>
         <ul className="m-0 flex list-none flex-col gap-1 p-0">
-          {[...NAV_ITEMS, ...(user?.role === 'ADMIN' ? [ADMIN_ITEM] : [])].map((item) => (
+          {items.map((item) => (
             <li key={item.to}>
               <NavLink
                 to={item.to}
@@ -56,60 +100,24 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 onClick={onNavigate}
                 className={({ isActive }) =>
                   cn(
-                    'flex min-h-11 items-center gap-3 rounded-pill px-3 text-[15px] font-semibold transition-colors',
+                    'flex min-h-11 items-center gap-3 rounded-pill px-3 text-[15px] font-medium transition-colors',
                     isActive
                       ? 'bg-surface-raised text-text'
                       : 'text-text-secondary hover:bg-surface hover:text-text',
                   )
                 }
               >
-                {({ isActive }) => (
-                  <>
-                    <Icon name={item.icon} className={isActive ? 'text-action' : undefined} />
-                    {t(item.labelKey)}
-                  </>
-                )}
+                <Icon name={item.icon} size={18} />
+                {t(item.labelKey)}
               </NavLink>
             </li>
           ))}
         </ul>
       </nav>
 
-      <section aria-labelledby="sidebar-subjects" className="min-h-0 flex-1 overflow-y-auto">
-        <h2 id="sidebar-subjects" className="label mb-3 px-3 text-text-muted">
-          {t('shell.subjects')}
-        </h2>
-        {subjects.length === 0 ? (
-          <p className="px-3 text-sm text-text-muted">
-            {current ? t('shell.noSubjects') : t('shell.noSemester')}
-          </p>
-        ) : (
-          <ul className="m-0 flex list-none flex-col gap-1 p-0">
-            {subjects.map((s) => (
-              <li key={s.id}>
-                <button
-                  type="button"
-                  onClick={() => openSubject(s.id)}
-                  className="flex min-h-11 w-full items-center gap-3 rounded-pill px-3 text-left text-sm text-text-secondary transition-colors hover:bg-surface hover:text-text"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="h-2 w-2 shrink-0 rounded-full"
-                    style={{ backgroundColor: s.color }}
-                  />
-                  <span className="flex-1 truncate">{s.name}</span>
-                  <span className="tabular text-text-muted">
-                    <span aria-hidden="true">{s.pendingTasks}</span>
-                    <span className="sr-only">{t('shell.pending', { count: s.pendingTasks })}</span>
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <SidebarSubjects onNavigate={onNavigate} />
 
-      <div className="flex flex-col gap-3 border-t border-border pt-4">
+      <div className="flex flex-col gap-2 border-t border-border pt-4">
         <div
           className="flex items-center gap-1 px-1"
           role="group"
@@ -142,7 +150,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             <Avatar name={user?.name} color={user?.avatarColor} />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-semibold">{user?.name}</span>
-              <span className="block truncate text-xs text-text-muted">{user?.email}</span>
+              <span className="block truncate text-xs text-text-muted">
+                {user?.course?.trim() || user?.email}
+              </span>
             </span>
           </NavLink>
           <Button

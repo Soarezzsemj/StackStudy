@@ -29,6 +29,8 @@ Cockpit para estudantes de qualquer curso (posicionamento neutro, ver Decisão 2
 | 9 | Roadmaps: trilhas por curso (seed de exemplo), mapa/lista, progresso, meta, sugestões, Premium preparado (desligado) | ✅ |
 | 10 | Salas de estudo: sem chat, presença em memória, Pomodoro compartilhado/tempo corrido, ranking, reações, moderação | ✅ |
 | 11 | Cadastro em 3 passos: conta, perfil, rotina, aceite (LGPD), senha forte; Google, verificação e foto preparados (desligados) | ✅ |
+| 13.1 | Visual alinhado ao mockup (`docs/mockup/`): tokens centrais, shell, login/cadastro em duas colunas, rótulos de topo | ✅ |
+| 14 | Grade Predictor redesenhado (abas, regra, destaque, cenários, cartões pequenos) e matérias em grade na barra lateral | ✅ |
 
 ## Estrutura
 
@@ -76,11 +78,13 @@ features/flashcards/ FlashcardsPage (decks, busca, estatísticas), DeckPage (car
                 ReviewPage (revisão em foco), FlashcardDialogs (host lido do flashcardStore),
                 CardList, Markdown.tsx; lógica pura e testada em markdownParse.ts,
                 reviewSession.ts, csv.ts, days.ts
-features/grades/ GradesPage, SubjectGradeCard, SimulatorCard ("e se"), SideCards (CR e faltas),
+features/grades/ GradesPage, GradeFocusCard (abas, regra, destaque, avaliações com "e se", cenários),
+                AllSubjects (cartões pequenos), SideCards (CR e faltas),
                 GradeDialogs (preferências, regra, avaliações, faltas), SubjectGradeLine (linha na
                 Stack), GradingRulePicker (seletor de regra, também no diálogo de matéria);
                 calculator.ts = espelho do GradeCalculator (BigInt em centésimos),
-                simulation.ts, format.ts, summary.ts (mensagem única por matéria)
+                simulation.ts (+ cenários), format.ts, summary.ts (mensagem única por matéria),
+                gradeView.ts (faixas de situação, número principal, grade lateral; sem calculadora)
 features/deepwork/ DeepWorkPage, TimerCard, InsightsSections (stats, heatmap, histórico), dialogs;
                 DeepWorkEngine (montado no AppShell: fim do pomodoro, pausas, alertas, título da aba);
                 lógica pura e testada em clock.ts, pomodoro.ts, heatmapGrid.ts, format.ts
@@ -178,6 +182,20 @@ Tokens em `frontend/src/styles/tokens.css` (fonte única), mapeados no `tailwind
 | Matérias (ordem de atribuição) | azul `#6aa7ff`, âmbar `#f2b861`, roxo `#bd6cf7`, ciano `#5ad1e6`, rosa `#ff7a90`, lima `#cdfb50` |
 | Heatmap 0–4 | `#1c1c1c`, `#2f3a14`, `#5a7119`, `#98bd2f`, `#cdfb50` |
 
+- **Escala e medidas (Fase 13.1)**, todas em `tokens.css`: tipografia (`--font-sans`, `--text-xs`
+  12 … `--text-page-title` 56, pesos `--weight-*`), espaçamentos `--space-1…10` (múltiplos de 4),
+  raios (`--radius-card` 22, `--radius-inner` 16, `--radius-small` 10, `--radius-control` pílula),
+  alturas `--control-height` 44 / `--control-height-lg` 52, `--shadow-dialog`, estados `--success`
+  (= lima), `--warning`, `--danger`, `--info` (azul). Só existe tema escuro (identidade aprovada);
+  um tema claro entraria redefinindo os mesmos tokens num seletor próprio.
+- Classes base (`index.css`): `.eyebrow` (rótulo acima do título da tela, via `PageTitle eyebrow`),
+  `.field-label` (rótulo de campo/legenda em frase normal, sem caixa alta), `.auth-title`,
+  `.btn-danger`, `.btn-lg`/`.input-lg` (telas de entrada), `.segmented` + `.segmented-item`
+  (abas com `aria-pressed`). Botão `variant="danger"` existe no `<Button>`.
+- Telas de entrada: `features/auth/AuthLayout.tsx` (`AuthFrame`, `AuthBrand`, `AuthCorner`,
+  `AuthHeading`) é a base do login, da confirmação de e-mail e do cadastro.
+- Mockups em `docs/mockup/` (README com tela × rota × fase × o que falta). São referência visual;
+  dados e preços são fictícios e nunca viram texto fixo.
 - Fonte **Manrope** variável (self-hosted via `@fontsource-variable/manrope`), 400–800.
   `.tabular` (tabular-nums) em timers, notas e contadores.
 - `.page-title`: 56px, 650, caixa alta, tracking -0.045em, line-height .98.
@@ -187,8 +205,10 @@ Tokens em `frontend/src/styles/tokens.css` (fonte única), mapeados no `tailwind
 - Acessibilidade: contraste ≥ 4.5:1, foco visível verde-limão, alvos ≥ 44px, clicáveis sempre
   `<button>`/`<a>`, `aria-label` em ícones sem texto, ícones SVG de traço 1.8 (`<Icon>`), sem emoji.
 - Wordmark `stack.study` minúsculo, 700, ponto verde-limão (`<Wordmark>`).
-- Layout: sidebar 248px (drawer no mobile), topbar 52px com breadcrumb `~/stackstudy / <slug>` e
-  busca `Ctrl K`, status bar 30px com a sessão ativa em **qualquer** tela.
+- Layout: sidebar 248px (drawer no mobile; itens em peso médio, ativo com fundo elevado; matérias
+  sob "Matérias · <semestre>"; rodapé com nome e curso), topbar 52px com breadcrumb
+  `~/stackstudy / <slug>` e busca "Buscar ou executar comando" `Ctrl K`, status bar 30px com a
+  sessão ativa em **qualquer** tela.
 
 ## The Stack (Fase 1)
 
@@ -295,6 +315,32 @@ nas preferências sugere mínima 7. O diálogo de matéria (The Stack) também e
 ampliando os dois `CHECK`; textos `grades.method.*`, `grades.methodHint.*` e, se precisar, ramo em
 `summary.ts` (`gradeHeadline`). Telas (cartão, Stack, simulador, Cockpit/radar futuros) **só leem**
 o resultado e usam `gradeHeadline` para a mensagem; nenhuma refaz a conta.
+
+### Tela do Grade Predictor (Fase 14)
+
+- `GradeFocusCard`: abas de matéria (`tablist`, roving tabindex; setas, Home e End trocam e
+  selecionam), seletor de regra (3 botões; **salva na hora** com `ruleInputWithMethod`: só o método
+  muda, os valores próprios ficam), destaque compacto (número principal `.figure`, no máximo 44 px,
+  mensagem de `gradeHeadline`, barra e situação), linhas de avaliação com "precisa X" no campo
+  "e se", exame hipotético, cenários e os estados vazios (sem avaliações → convite; tudo lançado →
+  "resultado final"). Região `Simulador`; dentro dela, `Sem simulação`/`Simulado`.
+- Cenários (`scenariosOf`, em `simulation.ts`): 0%, 60% e 100% do máximo em cada avaliação sem nota,
+  para baixo em centésimos, pela calculadora. Sem pendente, nenhum.
+- Faixas dos cartões pequenos (`statusBucket`): Possível (NOT_STARTED, ON_TRACK), Em risco (AT_RISK,
+  EXAM, IMPOSSIBLE), Aprovado (SECURED, PASSED), Reprovado (FAILED), Sem avaliações.
+- Medidas: `--text-figure`/`--text-figure-sm` (`clamp`), `.grid-fit` (`auto-fill` +
+  `minmax(min(100%, --fit-min), 1fr)`), `.grade-row`. Sem largura fixa que estoure a tela.
+
+### Matérias na barra lateral (Fase 14)
+
+`SidebarSubjects`: grade de 2 colunas (faixa da cor à esquerda, nome em até 2 linhas, nota/pontos
+ou "—" por `sidebarValue`; nome completo em `title` e `aria-label`), altura máxima com rolagem
+interna. Mais de 8: as 8 mais recentes primeiro (a API devolve em ordem de criação) e "Ver todas
+(N)" → `/stack`. Clicar = filtro da matéria na The Stack (como antes). Dados: o mesmo
+`GET /api/grades/overview` (5 consultas fixas, cache compartilhado com a Stack e o Grade Predictor),
+na barra lateral com `staleTime` de 5 min e sem refazer ao focar a aba; salvar nota, regra ou falta
+invalida na hora. No tablet (768–1023 px, `useMediaQuery`) a barra vira um menu recolhido: ícones,
+matérias como uma coluna de pontos com tooltip e o avatar; o menu completo abre pelo botão do topo.
 
 ## Flashcards (Fase 4)
 
@@ -889,3 +935,15 @@ Passo a passo em `DEPLOY.md`. Resumo da arquitetura:
 100. **Textos legais 1.0 em Markdown versionado** (antes ficavam no i18n, em pt-BR e en, como
     rascunho): o texto jurídico é um só, em pt-BR, revisado como arquivo. Serviço só para maiores
     de 18 (`MIN_AGE=18`), o que substitui as Decisões 92 e 98 quanto à idade.
+101. **Grade lateral usa o overview de notas que já existia** (sem endpoint novo): 5 consultas
+    fixas, sem N+1, cache dividido com a Stack e o Grade Predictor. Custo: uma chamada a mais ao
+    abrir o app. O teste do Cockpit passou a aceitar no máximo 1 chamada de notas (vinda da barra
+    lateral, não da home); tarefas e decks continuam proibidos.
+102. **"Em risco" inclui IMPOSSIBLE** nos cartões pequenos: nem com nota máxima dá para passar
+    direto, mas ainda não reprovou (exame, notas por lançar). "Reprovado" é só FAILED. O destaque
+    continua mostrando a situação detalhada ("Impossível passar") e a mensagem clara.
+103. **Trocar a regra pelos 3 botões salva na hora** (sem diálogo): trocar de regra não apaga pesos
+    nem pontos (Decisão 55), então é reversível com um clique. O diálogo "Regra" continua para o
+    resto (mínima, escala, exame, arredondamento, teto) e para voltar ao padrão.
+104. **Menu recolhido só no tablet** e montado só nessa faixa (media query), para a navegação não
+    aparecer duas vezes na árvore de acessibilidade. No celular continua o menu completo em gaveta.

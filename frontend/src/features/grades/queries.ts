@@ -21,13 +21,16 @@ function useIsAuthenticated() {
 }
 
 /** Tela inteira numa chamada: matérias do semestre com notas, faltas e o CR. */
-export function useGradesOverview(semesterId?: string) {
+export function useGradesOverview(semesterId?: string, opts: { background?: boolean } = {}) {
   return useQuery({
     queryKey: gradeKeys.overview(semesterId),
     queryFn: () => gradesApi.overview(semesterId),
     enabled: useIsAuthenticated(),
     // Trocar de semestre mantém a tela anterior até a nova chegar.
     placeholderData: keepPreviousData,
+    // Barra lateral (em todas as telas): não refaz a consulta por foco nem a cada 30 s. Salvar
+    // nota, regra ou falta invalida o cache e atualiza na hora.
+    ...(opts.background ? { staleTime: 5 * 60_000, refetchOnWindowFocus: false } : {}),
   });
 }
 

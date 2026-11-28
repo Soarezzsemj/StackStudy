@@ -18,7 +18,7 @@ interface FieldFrameProps {
 function FieldFrame({ id, label, hint, error, children }: FieldFrameProps) {
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="label text-text-secondary">
+      <label htmlFor={id} className="field-label">
         {label}
       </label>
       {children}

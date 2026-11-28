@@ -16,7 +16,7 @@
     background: var(--page-glow), var(--bg);
     background-attachment: fixed;
     color: var(--text);
-    font-family: 'Manrope Variable', Manrope, system-ui, sans-serif;
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -55,28 +55,91 @@
 @layer components {
   /* Tipografia */
   .page-title {
-    font-size: clamp(2.5rem, 6vw, 56px);
-    font-weight: 650;
+    font-size: clamp(2.5rem, 6vw, var(--text-page-title));
+    font-weight: var(--weight-strong);
     text-transform: uppercase;
     letter-spacing: -0.045em;
     line-height: 0.98;
   }
 
   .card-title {
-    font-size: 20px;
-    font-weight: 650;
+    font-size: var(--text-card-title);
+    font-weight: var(--weight-strong);
     letter-spacing: -0.02em;
   }
 
+  /* Título das telas de entrada e cadastro: grande, sem caixa alta (mockup) */
+  .auth-title {
+    font-size: clamp(2rem, 5vw, var(--text-auth-title));
+    font-weight: var(--weight-strong);
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+  }
+
   .label {
-    font-size: 12px;
-    font-weight: 650;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-strong);
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
 
+  /* Rótulo acima do título da tela e dos cartões (ex.: "SEMESTRE 2026.2 · 5 MATÉRIAS") */
+  .eyebrow {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+
+  /* Rótulo de campo de formulário: frase normal, sem caixa alta (mockup) */
+  .field-label {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
+    color: var(--text-secondary);
+  }
+
   .tabular {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Número de destaque (nota, pontos, CR) */
+  .figure,
+  .figure-sm {
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--weight-strong);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .figure {
+    font-size: var(--text-figure);
+  }
+
+  .figure-sm {
+    font-size: var(--text-figure-sm);
+  }
+
+  /* Grade que se ajusta sozinha: colunas de pelo menos --fit-min, nunca mais largas que a tela */
+  .grid-fit {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--fit-min, 12rem)), 1fr));
+  }
+
+  /* Linha compacta de avaliação (nome à esquerda, nota ou "e se" à direita) */
+  .grade-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border);
+    padding: var(--space-2) 0;
+  }
+
+  .grade-row:last-child {
+    border-bottom: 0;
   }
 
   /* Cards */
@@ -91,6 +154,11 @@
     background: var(--space-glow-gradient), var(--card-sheen), var(--surface);
   }
 
+  /* Painel de marca do login e do cadastro: superfície com o brilho roxo no alto */
+  .auth-brand {
+    background: var(--auth-brand-glow), var(--surface);
+  }
+
   .card-inner {
     border: 1px solid var(--border);
     border-radius: var(--radius-inner);
@@ -100,14 +168,14 @@
   /* Botões */
   .btn {
     display: inline-flex;
-    min-height: 44px;
+    min-height: var(--control-height);
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    border-radius: 999px;
-    padding: 0 1.25rem;
-    font-size: 13px;
-    font-weight: 650;
+    gap: var(--space-2);
+    border-radius: var(--radius-control);
+    padding: 0 var(--space-5);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-strong);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     white-space: nowrap;
@@ -147,6 +215,24 @@
     color: var(--text-secondary);
   }
 
+  /* Ação destrutiva (excluir, denunciar): contorno vermelho, como no mockup */
+  .btn-danger {
+    border: 1px solid color-mix(in srgb, var(--danger) 55%, transparent);
+    background: color-mix(in srgb, var(--danger) 8%, transparent);
+    color: var(--danger);
+  }
+
+  .btn-danger:not(:disabled):hover {
+    border-color: var(--danger);
+    background: color-mix(in srgb, var(--danger) 14%, transparent);
+  }
+
+  /* Botão largo das telas de entrada (mais alto) */
+  .btn-lg {
+    min-height: var(--control-height-lg);
+    font-size: var(--text-base);
+  }
+
   .btn-ghost:not(:disabled):hover {
     background: var(--secondary-fill);
     color: var(--text);
@@ -154,14 +240,18 @@
 
   /* Campos de formulário */
   .input {
-    min-height: 44px;
+    min-height: var(--control-height);
     width: 100%;
     border: 1px solid var(--border-control);
-    border-radius: 999px;
+    border-radius: var(--radius-control);
     background: var(--surface-raised);
     padding: 0 1.125rem;
     color: var(--text);
-    font-size: 15px;
+    font-size: var(--text-base);
+  }
+
+  .input-lg {
+    min-height: var(--control-height-lg);
   }
 
   .input::placeholder {
@@ -203,6 +293,42 @@
   .input[type='date'],
   .input[type='time'] {
     color-scheme: dark;
+  }
+
+  /* Abas segmentadas (Pomodoro/Flow, semana/mês, regra de nota): trilho escuro e aba ativa clara */
+  .segmented {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    background: var(--bg);
+    padding: var(--space-1);
+  }
+
+  .segmented-item {
+    min-height: var(--control-height);
+    border-radius: var(--radius-control);
+    padding: 0 var(--space-4);
+    color: var(--text-secondary);
+    font-size: var(--text-base);
+    font-weight: var(--weight-medium);
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .segmented-item:not(:disabled):hover {
+    color: var(--text);
+  }
+
+  .segmented-item[aria-pressed='true'] {
+    background: var(--surface-raised);
+    color: var(--text);
+  }
+
+  .segmented-item:disabled {
+    cursor: not-allowed;
   }
 
   /* Documentos legais: título menor que o das telas (são longos) */

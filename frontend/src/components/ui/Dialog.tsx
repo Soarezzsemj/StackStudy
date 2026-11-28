@@ -77,7 +77,7 @@ export function Dialog({ title, onClose, children, footer, className }: DialogPr
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={cn('card card-hero relative z-10 w-full max-w-xl p-6 shadow-2xl', className)}
+        className={cn('card card-hero relative z-10 w-full max-w-xl p-6 shadow-dialog', className)}
       >
         <header className="mb-5 flex items-start justify-between gap-4">
           <h2 id={titleId} className="card-title">

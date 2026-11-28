@@ -160,48 +160,64 @@ afterEach(() => {
   void i18n.changeLanguage('pt-BR');
 });
 
+/** Abre a matéria pela aba e devolve o cartão principal. */
+async function openSubject(user: ReturnType<typeof userEvent.setup>, name: string) {
+  const card = await screen.findByRole('region', { name: 'Simulador' });
+  await user.click(within(card).getByRole('tab', { name }));
+  return card;
+}
+
 describe('Grade Predictor em soma de pontos', () => {
-  it('cartão possível: pontos, quanto falta, quanto ainda dá para ganhar e a lista', async () => {
-    setup([history]);
-    const card = await screen.findByRole('article', { name: /História/ });
-    expect(within(card).getByText('5,50 de 7,00 pontos')).toBeInTheDocument();
-    expect(within(card).getByText(/faltam 1,50 pontos/)).toBeInTheDocument();
-    expect(within(card).getByText(/pode ganhar mais até 4,00/)).toBeInTheDocument();
-    expect(within(card).getByText('Precisa de 1,50 pontos para passar')).toBeInTheDocument();
-    expect(within(card).getByText('Possível')).toBeInTheDocument();
+  it('possível: pontos, quanto falta, quanto ainda dá para ganhar e a lista', async () => {
+    const { user } = setup([history]);
+    const card = await openSubject(user, 'História');
+    const real = within(card).getByRole('region', { name: 'Sem simulação' });
+    expect(within(real).getByText('Pontos somados até agora')).toBeInTheDocument();
+    expect(within(real).getByText('5,50')).toBeInTheDocument();
+    expect(within(real).getByText('/ 7,00 para passar')).toBeInTheDocument();
+    expect(within(real).getByText('Precisa de 1,50 pontos para passar')).toBeInTheDocument();
+    expect(within(real).getByText('Possível')).toBeInTheDocument();
+    // Quanto falta e quanto ainda dá para ganhar.
+    expect(within(real).getByText('1,50')).toBeInTheDocument();
+    expect(within(real).getByText('4,00')).toBeInTheDocument();
     // Barra até a nota mínima, com nome acessível.
     expect(
-      within(card).getByRole('progressbar', {
+      within(real).getByRole('progressbar', {
         name: '5,50 de 7,00 pontos até a nota mínima',
       }),
     ).toHaveAttribute('aria-valuenow', '79');
-    // Lista: "vale X", nota e pílula de situação.
+    // Lista: "vale X", notas lançadas e "precisa X" na que falta.
     const list = within(card).getByRole('list', { name: 'Avaliações' });
     expect(within(list).getByText('vale 3,00')).toBeInTheDocument();
-    expect(within(list).getByText('precisa 1,50')).toBeInTheDocument();
     expect(within(list).getAllByText('lançada')).toHaveLength(3);
+    expect(within(list).getByLabelText('E se eu tirar em P2')).toHaveAttribute(
+      'placeholder',
+      'precisa 1,50',
+    );
     // Sem peso nem "média" no modo soma.
     expect(within(card).queryByText('Média atual')).not.toBeInTheDocument();
   });
 
-  it('cartão já passou e cartão impossível (ícone + texto, não só cor)', async () => {
-    setup([arts, music]);
-    const passed = await screen.findByRole('article', { name: /Artes/ });
-    expect(within(passed).getByText('Já passou')).toBeInTheDocument();
+  it('já passou e impossível (ícone + texto, não só cor)', async () => {
+    const { user } = setup([arts, music]);
+    const card = await openSubject(user, 'Artes');
+    let real = within(card).getByRole('region', { name: 'Sem simulação' });
+    expect(within(real).getByText('Já passou')).toBeInTheDocument();
     expect(
-      within(passed).getByText('Passou com 7,50 pontos; o restante é bônus'),
+      within(real).getByText('Passou com 7,50 pontos; o restante é bônus'),
     ).toBeInTheDocument();
 
-    const impossible = screen.getByRole('article', { name: /Música/ });
-    expect(within(impossible).getByText('Impossível passar')).toBeInTheDocument();
+    await user.click(within(card).getByRole('tab', { name: 'Música' }));
+    real = within(card).getByRole('region', { name: 'Sem simulação' });
+    expect(within(real).getByText('Impossível passar')).toBeInTheDocument();
     expect(
-      within(impossible).getByText('Faltam 5,00 pontos e só dá para ganhar mais 4,00'),
+      within(real).getByText('Faltam 5,00 pontos e só dá para ganhar mais 4,00'),
     ).toBeInTheDocument();
   });
 
   it('avisa quando as avaliações não fecham a escala', async () => {
-    setup([nine]);
-    const card = await screen.findByRole('article', { name: /Filosofia/ });
+    const { user } = setup([nine]);
+    const card = await openSubject(user, 'Filosofia');
     expect(within(card).getByRole('note')).toHaveTextContent(
       'As avaliações somam 9,00 de 10,00 pontos',
     );
@@ -209,24 +225,24 @@ describe('Grade Predictor em soma de pontos', () => {
 
   it('simula "e se eu tirar N" na hora, sem salvar nada', async () => {
     const { user, fetchMock } = setup([history]);
-    const simulator = await screen.findByRole('region', { name: 'Simulador' });
-    const input = within(simulator).getByLabelText('E se eu tirar em P2');
+    const card = await openSubject(user, 'História');
+    const input = within(card).getByLabelText('E se eu tirar em P2');
     expect(input).toHaveAttribute('placeholder', 'precisa 1,50');
 
     await user.type(input, '1,5');
-    const panel = within(simulator).getByRole('region', { name: 'Simulado' });
-    expect(within(panel).getByText('7,00 de 7,00 pontos')).toBeInTheDocument();
+    const panel = within(card).getByRole('region', { name: 'Simulado' });
+    expect(within(panel).getByText('7,00')).toBeInTheDocument();
     expect(within(panel).getByText('Aprovado')).toBeInTheDocument();
 
     await user.clear(input);
     await user.type(input, '1,49');
-    expect(within(panel).getByText('6,99 de 7,00 pontos')).toBeInTheDocument();
+    expect(within(panel).getByText('6,99')).toBeInTheDocument();
     expect(within(panel).getByText('Reprovado')).toBeInTheDocument();
 
     // Acima do que a P2 vale (4) é recusado.
     await user.clear(input);
     await user.type(input, '4,5');
-    expect(within(simulator).getByText('Use uma nota de 0 a 4, com até 2 casas.')).toBeVisible();
+    expect(within(card).getByText('Use uma nota de 0 a 4, com até 2 casas.')).toBeVisible();
     expect(
       fetchMock.mock.calls.filter(([, init]) => init?.method && init.method !== 'GET'),
     ).toHaveLength(0);
@@ -236,7 +252,7 @@ describe('Grade Predictor em soma de pontos', () => {
     const { user, fetchMock } = setup([history], {
       'PUT /api/subjects/h/assessments': () => jsonResponse(200, history),
     });
-    const card = await screen.findByRole('article', { name: /História/ });
+    const card = await openSubject(user, 'História');
     await user.click(within(card).getByRole('button', { name: 'Avaliações de História' }));
     const dialog = screen.getByRole('dialog', { name: 'Avaliações de História' });
     expect(within(dialog).getAllByLabelText('Vale quantos pontos')).toHaveLength(4);
@@ -271,7 +287,7 @@ describe('Grade Predictor em soma de pontos', () => {
     const { user, fetchMock } = setup([weighted], {
       'PUT /api/subjects/h/grading': () => jsonResponse(200, history),
     });
-    const card = await screen.findByRole('article', { name: /História/ });
+    const card = await openSubject(user, 'História');
     await user.click(within(card).getByRole('button', { name: 'Regra de História' }));
     const dialog = screen.getByRole('dialog', { name: 'Regra de História' });
     const group = within(dialog).getByRole('group', {

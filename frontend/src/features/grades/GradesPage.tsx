@@ -12,11 +12,12 @@ import {
   SelectField,
 } from '@/components/ui';
 import { useSemesters } from '@/features/stack/queries';
+import { AllSubjects } from './AllSubjects';
 import { AbsenceDialog, AssessmentsDialog, GradeSettingsDialog, RuleDialog } from './GradeDialogs';
+import { GradeFocusCard } from './GradeFocusCard';
+import { defaultSubjectId } from './gradeView';
 import { useGradesOverview } from './queries';
 import { AttendanceCard, GpaCard } from './SideCards';
-import { SimulatorCard } from './SimulatorCard';
-import { SubjectGradeCard } from './SubjectGradeCard';
 
 type PageDialog =
   | { kind: 'settings' }
@@ -26,8 +27,9 @@ type PageDialog =
   | null;
 
 /**
- * Grade Predictor: cartões por matéria (média, nota necessária, situação), simulador "e se",
- * faltas e CR. As matérias são as mesmas da The Stack.
+ * Grade Predictor (layout da Fase 14): abas de matéria com a regra, o destaque, as avaliações com
+ * "e se" e os cenários; "Todas as matérias" em cartões pequenos; CR e faltas na lateral. As
+ * matérias são as mesmas da The Stack.
  */
 export function GradesPage() {
   const { t } = useTranslation();
@@ -35,14 +37,13 @@ export function GradesPage() {
   const [semesterId, setSemesterId] = useState<string | undefined>(undefined);
   const overview = useGradesOverview(semesterId);
   const [dialog, setDialog] = useState<PageDialog>(null);
-  const [simulatedId, setSimulatedId] = useState<string | undefined>(undefined);
-  const simulatorRef = useRef<HTMLDivElement>(null);
+  const [chosenId, setChosenId] = useState<string | undefined>(undefined);
+  const focusRef = useRef<HTMLDivElement>(null);
 
   const data = overview.data;
   const subjects = data?.subjects ?? [];
-  const simulatable = subjects.filter((s) => s.assessments.length > 0);
-  const simulated =
-    simulatable.find((s) => s.subjectId === simulatedId)?.subjectId ?? simulatable[0]?.subjectId;
+  const selectedId =
+    subjects.find((s) => s.subjectId === chosenId)?.subjectId ?? defaultSubjectId(subjects);
   const dialogSubject =
     dialog && 'subjectId' in dialog
       ? subjects.find((s) => s.subjectId === dialog.subjectId)
@@ -50,12 +51,17 @@ export function GradesPage() {
   const semesterOptions = (semesters.data ?? []).filter(
     (s) => !s.archived || s.id === data?.semesterId,
   );
+  const semesterName = semesters.data?.find((s) => s.id === data?.semesterId)?.name;
 
   return (
     <>
       <PageTitle
         title={t('pages.grades.title')}
-        description={t('pages.grades.description')}
+        eyebrow={
+          semesterName
+            ? `${t('pages.grades.eyebrow')} · ${semesterName}`
+            : t('pages.grades.eyebrow')
+        }
         actions={
           <>
             {semesterOptions.length > 1 && (
@@ -101,7 +107,7 @@ export function GradesPage() {
           }
         />
       ) : (
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(17rem,21rem)]">
           <div className="flex min-w-0 flex-col gap-6">
             {subjects.length === 0 ? (
               <EmptyState
@@ -115,40 +121,32 @@ export function GradesPage() {
               />
             ) : (
               <>
-                {simulated ? (
-                  <div ref={simulatorRef} className="scroll-mt-16">
-                    <SimulatorCard
-                      subjects={simulatable}
-                      selectedId={simulated}
-                      onSelect={setSimulatedId}
-                    />
-                  </div>
-                ) : (
-                  <EmptyState title={t('grades.simulator.empty')} />
-                )}
-                <section aria-label={t('pages.grades.title')} className="grid gap-4 md:grid-cols-2">
-                  {subjects.map((s) => (
-                    <SubjectGradeCard
-                      key={s.subjectId}
-                      subject={s}
-                      selected={s.subjectId === simulated}
-                      onSimulate={() => {
-                        setSimulatedId(s.subjectId);
-                        // Leva até o simulador (o cartão pode estar bem abaixo).
-                        simulatorRef.current?.scrollIntoView?.({ block: 'start' });
-                      }}
-                      onEditAssessments={() =>
-                        setDialog({ kind: 'assessments', subjectId: s.subjectId })
-                      }
-                      onEditRule={() => setDialog({ kind: 'rule', subjectId: s.subjectId })}
-                    />
-                  ))}
-                </section>
+                <div ref={focusRef} className="scroll-mt-16">
+                  <GradeFocusCard
+                    subjects={subjects}
+                    selectedId={selectedId!}
+                    onSelect={setChosenId}
+                    onEditAssessments={(subjectId) => setDialog({ kind: 'assessments', subjectId })}
+                    onEditRule={(subjectId) => setDialog({ kind: 'rule', subjectId })}
+                  />
+                </div>
+                <AllSubjects
+                  subjects={subjects}
+                  selectedId={selectedId}
+                  onSelect={(id) => {
+                    setChosenId(id);
+                    // Leva até o cartão principal e põe o foco na aba (teclado e leitor de tela).
+                    focusRef.current?.scrollIntoView?.({ block: 'start' });
+                    requestAnimationFrame(() =>
+                      document.getElementById(`grade-tab-${id}`)?.focus({ preventScroll: true }),
+                    );
+                  }}
+                />
                 <p className="text-center text-xs text-text-muted">{t('grades.simulationHint')}</p>
               </>
             )}
           </div>
-          <aside className="flex flex-col gap-6">
+          <aside className="flex min-w-0 flex-col gap-6">
             <GpaCard gpa={data!.gpa} semesterId={data!.semesterId} />
             {subjects.length > 0 && (
               <AttendanceCard

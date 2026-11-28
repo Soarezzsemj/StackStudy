@@ -75,11 +75,7 @@ export function TimerCard({
   return (
     <Card variant="hero" className="flex flex-col gap-6 p-6 lg:p-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div
-          role="group"
-          aria-label={t('deepWork.mode.label')}
-          className="flex gap-1 rounded-pill border border-border bg-bg/40 p-1"
-        >
+        <div role="group" aria-label={t('deepWork.mode.label')} className="segmented">
           {(['POMODORO', 'FLOW'] as SessionMode[]).map((m) => {
             const current = active ? active.mode === m : mode === m;
             return (
@@ -89,10 +85,7 @@ export function TimerCard({
                 aria-pressed={current}
                 disabled={!!active}
                 onClick={() => setMode(m)}
-                className={cn(
-                  'label min-h-11 rounded-pill px-4 transition-colors disabled:cursor-not-allowed',
-                  current ? 'bg-surface-raised text-text' : 'text-text-muted hover:text-text',
-                )}
+                className="segmented-item"
               >
                 {t(`deepWork.mode.${m}`)}
               </button>
@@ -135,8 +128,9 @@ export function TimerCard({
                 key={i}
                 aria-hidden="true"
                 className={cn(
-                  'h-2 w-2 rounded-full',
-                  i < position ? 'bg-action' : 'bg-border-control',
+                  // Traços do ciclo (mockup): feitos em lima, o atual em azul, o resto apagado.
+                  'h-1.5 w-7 rounded-pill',
+                  i < position ? 'bg-action' : i === position ? 'bg-info' : 'bg-border',
                 )}
               />
             ))}
@@ -186,7 +180,7 @@ export function TimerCard({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-center gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-3 [&>.btn]:min-h-control-lg">
         {!active && (
           <>
             <Button

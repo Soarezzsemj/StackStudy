@@ -201,9 +201,7 @@ export function SubjectDialog({
         />
 
         <fieldset className="flex flex-col gap-2">
-          <legend className="label mb-2 text-text-secondary">
-            {t('stack.subjects.fields.color')}
-          </legend>
+          <legend className="field-label mb-2 block">{t('stack.subjects.fields.color')}</legend>
           <div className="flex flex-wrap gap-2">
             {SUBJECT_COLORS.map((c) => (
               <label

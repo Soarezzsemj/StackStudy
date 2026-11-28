@@ -1,12 +1,12 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Button, TextField } from '@/components/ui';
 import { authApi } from '@/lib/api/auth';
 import { safeRedirect } from '@/lib/errors';
 import { useAuthStore } from '@/stores/authStore';
-import { AuthLayout } from './AuthLayout';
+import { AuthCorner, AuthLayout } from './AuthLayout';
 import { errorMessage } from './errorMessage';
 
 export function LoginPage() {
@@ -32,8 +32,16 @@ export function LoginPage() {
 
   return (
     <AuthLayout
+      eyebrow={t('auth.login.eyebrow')}
       title={t('auth.login.title')}
       subtitle={t('auth.login.subtitle')}
+      corner={
+        <AuthCorner
+          prompt={t('auth.login.noAccount')}
+          to="/signup"
+          label={t('auth.login.toRegister')}
+        />
+      }
       notice={
         google === 'unverified' || google === 'error' ? (
           <p
@@ -55,20 +63,14 @@ export function LoginPage() {
           )
         )
       }
-      footer={
-        <>
-          {t('auth.login.noAccount')}{' '}
-          <Link to="/signup" className="font-semibold text-action hover:underline">
-            {t('auth.login.toRegister')}
-          </Link>
-        </>
-      }
+      footer={t('auth.login.wakeHint')}
     >
       <form className="flex flex-col gap-5" onSubmit={onSubmit} noValidate>
         <TextField
           label={t('auth.email')}
           type="email"
           name="email"
+          className="input-lg"
           autoComplete="email"
           required
           value={email}
@@ -78,6 +80,7 @@ export function LoginPage() {
           label={t('auth.password')}
           type="password"
           name="password"
+          className="input-lg"
           autoComplete="current-password"
           required
           value={password}
@@ -88,7 +91,7 @@ export function LoginPage() {
             {errorMessage(t, login.error)}
           </p>
         )}
-        <Button type="submit" className="mt-2 w-full" disabled={login.isPending}>
+        <Button type="submit" className="btn-lg mt-2 w-full" disabled={login.isPending}>
           {login.isPending ? t('common.loading') : t('auth.login.submit')}
         </Button>
       </form>

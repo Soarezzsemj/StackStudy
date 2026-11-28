@@ -95,3 +95,35 @@ export function parseScore(text: string, max: number): number | null | 'invalid'
   if (!Number.isFinite(value) || value > max) return 'invalid';
   return value;
 }
+
+export const SCENARIOS = [
+  { key: 'worst', pct: 0 },
+  { key: 'realistic', pct: 60 },
+  { key: 'best', pct: 100 },
+] as const;
+
+export type ScenarioKey = (typeof SCENARIOS)[number]['key'];
+
+export interface Scenario {
+  key: ScenarioKey;
+  pct: number;
+  result: CalcResult;
+}
+
+/**
+ * Cenários "e se" para o que ainda falta: a mesma porcentagem do máximo em cada avaliação sem nota
+ * (0%, 60% e 100%), recalculados pela calculadora. Sem avaliação pendente, nenhum cenário.
+ * O exame não entra (ele tem o próprio campo).
+ */
+export function scenariosOf(subject: SubjectGrades): Scenario[] {
+  const pending = subject.assessments.filter((a) => a.score === undefined);
+  if (pending.length === 0) return [];
+  return SCENARIOS.map(({ key, pct }) => {
+    const whatIf: WhatIf = {};
+    for (const a of pending) {
+      // Para baixo em centésimos: o cenário nunca passa do máximo da avaliação.
+      whatIf[a.id] = Math.floor(maxScoreOf(subject, a) * pct) / 100;
+    }
+    return { key, pct, result: simulate(subject, whatIf) };
+  });
+}

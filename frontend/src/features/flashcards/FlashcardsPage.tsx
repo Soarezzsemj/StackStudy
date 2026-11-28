@@ -37,7 +37,7 @@ export function FlashcardsPage() {
     <>
       <PageTitle
         title={t('pages.flashcards.title')}
-        description={t('pages.flashcards.description')}
+        eyebrow={t('pages.flashcards.eyebrow')}
         actions={
           <>
             <Button variant="secondary" onClick={() => openDialog({ kind: 'settings' })}>
@@ -54,6 +54,8 @@ export function FlashcardsPage() {
           </>
         }
       />
+
+      {decks.isSuccess && list.length > 0 && <TodayTiles decks={list} />}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="flex min-w-0 flex-col gap-6">
@@ -184,6 +186,38 @@ function DeckCard({ deck }: { deck: Deck }) {
   );
 }
 
+/** Fileira de números do topo (mockup): somas dos decks, os mesmos dados dos cartões. */
+function TodayTiles({ decks }: { decks: Deck[] }) {
+  const { t } = useTranslation();
+  const sum = (pick: (d: Deck) => number) => decks.reduce((acc, d) => acc + pick(d), 0);
+  const newToday = sum((d) => d.newToday);
+  const dueToday = sum((d) => d.dueToday);
+  const tiles = [
+    { key: 'today', value: newToday + dueToday, accent: true },
+    { key: 'newToday', value: newToday },
+    { key: 'due', value: dueToday },
+    { key: 'total', value: sum((d) => d.totalCards) },
+  ] as const;
+  return (
+    <section aria-label={t('flashcards.tiles.label')} className="mb-6">
+      <dl className="m-0 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+        {tiles.map((tile) => (
+          <div key={tile.key} className="card flex flex-col-reverse justify-end gap-2 px-5 py-4">
+            <dt className="label text-text-secondary">{t(`flashcards.tiles.${tile.key}`)}</dt>
+            <dd
+              className={`tabular m-0 text-4xl font-[650] leading-none tracking-card ${
+                'accent' in tile ? 'text-action' : ''
+              }`}
+            >
+              {tile.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
 function Count({ label, value, tone }: { label: string; value: number; tone?: string }) {
   return (
     <div className="flex flex-col gap-1">
@@ -218,6 +252,7 @@ function StatsBody({ stats }: { stats: FlashcardStats }) {
   const max = Math.max(1, ...days.map((d) => d.count));
   const weekday = new Intl.DateTimeFormat(i18n.language, { weekday: 'short', timeZone: 'UTC' });
   const forecast = lastDays(addDays(stats.today, 6), 7, stats.forecast);
+  const forecastMax = Math.max(1, ...forecast.map((d) => d.count));
 
   return (
     <div className="flex flex-col gap-5">
@@ -258,13 +293,23 @@ function StatsBody({ stats }: { stats: FlashcardStats }) {
       </div>
       <div>
         <h3 className="label mb-2 text-text-muted">{t('flashcards.stats.forecast')}</h3>
-        <ul className="m-0 grid list-none grid-cols-7 gap-1 p-0 text-center text-xs">
-          {forecast.map((d) => (
-            <li key={d.date} className="flex flex-col gap-1">
-              <span className="text-text-muted">
+        {/* Barras dos próximos 7 dias (mockup): número em cima, hoje em destaque. */}
+        <ul className="m-0 grid list-none grid-cols-7 gap-1.5 p-0 text-center text-xs">
+          {forecast.map((d, i) => (
+            <li key={d.date} className="flex flex-col items-stretch gap-1">
+              <span className="tabular text-xs text-text-secondary">{d.count}</span>
+              <span aria-hidden="true" className="flex h-16 items-end">
+                <span
+                  className={`w-full rounded-small ${i === 0 ? 'bg-action' : 'bg-heat-2'}`}
+                  style={{
+                    height: `${d.count === 0 ? 6 : Math.max(14, (d.count / forecastMax) * 100)}%`,
+                    opacity: d.count === 0 ? 0.35 : 1,
+                  }}
+                />
+              </span>
+              <span className="uppercase text-text-muted">
                 {weekday.format(new Date(`${d.date}T00:00:00Z`))}
               </span>
-              <span className="tabular text-sm text-text">{d.count}</span>
             </li>
           ))}
         </ul>

@@ -32,17 +32,21 @@
   "shell": {
     "root": "~/stackstudy",
     "breadcrumb": "Path",
-    "search": "Search",
+    "search": "Search or run a command",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "subjects": "Semester subjects",
+    "subjectsOf": "Subjects · {{semester}}",
     "noSubjects": "No subjects yet",
     "logout": "Log out",
     "userMenu": "Account",
-    "pending": "{{count}} pending",
     "noSemester": "No current semester",
     "openProfile": "Open {{name}}’s profile",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "subjectTile": "{{name}}: {{value}}",
+    "noGrade": "no grade",
+    "viewAll": "See all ({{count}})",
+    "compactMenu": "Collapsed menu"
   },
   "statusbar": {
     "label": "Status bar",
@@ -77,15 +81,22 @@
     "logout": "Sign out"
   },
   "auth": {
-    "tagline": "The student's cockpit.",
+    "tagline": "The student cockpit",
+    "brand": {
+      "description": "Subjects, tasks, focus, grades and roadmaps in one place. For any course.",
+      "weekTitle": "Your week is waiting",
+      "weekBody": "Pick up where you left off: tasks, focus and roadmap stay just as you left them."
+    },
     "name": "Name",
     "email": "Email",
     "password": "Password",
     "passwordHint": "At least 10 characters.",
     "login": {
+      "eyebrow": "Welcome back",
       "title": "Log in",
-      "subtitle": "Welcome back. Pick up where you left off.",
+      "subtitle": "Use your email and password to open the cockpit.",
       "submit": "Log in",
+      "wakeHint": "Server waking up? The first sign-in of the day can take a few seconds.",
       "noAccount": "No account yet?",
       "toRegister": "Create account",
       "expired": "Your session expired. Sign in again to continue.",
@@ -137,19 +148,19 @@
     },
     "stack": {
       "title": "The Stack",
-      "description": "Subjects, semesters and tasks organized by due date."
+      "eyebrow": "Subjects, semesters and tasks by due date"
     },
     "deepWork": {
       "title": "Deep Work",
-      "description": "Pomodoro or Flow tied to a subject, with heatmap, streak and weekly goal."
+      "eyebrow": "Deep focus · Pomodoro and Flow"
     },
     "flashcards": {
       "title": "Flashcards",
-      "description": "Decks with spaced repetition (SM-2): review at your pace, every day."
+      "eyebrow": "Spaced repetition · SM-2"
     },
     "grades": {
       "title": "Grade Predictor",
-      "description": "Needed grade, scenarios, absences, CR and GPA."
+      "eyebrow": "Required grade, scenarios, absences and GPA"
     },
     "notFound": {
       "title": "404",
@@ -205,6 +216,10 @@
     "offline": "You are offline. Nothing will be saved until the connection is back."
   },
   "stack": {
+    "eyebrowSubjects_one": "{{count}} subject",
+    "eyebrowSubjects_other": "{{count}} subjects",
+    "eyebrowTasks_one": "{{count}} open task",
+    "eyebrowTasks_other": "{{count}} open tasks",
     "semester": {
       "label": "Current semester",
       "select": "Change current semester",
@@ -693,6 +708,34 @@
       },
       "pointsCap": "Total cap (optional)",
       "pointsCapHint": "With extra points, the total never goes above this. Empty = no cap."
+    },
+    "bucket": {
+      "NONE": "No assessments",
+      "POSSIBLE": "Possible",
+      "AT_RISK": "At risk",
+      "PASSED": "Passed",
+      "FAILED": "Failed"
+    },
+    "focus": {
+      "tabs": "Semester subjects",
+      "ruleLabel": "Grading rule for {{name}}",
+      "ruleSaving": "Saving the rule…",
+      "pointsSoFar": "Points so far",
+      "toPass": "/ {{value}} to pass",
+      "noAssessmentsTitle": "No assessments yet",
+      "addAssessments": "Add assessments",
+      "allGraded": "All grades are in: this is the final result."
+    },
+    "scenarios": {
+      "title": "What if… scenarios for what is left",
+      "worst": "Worst case ({{pct}}% of what is left)",
+      "realistic": "Realistic ({{pct}}% of what is left)",
+      "best": "Best case ({{pct}}% of what is left)"
+    },
+    "all": {
+      "title": "All subjects",
+      "hint": "Tap to open in the simulator",
+      "open": "Open {{name}} in the simulator ({{status}})"
     }
   },
   "flashcards": {
@@ -840,6 +883,13 @@
     },
     "export": {
       "open": "Export CSV"
+    },
+    "tiles": {
+      "label": "Today's summary",
+      "today": "To review today",
+      "newToday": "New today",
+      "due": "Due reviews",
+      "total": "Cards in total"
     }
   },
   "profile": {
@@ -1389,7 +1439,7 @@
   },
   "rooms": {
     "title": "Study rooms",
-    "description": "Study together with other people and see who is active. No chatting.",
+    "eyebrow": "Study together · live presence · no chat",
     "loading": "Loading the room…",
     "loadError": "Could not load.",
     "notFound": "Room not found (or you are not a member).",
@@ -1621,6 +1671,8 @@
   },
   "signup": {
     "title": "Create account",
+    "subtitle": "It's free and takes a few minutes.",
+    "stepOf": "Step {{n}} of {{total}}",
     "haveAccount": "Already have an account?",
     "toLogin": "Sign in",
     "continue": "Continue",

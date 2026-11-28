@@ -310,7 +310,7 @@ function DeckDialog({ deck, onClose }: { deck?: Deck; onClose: () => void }) {
             ))}
         </SelectField>
         <fieldset className="grid gap-4 sm:grid-cols-2">
-          <legend className="label mb-2 text-text-secondary">{t('flashcards.decks.limits')}</legend>
+          <legend className="field-label mb-2 block">{t('flashcards.decks.limits')}</legend>
           <TextField
             type="number"
             inputMode="numeric"
@@ -534,7 +534,7 @@ function ImportDialog({ deck, onClose }: { deck: Deck; onClose: () => void }) {
         <form id="import-form" noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
           <p className="text-sm text-text-secondary">{t('flashcards.import.hint')}</p>
           <div className="flex flex-col gap-2">
-            <label htmlFor="csv-file" className="label text-text-secondary">
+            <label htmlFor="csv-file" className="field-label">
               {t('flashcards.import.file')}
             </label>
             <input

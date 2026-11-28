@@ -42,12 +42,21 @@ export function StackPage() {
 
   const semesterList = semesters.data ?? [];
   const noSemester = semesters.isSuccess && semesterList.length === 0;
+  // Rótulo do topo (mockup): "2026.2 · 5 matérias · 22 tarefas abertas", com os dados reais.
+  const openTasks = currentSubjects.reduce((sum, s) => sum + s.pendingTasks, 0);
+  const eyebrow = current
+    ? [
+        current.name,
+        t('stack.eyebrowSubjects', { count: currentSubjects.length }),
+        t('stack.eyebrowTasks', { count: openTasks }),
+      ].join(' · ')
+    : t('pages.stack.eyebrow');
 
   return (
     <>
       <PageTitle
         title={t('pages.stack.title')}
-        description={t('pages.stack.description')}
+        eyebrow={eyebrow}
         actions={
           <>
             <Button variant="secondary" onClick={() => openDialog({ kind: 'semesters' })}>

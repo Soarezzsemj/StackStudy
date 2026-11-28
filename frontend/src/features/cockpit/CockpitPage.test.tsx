@@ -266,13 +266,17 @@ describe('Cockpit', () => {
     expect(
       String(fetchMock.mock.calls.find(([u]) => String(u).startsWith('/api/cockpit'))![0]),
     ).toMatch(/tz=/);
-    // A home não chama as telas das fases (tarefas, notas, decks) por conta própria.
-    for (const path of ['/api/tasks', '/api/grades/overview', '/api/flashcards/decks']) {
+    // A home não chama as telas das fases (tarefas, decks) por conta própria. As notas aparecem
+    // uma vez só, pela grade de matérias da barra lateral (Fase 14), não pela home.
+    for (const path of ['/api/tasks', '/api/flashcards/decks']) {
       expect(
         fetchMock.mock.calls.some(([url]) => String(url).startsWith(path)),
         path,
       ).toBe(false);
     }
+    expect(
+      fetchMock.mock.calls.filter(([url]) => String(url).startsWith('/api/grades/overview')).length,
+    ).toBeLessThanOrEqual(1);
   });
 
   it('ações rápidas: nova tarefa abre o diálogo na The Stack', async () => {

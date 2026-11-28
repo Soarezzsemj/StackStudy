@@ -45,9 +45,9 @@ function NoChatNotice() {
   return (
     <p
       role="note"
-      className="flex items-center gap-3 rounded-inner border border-space-glow/40 bg-space-deep/30 px-4 py-3 text-sm text-text-on-space"
+      className="mb-6 flex items-center gap-3 rounded-inner border border-space-glow/30 bg-space-deep/30 px-5 py-4 text-sm text-text-on-space"
     >
-      <Icon name="ban" size={18} className="shrink-0 text-space-glow" />
+      <Icon name="ban" size={18} className="shrink-0 text-text" />
       {t('rooms.noChat')}
     </p>
   );
@@ -55,9 +55,7 @@ function NoChatNotice() {
 
 function Header({ actions }: { actions?: ReactNode }) {
   const { t } = useTranslation();
-  return (
-    <PageTitle title={t('rooms.title')} description={t('rooms.description')} actions={actions} />
-  );
+  return <PageTitle title={t('rooms.title')} eyebrow={t('rooms.eyebrow')} actions={actions} />;
 }
 
 function RoomsHome({ onDialog }: { onDialog: (d: PageDialog) => void }) {
@@ -77,9 +75,9 @@ function RoomsHome({ onDialog }: { onDialog: (d: PageDialog) => void }) {
   if (target) return <Navigate to={`/rooms/${target}`} replace />;
   return (
     <>
+      <NoChatNotice />
       <Header />
       <div className="flex flex-col gap-6">
-        <NoChatNotice />
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
           <Card>
             <EmptyState
@@ -145,6 +143,7 @@ function RoomView({
   const mode = sessionMode ?? chosen ?? data.defaultMode;
   return (
     <>
+      <NoChatNotice />
       <Header
         actions={
           <>
@@ -162,7 +161,6 @@ function RoomView({
         }
       />
       <div className="flex flex-col gap-6">
-        <NoChatNotice />
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="flex min-w-0 flex-col gap-6">
             <h2 className="card-title m-0">

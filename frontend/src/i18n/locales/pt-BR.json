@@ -32,17 +32,21 @@
   "shell": {
     "root": "~/stackstudy",
     "breadcrumb": "Caminho",
-    "search": "Buscar",
+    "search": "Buscar ou executar comando",
     "openMenu": "Abrir menu",
     "closeMenu": "Fechar menu",
     "subjects": "Matérias do semestre",
+    "subjectsOf": "Matérias · {{semester}}",
     "noSubjects": "Nenhuma matéria ainda",
     "logout": "Sair",
     "userMenu": "Conta",
-    "pending": "{{count}} pendentes",
     "noSemester": "Nenhum semestre atual",
     "openProfile": "Abrir perfil de {{name}}",
-    "skipToContent": "Pular para o conteúdo"
+    "skipToContent": "Pular para o conteúdo",
+    "subjectTile": "{{name}}: {{value}}",
+    "noGrade": "sem nota",
+    "viewAll": "Ver todas ({{count}})",
+    "compactMenu": "Menu recolhido"
   },
   "statusbar": {
     "label": "Barra de status",
@@ -77,15 +81,22 @@
     "logout": "Sair da conta"
   },
   "auth": {
-    "tagline": "O cockpit do estudante.",
+    "tagline": "O cockpit do estudante",
+    "brand": {
+      "description": "Matérias, tarefas, foco, notas e roadmaps em um lugar só. Para qualquer curso.",
+      "weekTitle": "Sua semana te espera",
+      "weekBody": "Continue de onde parou: tarefas, foco e roadmap ficam do jeito que você deixou."
+    },
     "name": "Nome",
     "email": "E-mail",
     "password": "Senha",
     "passwordHint": "Mínimo de 10 caracteres.",
     "login": {
+      "eyebrow": "Bem-vindo de volta",
       "title": "Entrar",
-      "subtitle": "Bem-vindo de volta. Continue de onde parou.",
+      "subtitle": "Use seu e-mail e senha para abrir o cockpit.",
       "submit": "Entrar",
+      "wakeHint": "Servidor acordando? A primeira entrada do dia pode levar alguns segundos.",
       "noAccount": "Ainda não tem conta?",
       "toRegister": "Criar conta",
       "expired": "Sua sessão expirou. Entre de novo para continuar.",
@@ -137,19 +148,19 @@
     },
     "stack": {
       "title": "The Stack",
-      "description": "Matérias, semestres e tarefas organizadas por prazo."
+      "eyebrow": "Matérias, semestres e tarefas por prazo"
     },
     "deepWork": {
       "title": "Deep Work",
-      "description": "Pomodoro ou Flow ligado à matéria, com heatmap, sequência e meta semanal."
+      "eyebrow": "Foco profundo · Pomodoro e Flow"
     },
     "flashcards": {
       "title": "Flashcards",
-      "description": "Decks com repetição espaçada (SM-2): revise no seu ritmo, todo dia."
+      "eyebrow": "Repetição espaçada · SM-2"
     },
     "grades": {
       "title": "Grade Predictor",
-      "description": "Nota necessária, cenários, faltas, CR e GPA."
+      "eyebrow": "Nota necessária, cenários, faltas, CR e GPA"
     },
     "notFound": {
       "title": "404",
@@ -205,6 +216,10 @@
     "offline": "Você está sem internet. Nada será salvo até a conexão voltar."
   },
   "stack": {
+    "eyebrowSubjects_one": "{{count}} matéria",
+    "eyebrowSubjects_other": "{{count}} matérias",
+    "eyebrowTasks_one": "{{count}} tarefa aberta",
+    "eyebrowTasks_other": "{{count}} tarefas abertas",
     "semester": {
       "label": "Semestre atual",
       "select": "Trocar semestre atual",
@@ -693,6 +708,34 @@
       },
       "pointsCap": "Teto do total (opcional)",
       "pointsCapHint": "Com pontos extras, o total não passa disso. Vazio = sem teto."
+    },
+    "bucket": {
+      "NONE": "Sem avaliações",
+      "POSSIBLE": "Possível",
+      "AT_RISK": "Em risco",
+      "PASSED": "Aprovado",
+      "FAILED": "Reprovado"
+    },
+    "focus": {
+      "tabs": "Matérias do semestre",
+      "ruleLabel": "Regra de nota de {{name}}",
+      "ruleSaving": "Salvando a regra…",
+      "pointsSoFar": "Pontos somados até agora",
+      "toPass": "/ {{value}} para passar",
+      "noAssessmentsTitle": "Nenhuma avaliação cadastrada",
+      "addAssessments": "Cadastrar avaliações",
+      "allGraded": "Todas as notas lançadas: este é o resultado final."
+    },
+    "scenarios": {
+      "title": "E se… cenários para o que falta",
+      "worst": "Pior caso ({{pct}}% do que falta)",
+      "realistic": "Realista ({{pct}}% do que falta)",
+      "best": "Melhor caso ({{pct}}% do que falta)"
+    },
+    "all": {
+      "title": "Todas as matérias",
+      "hint": "Toque para abrir no simulador",
+      "open": "Abrir {{name}} no simulador ({{status}})"
     }
   },
   "flashcards": {
@@ -840,6 +883,13 @@
     },
     "export": {
       "open": "Exportar CSV"
+    },
+    "tiles": {
+      "label": "Resumo de hoje",
+      "today": "Para revisar hoje",
+      "newToday": "Novas hoje",
+      "due": "Revisões vencidas",
+      "total": "Cartas no total"
     }
   },
   "profile": {
@@ -1389,7 +1439,7 @@
   },
   "rooms": {
     "title": "Salas de estudo",
-    "description": "Estude junto com outras pessoas, vendo quem está ativo. Sem conversa.",
+    "eyebrow": "Estude em grupo · presença ao vivo · sem chat",
     "loading": "Carregando a sala…",
     "loadError": "Não foi possível carregar.",
     "notFound": "Sala não encontrada (ou você não faz parte dela).",
@@ -1621,6 +1671,8 @@
   },
   "signup": {
     "title": "Criar conta",
+    "subtitle": "É grátis e leva poucos minutos.",
+    "stepOf": "Passo {{n}} de {{total}}",
     "haveAccount": "Já tem conta?",
     "toLogin": "Entrar",
     "continue": "Continuar",

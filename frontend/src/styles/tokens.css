@@ -28,9 +28,11 @@
   --space-deep: #3c1c7e;
   --space-glow: #bd6cf7;
 
-  /* Feedback */
+  /* Feedback (sucesso = a própria cor de ação, como no mockup: "aprovado", "possível") */
+  --success: #cdfb50;
   --danger: #ff8a7a;
   --warning: #f2b861;
+  --info: #6aa7ff;
 
   /* Cores das matérias (dadas em ordem ao criar a matéria) */
   --subject-blue: #6aa7ff;
@@ -50,6 +52,42 @@
   /* Formas */
   --radius-card: 22px;
   --radius-inner: 16px;
+  --radius-control: 999px;
+  --radius-small: 10px;
+
+  /* Tipografia: família, escala e pesos */
+  --font-sans: 'Manrope Variable', Manrope, system-ui, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-lg: 17px;
+  --text-card-title: 20px;
+  --text-auth-title: 40px;
+  --text-page-title: 56px;
+  /* Números de destaque (notas, CR): encolhem no celular; o maior nunca passa de 44px */
+  --text-figure: clamp(1.75rem, 1.2rem + 1.8vw, 2.75rem);
+  --text-figure-sm: clamp(1.25rem, 1.05rem + 0.8vw, 1.625rem);
+  --weight-regular: 450;
+  --weight-medium: 550;
+  --weight-strong: 650;
+  --weight-black: 750;
+
+  /* Espaçamentos (múltiplos de 4) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Alturas de controles (alvo de toque mínimo = 44px) */
+  --control-height: 44px;
+  --control-height-lg: 52px;
+
+  /* Sombras */
+  --shadow-dialog: 0 24px 64px rgba(0, 0, 0, 0.55);
 
   /* Gradientes */
   --card-sheen: linear-gradient(165deg, rgba(245, 245, 242, 0.05), transparent 45%);
@@ -60,6 +98,8 @@
     ),
     radial-gradient(35% 55% at 100% 0%, rgba(189, 108, 247, 0.18), transparent 70%);
   --page-glow: radial-gradient(60% 38% at 100% 0%, rgba(60, 28, 126, 0.6), transparent 70%);
+  --auth-brand-glow: radial-gradient(80% 50% at 100% 0%, rgba(60, 28, 126, 0.95), transparent 75%),
+    radial-gradient(40% 30% at 100% 0%, rgba(189, 108, 247, 0.16), transparent 70%);
 
   /* Botão secundário */
   --secondary-fill: rgba(245, 245, 242, 0.06);

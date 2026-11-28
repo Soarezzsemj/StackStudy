@@ -93,9 +93,7 @@ export function ProfileSection({ user }: { user: User }) {
         />
 
         <fieldset className="flex flex-col gap-2">
-          <legend className="label mb-2 text-text-secondary">
-            {t('profile.profile.avatarColor')}
-          </legend>
+          <legend className="field-label mb-2 block">{t('profile.profile.avatarColor')}</legend>
           <div className="flex flex-wrap gap-2">
             <ColorOption
               label={t('profile.profile.avatarDefault')}

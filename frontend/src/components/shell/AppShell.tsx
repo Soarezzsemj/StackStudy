@@ -10,12 +10,17 @@ import { CommandPalette } from './CommandPalette';
 import { DeepWorkEngine } from '@/features/deepwork/DeepWorkEngine';
 import { RoomEngine } from '@/features/rooms/RoomEngine';
 import { RouteFallback } from './RouteFallback';
+import { useMediaQuery } from '@/lib/useMediaQuery';
+
+// Mesma faixa do Tailwind: md (768px) até antes do lg (1024px).
+const TABLET_QUERY = '(min-width: 768px) and (max-width: 1023.98px)';
 
 export function AppShell() {
   const { t } = useTranslation();
   const mobileNavOpen = useUiStore((s) => s.mobileNavOpen);
   const setMobileNavOpen = useUiStore((s) => s.setMobileNavOpen);
   const { pathname } = useLocation();
+  const isTablet = useMediaQuery(TABLET_QUERY);
 
   // Fecha o menu mobile ao navegar e ao apertar Esc.
   useEffect(() => setMobileNavOpen(false), [pathname, setMobileNavOpen]);
@@ -39,6 +44,16 @@ export function AppShell() {
         <aside className="hidden w-sidebar shrink-0 border-r border-border lg:block">
           <Sidebar />
         </aside>
+        {/* Tablet: menu recolhido (só ícones e pontos); o botão de menu do topo abre o completo.
+            Só montado nessa faixa, para não duplicar a navegação na árvore de acessibilidade. */}
+        {isTablet && (
+          <aside
+            aria-label={t('shell.compactMenu')}
+            className="w-[4.5rem] shrink-0 border-r border-border"
+          >
+            <Sidebar compact />
+          </aside>
+        )}
 
         {mobileNavOpen && (
           <div className="fixed inset-0 z-30 lg:hidden">

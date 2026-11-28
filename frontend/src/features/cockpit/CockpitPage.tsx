@@ -68,7 +68,7 @@ export function CockpitPage() {
 
   return (
     <>
-      <PageTitle title={title} description={date} />
+      <PageTitle title={title} eyebrow={date} />
       {cockpit.isPending ? (
         <CockpitSkeleton />
       ) : cockpit.isError ? (

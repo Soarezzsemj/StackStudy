@@ -99,9 +99,7 @@ function PreferencesForm({
   return (
     <form noValidate onSubmit={onSubmit} className="flex flex-col gap-6">
       <fieldset className="grid gap-4 sm:grid-cols-2">
-        <legend className="label mb-2 text-text-secondary">
-          {t('profile.preferences.general')}
-        </legend>
+        <legend className="field-label mb-2 block">{t('profile.preferences.general')}</legend>
         <SelectField
           label={t('common.language')}
           value={form.locale}
@@ -133,9 +131,7 @@ function PreferencesForm({
       </fieldset>
 
       <fieldset className="grid gap-4 sm:grid-cols-2">
-        <legend className="label mb-2 text-text-secondary">
-          {t('profile.preferences.grades')}
-        </legend>
+        <legend className="field-label mb-2 block">{t('profile.preferences.grades')}</legend>
         <SelectField
           label={t('profile.preferences.gradeMethod')}
           value={form.gradeMethod}
@@ -157,9 +153,7 @@ function PreferencesForm({
       </fieldset>
 
       <fieldset className="grid gap-4 sm:grid-cols-2">
-        <legend className="label mb-2 text-text-secondary">
-          {t('profile.preferences.deepWork')}
-        </legend>
+        <legend className="field-label mb-2 block">{t('profile.preferences.deepWork')}</legend>
         {num('focusMinutes', t('profile.preferences.focusMinutes'), { min: 1, max: 180 })}
         {num('shortBreakMinutes', t('profile.preferences.shortBreakMinutes'), { min: 1, max: 60 })}
         {num('longBreakMinutes', t('profile.preferences.longBreakMinutes'), { min: 1, max: 120 })}
@@ -168,9 +162,7 @@ function PreferencesForm({
       </fieldset>
 
       <fieldset className="grid gap-4 sm:grid-cols-2">
-        <legend className="label mb-2 text-text-secondary">
-          {t('profile.preferences.flashcards')}
-        </legend>
+        <legend className="field-label mb-2 block">{t('profile.preferences.flashcards')}</legend>
         {num('newCardsPerDay', t('profile.preferences.newCardsPerDay'), { min: 0, max: 1000 })}
         {num('reviewsPerDay', t('profile.preferences.reviewsPerDay'), { min: 0, max: 1000 })}
       </fieldset>
